@@ -1,0 +1,23 @@
+Source: golang-github-linuxdeepin-go-x11-client
+Section: devel
+Priority: extra
+Maintainer: Deepin Packages Builder <packages@deepin.com>
+Build-Depends: debhelper (>= 10),
+               dh-golang,
+               golang-any,
+               golang-github-gavv-monotime-dev,
+               golang-github-smartystreets-goconvey-dev,
+               golang-gopkg-check.v1-dev
+Standards-Version: 4.0.0
+Homepage: https://github.com/linuxdeepin/go-x11-client
+XS-Go-Import-Path: github.com/linuxdeepin/go-x11-client
+Testsuite: autopkgtest-pkg-go
+
+Package: golang-github-linuxdeepin-go-x11-client-dev
+Architecture: all
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         golang-github-gavv-monotime-dev,
+         golang-github-smartystreets-goconvey-dev,
+         golang-gopkg-check.v1-dev
+Description: mirrored from https://cr.deepin.io/#/admin/projects/go-x11-client

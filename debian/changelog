@@ -1,0 +1,5 @@
+golang-github-linuxdeepin-go-x11-client (0.0~git20170814.0.a1811f4) unstable; urgency=medium
+
+  * Initial release 
+
+ -- root <root@virt.test.com>  Sun, 13 Aug 2017 21:55:25 -0400
