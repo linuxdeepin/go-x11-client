@@ -19,4 +19,4 @@ Depends: ${shlibs:Depends},
          golang-github-gavv-monotime-dev,
          golang-github-smartystreets-goconvey-dev,
          golang-gopkg-check.v1-dev
-Description: mirrored from https://cr.deepin.io/#/admin/projects/go-x11-client
+Description: mirrored from https://cr.deepin.io/#/admin/projects/go-x11-client 
