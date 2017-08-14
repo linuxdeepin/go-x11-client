@@ -1,73 +1,68 @@
 package client
 
 import (
-	. "github.com/smartystreets/goconvey/convey"
+	. "gopkg.in/check.v1"
 	"testing"
 )
 
-func TestReader(t *testing.T) {
-	Convey("Reader", t, func() {
-		buf := make([]byte, 8)
-		buf[0] = 1
-		buf[1] = 2
-		buf[2] = 3
-		buf[3] = 4
-		buf[4] = 5
-		buf[5] = 6
-		buf[6] = 7
-		buf[7] = 8
+// Hook up gocheck into the "go test" runner.
+func Test(t *testing.T) { TestingT(t) }
 
-		r := NewReaderFromData(buf)
+type MySuite struct {
+	r *Reader
+}
 
-		Convey("ReadBytes", func() {
-			So(r.ReadBytes(4), ShouldResemble, []byte{1, 2, 3, 4})
-			So(r.Err(), ShouldBeNil)
+var _ = Suite(&MySuite{})
 
-			So(r.ReadBytes(3), ShouldResemble, []byte{5, 6, 7})
-			So(r.Err(), ShouldBeNil)
+func (s *MySuite) SetUpTest(c *C) {
+	buf := []byte{1, 2, 3, 4, 5, 6, 7, 8}
+	s.r = NewReaderFromData(buf)
+}
 
-			So(r.ReadBytes(2), ShouldEqual, nil)
-			So(r.Err(), ShouldNotBeNil)
-		})
+func (s *MySuite) TestReaderReadBytes(c *C) {
+	c.Assert(s.r.ReadBytes(4), DeepEquals, []byte{1, 2, 3, 4})
+	c.Assert(s.r.Err(), IsNil)
 
-		Convey("Read1b", func() {
-			So(r.Read1b(), ShouldEqual, 1)
-			So(r.Read1b(), ShouldEqual, 2)
-			So(r.Read1b(), ShouldEqual, 3)
-			So(r.Read1b(), ShouldEqual, 4)
-			So(r.Err(), ShouldBeNil)
-			So(r.Read1b(), ShouldEqual, 5)
-			So(r.Err(), ShouldBeNil)
-		})
+	c.Assert(s.r.ReadBytes(3), DeepEquals, []byte{5, 6, 7})
+	c.Assert(s.r.Err(), IsNil)
 
-		Convey("Read2b", func() {
-			So(r.Read2b(), ShouldEqual, 0x0201)
-			So(r.Err(), ShouldBeNil)
+	c.Assert(s.r.ReadBytes(2), IsNil)
+	c.Assert(s.r.Err(), NotNil)
+}
 
-			So(r.Read2b(), ShouldEqual, 0x0403)
-			So(r.Err(), ShouldBeNil)
+func (s *MySuite) TestReaderRead1b(c *C) {
+	for i := 1; i <= 8; i++ {
+		c.Assert(s.r.Read1b(), Equals, uint8(i))
+		c.Assert(s.r.Err(), IsNil)
+	}
+	c.Assert(s.r.Read1b(), Equals, uint8(0))
+	c.Assert(s.r.Err(), NotNil)
+}
 
-			So(r.Read2b(), ShouldEqual, 0x0605)
-			So(r.Err(), ShouldBeNil)
-		})
+func (s *MySuite) TestReaderRead2b(c *C) {
+	results := []uint16{0x0201, 0x0403, 0x0605, 0x0807}
+	for _, result := range results {
+		c.Assert(s.r.Read2b(), Equals, result)
+		c.Assert(s.r.Err(), IsNil)
+	}
+	c.Assert(s.r.Read2b(), Equals, uint16(0))
+	c.Assert(s.r.Err(), NotNil)
+}
 
-		Convey("Read4b", func() {
-			So(r.Read4b(), ShouldEqual, 0x04030201)
-			So(r.Err(), ShouldBeNil)
+func (s *MySuite) TestReaderRead4b(c *C) {
+	results := []uint32{0x04030201, 0x08070605}
+	for _, result := range results {
+		c.Assert(s.r.Read4b(), Equals, result)
+		c.Assert(s.r.Err(), IsNil)
+	}
+	c.Assert(s.r.Read4b(), Equals, uint32(0))
+	c.Assert(s.r.Err(), NotNil)
+}
 
-			So(r.Read4b(), ShouldEqual, 0x08070605)
-			So(r.Err(), ShouldBeNil)
+func (s *MySuite) TestReaderRead8b(c *C) {
+	c.Assert(s.r.Read8b(), Equals, uint64(0x0807060504030201))
+	c.Assert(s.r.Err(), IsNil)
 
-			So(r.Read2b(), ShouldEqual, 0)
-			So(r.Err(), ShouldNotBeNil)
-		})
-
-		Convey("Read8b", func() {
-			So(r.Read8b(), ShouldEqual, 0x0807060504030201)
-			So(r.Err(), ShouldBeNil)
-
-			So(r.Read2b(), ShouldEqual, 0)
-			So(r.Err(), ShouldNotBeNil)
-		})
-	})
+	c.Assert(s.r.Read8b(), Equals, uint64(0))
+	c.Assert(s.r.Err(), NotNil)
 }
