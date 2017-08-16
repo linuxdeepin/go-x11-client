@@ -180,7 +180,7 @@ func (c *Conn) RequestChangeActiveWindow(windowToActivate x.Window, source Clien
  *    _NET_SHOWING_DESKTOP
  */
 
-func SetShowingDesktopChecked(c *Conn, show bool) x.VoidCookie {
+func (c *Conn) SetShowingDesktopChecked(show bool) x.VoidCookie {
 	val := uint32(0)
 	if show {
 		val = 1
@@ -191,7 +191,7 @@ func SetShowingDesktopChecked(c *Conn, show bool) x.VoidCookie {
 		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCARDINAL, 32, 1, w.Bytes())
 }
 
-func SetShowingDesktop(c *Conn, show bool) x.VoidCookie {
+func (c *Conn) SetShowingDesktop(show bool) x.VoidCookie {
 	val := uint32(0)
 	if show {
 		val = 1

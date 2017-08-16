@@ -12,7 +12,7 @@ def l(fmt, *arg):
 def DO_GET_PROPERTY(sth, _property, atype, length, cookie_type):
     return_type = 'Get' + cookie_type + 'Cookie'
     for unchecked in UNCHECKED:
-        l('\nfunc Get%s%s(c *Conn, window x.Window) %s{', sth, unchecked,
+        l('\nfunc (c *Conn) Get%s%s(window x.Window) %s{', sth, unchecked,
           return_type)
         l('    cookie := x.GetProperty%s(c.conn, x.False, window,\nc.GetAtom("%s"), %s, 0, %s)',
           unchecked, _property, atype, length)
@@ -23,7 +23,7 @@ def DO_GET_PROPERTY(sth, _property, atype, length, cookie_type):
 def DO_GET_ROOT_PROPERTY(sth, _property, atype, length, cookie_type):
     return_type = 'Get' + cookie_type + 'Cookie'
     for unchecked in UNCHECKED:
-        l('\nfunc Get%s%s(c *Conn) %s{', sth, unchecked, return_type)
+        l('\nfunc (c *Conn) Get%s%s() %s{', sth, unchecked, return_type)
         l('    cookie := x.GetProperty%s(c.conn, x.False, c.GetRootWin(),\nc.GetAtom("%s"),%s, 0, %s)',
           unchecked, _property, atype, length)
         l('    return %s(cookie)', return_type)
@@ -48,7 +48,7 @@ def DO_SINGLE_VALUE(sth, _property, atype, go_type, cookie_type):
     DO_GET_PROPERTY(sth, _property, atype, '1', cookie_type)
 
     for checked in CHECKED:
-        l('\nfunc Set%s%s(c *Conn, window x.Window, val %s) x.VoidCookie {',
+        l('\nfunc (c *Conn) Set%s%s(window x.Window, val %s) x.VoidCookie {',
           sth, checked, go_type)
         l('    w := x.NewWriter()')
         l('    w.Write4b(uint32(val))')
@@ -61,7 +61,7 @@ def DO_ROOT_SINGLE_VALUE(sth, _property, atype, go_type, cookie_type):
     DO_GET_ROOT_PROPERTY(sth, _property, atype, '1', cookie_type)
 
     for checked in CHECKED:
-        l('\nfunc Set%s%s(c *Conn, val %s) x.VoidCookie {', sth, checked,
+        l('\nfunc (c *Conn) Set%s%s(val %s) x.VoidCookie {', sth, checked,
           go_type)
         l('    w := x.NewWriter()')
         l('    w.Write4b(uint32(val))')
@@ -94,7 +94,7 @@ def DO_ROOT_LIST_VALUES(sth, _property, atype, go_type, cookie_type):
     DO_GET_ROOT_PROPERTY(sth, _property, atype, 'LENGTH_MAX', cookie_type)
 
     for checked in CHECKED:
-        l('\nfunc Set%s%s(c *Conn, vals []%s) x.VoidCookie {', sth, checked,
+        l('\nfunc (c *Conn) Set%s%s(vals []%s) x.VoidCookie {', sth, checked,
           go_type)
         l('    w := x.NewWriter()')
         l('    for _, val := range vals {')
@@ -112,7 +112,7 @@ def DO_LIST_VALUES(sth, _property, atype, go_type, cookie_type):
     DO_GET_PROPERTY(sth, _property, atype, 'LENGTH_MAX', cookie_type)
 
     for checked in CHECKED:
-        l('\nfunc Set%s%s(c *Conn, window x.Window,vals []%s) x.VoidCookie {',
+        l('\nfunc (c *Conn) Set%s%s(window x.Window,vals []%s) x.VoidCookie {',
           sth, checked, go_type)
         l('    w := x.NewWriter()')
         l('    for _, val := range vals {')
@@ -202,7 +202,7 @@ def DO_UTF8_STRING(sth, _property):
                     'UTF8Str')
 
     for checked in CHECKED:
-        l('\nfunc Set%s%s(c *Conn, window x.Window, val string) x.VoidCookie {',
+        l('\nfunc (c *Conn) Set%s%s(window x.Window, val string) x.VoidCookie {',
           sth, checked)
         l('    return x.ChangeProperty%s(c.conn, x.PropModeReplace, window,\nc.GetAtom("%s"),'
           + 'c.GetAtom("UTF8_STRING"), 8, uint32(len(val)), []byte(val))',
@@ -215,7 +215,7 @@ def DO_ROOT_UTF8_STRING(sth, _property):
                          'LENGTH_MAX', 'UTF8Str')
 
     for checked in CHECKED:
-        l('\nfunc Set%s%s(c *Conn, val string) x.VoidCookie {', sth, checked)
+        l('\nfunc (c *Conn) Set%s%s(val string) x.VoidCookie {', sth, checked)
         l('    return x.ChangeProperty%s(c.conn, x.PropModeReplace, c.GetRootWin(),\nc.GetAtom("%s"),'
           + 'c.GetAtom("UTF8_STRING"), 8, uint32(len(val)), []byte(val))',
           checked, _property)
@@ -227,7 +227,7 @@ def DO_ROOT_UTF8_STRINGS(sth, _property):
                          'LENGTH_MAX', 'UTF8Strs')
 
     for checked in CHECKED:
-        l('\nfunc Set%s%s(c *Conn, vals []string) x.VoidCookie {', sth,
+        l('\nfunc (c *Conn) Set%s%s(vals []string) x.VoidCookie {', sth,
           checked)
         l('    w := x.NewWriter()')
         l('    length := 0')
@@ -245,7 +245,7 @@ def DO_ROOT_UTF8_STRINGS(sth, _property):
 def DO_SET_ROOT_STRUCTURES(sth, _property, go_type, fields):
     n_fields = len(fields)
     for checked in CHECKED:
-        l('\nfunc Set%s%s(c *Conn, vals []%s) x.VoidCookie {', sth, checked,
+        l('\nfunc (c *Conn) Set%s%s(vals []%s) x.VoidCookie {', sth, checked,
           go_type)
         l('    w := x.NewWriter()')
         l('    for _, val := range vals {')
@@ -265,7 +265,7 @@ def DO_SET_ROOT_STRUCTURES(sth, _property, go_type, fields):
 
 def DO_SET_ROOT_STRUCTURE(sth, _property, go_type, fields):
     for checked in CHECKED:
-        l('\nfunc Set%s%s(c *Conn, val %s) x.VoidCookie {', sth, checked,
+        l('\nfunc (c *Conn) Set%s%s(val %s) x.VoidCookie {', sth, checked,
           go_type)
         l('    w := x.NewWriter()')
         for field in fields:
@@ -279,7 +279,7 @@ def DO_SET_ROOT_STRUCTURE(sth, _property, go_type, fields):
 
 def DO_SET_STRUCTURE(sth, _property, go_type, fields):
     for checked in CHECKED:
-        l('\nfunc Set%s%s(c *Conn, window x.Window, val %s) x.VoidCookie {',
+        l('\nfunc (c *Conn) Set%s%s(window x.Window, val %s) x.VoidCookie {',
           sth, checked, go_type)
         l('    w := x.NewWriter()')
         for field in fields:
