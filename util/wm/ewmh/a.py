@@ -333,6 +333,7 @@ def main():
 
     DO_COOKIE_REPLY('UTF8Str', 'c.GetAtom("UTF8_STRING")', 'string', '""')
     DO_COOKIE_REPLY('UTF8Strs', 'c.GetAtom("UTF8_STRING")', '[]string', 'nil')
+    DO_COOKIE_REPLY('Boolean', 'x.AtomCARDINAL', 'bool', 'false')
 
     DO_REPLY_SINGLE_VALUE('Window', 'x.AtomWINDOW', 'x.Window', 'Window')
     DO_REPLY_SINGLE_VALUE('Cardinal', 'x.AtomCARDINAL', 'uint32', 'Cardinal')
@@ -367,7 +368,7 @@ def main():
                          'x.AtomCARDINAL', '2', 'DesktopGeometry')
     desktop_geometry_fields = ['Width', 'Height']
     DO_REPLY_STRUCTURE('DesktopGeometry', desktop_geometry_fields)
-    DO_SET_ROOT_STRUCTURE('DesktopGeometry', '_NET_DESKTOP_GEOMETRYO',
+    DO_SET_ROOT_STRUCTURE('DesktopGeometry', '_NET_DESKTOP_GEOMETRY',
                           'DesktopGeometry', desktop_geometry_fields)
 
     #> _NET_DESKTOP_VIEWPORT
@@ -426,8 +427,8 @@ def main():
 
     #> _NET_SHOWING_DESKTOP
     do_header('_NET_SHOWING_DESKTOP')
-    DO_ROOT_SINGLE_VALUE('ShowingDesktop', '_NET_SHOWING_DESKTOP',
-                         'x.AtomCARDINAL', 'uint32', 'Cardinal')
+    DO_GET_ROOT_PROPERTY('ShowingDesktop', '_NET_SHOWING_DESKTOP',
+                         'x.AtomCARDINAL', '1', 'Boolean')
 
     #> _NET_WM_NAME
     do_header('_NET_WM_NAME')
@@ -527,6 +528,15 @@ def main():
     DO_REPLY_STRUCTURE('FrameExtents', frame_extents_fields)
     DO_SET_STRUCTURE('FrameExtents', '_NET_FRAME_EXTENTS', 'FrameExtents',
                      frame_extents_fields)
+
+    #> _NET_WM_SYNC_REQUEST_COUNTER
+    do_header('_NET_WM_SYNC_REQUEST_COUNTER')
+    DO_GET_PROPERTY('WmSyncRequestCounter', '_NET_WM_SYNC_REQUEST_COUNTER',
+                    'x.AtomCARDINAL', '2', 'WmSyncRequestCounter')
+    request_counter_fields = ['Low', 'High']
+    DO_REPLY_STRUCTURE('WmSyncRequestCounter', request_counter_fields)
+    DO_SET_STRUCTURE('WmSyncRequestCounter', '_NET_WM_SYNC_REQUEST_COUNTER',
+                     'WmSyncRequestCounter', request_counter_fields)
 
     #> _NET_WM_FULLSCREEN_MONITORS
     do_header('_NET_WM_FULLSCREEN_MONITORS')

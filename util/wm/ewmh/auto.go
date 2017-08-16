@@ -29,6 +29,19 @@ func (cookie GetUTF8StrsCookie) Reply(c *Conn) ([]string, error) {
 	return getUTF8StrsFromReply(reply)
 }
 
+type GetBooleanCookie x.GetPropertyCookie
+
+func (cookie GetBooleanCookie) Reply(c *Conn) (bool, error) {
+	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
+	if err != nil {
+		return false, err
+	}
+	if reply.Type != x.AtomCARDINAL {
+		return false, errors.New("bad reply")
+	}
+	return getBooleanFromReply(reply)
+}
+
 func getWindowFromReply(r *x.GetPropertyReply) (x.Window, error) {
 	if r.Format != 32 || len(r.Value) != 4 {
 		return 0, errors.New("bad reply")
@@ -332,7 +345,7 @@ func SetDesktopGeometryChecked(c *Conn, val DesktopGeometry) x.VoidCookie {
 	w.Write4b(val.Width)
 	w.Write4b(val.Height)
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_GEOMETRYO"), x.AtomCARDINAL, 32, 2, w.Bytes())
+		c.GetAtom("_NET_DESKTOP_GEOMETRY"), x.AtomCARDINAL, 32, 2, w.Bytes())
 }
 
 func SetDesktopGeometry(c *Conn, val DesktopGeometry) x.VoidCookie {
@@ -340,7 +353,7 @@ func SetDesktopGeometry(c *Conn, val DesktopGeometry) x.VoidCookie {
 	w.Write4b(val.Width)
 	w.Write4b(val.Height)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_GEOMETRYO"), x.AtomCARDINAL, 32, 2, w.Bytes())
+		c.GetAtom("_NET_DESKTOP_GEOMETRY"), x.AtomCARDINAL, 32, 2, w.Bytes())
 }
 
 /**
@@ -737,30 +750,16 @@ func SetDesktopLayout(c *Conn, val DesktopLayout) x.VoidCookie {
  *    _NET_SHOWING_DESKTOP
  */
 
-func GetShowingDesktop(c *Conn) GetCardinalCookie {
+func GetShowingDesktop(c *Conn) GetBooleanCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
 		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCARDINAL, 0, 1)
-	return GetCardinalCookie(cookie)
+	return GetBooleanCookie(cookie)
 }
 
-func GetShowingDesktopUnchecked(c *Conn) GetCardinalCookie {
+func GetShowingDesktopUnchecked(c *Conn) GetBooleanCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
 		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCARDINAL, 0, 1)
-	return GetCardinalCookie(cookie)
-}
-
-func SetShowingDesktopChecked(c *Conn, val uint32) x.VoidCookie {
-	w := x.NewWriter()
-	w.Write4b(uint32(val))
-	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCARDINAL, 32, 1, w.Bytes())
-}
-
-func SetShowingDesktop(c *Conn, val uint32) x.VoidCookie {
-	w := x.NewWriter()
-	w.Write4b(uint32(val))
-	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCARDINAL, 32, 1, w.Bytes())
+	return GetBooleanCookie(cookie)
 }
 
 /**
@@ -1450,6 +1449,70 @@ func SetFrameExtents(c *Conn, window x.Window, val FrameExtents) x.VoidCookie {
 	w.Write4b(val.Bottom)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_FRAME_EXTENTS"), x.AtomCARDINAL, 32, 4, w.Bytes())
+}
+
+/**
+ *    _NET_WM_SYNC_REQUEST_COUNTER
+ */
+
+func GetWmSyncRequestCounter(c *Conn, window x.Window) GetWmSyncRequestCounterCookie {
+	cookie := x.GetProperty(c.conn, x.False, window,
+		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCARDINAL, 0, 2)
+	return GetWmSyncRequestCounterCookie(cookie)
+}
+
+func GetWmSyncRequestCounterUnchecked(c *Conn, window x.Window) GetWmSyncRequestCounterCookie {
+	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
+		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCARDINAL, 0, 2)
+	return GetWmSyncRequestCounterCookie(cookie)
+}
+
+type GetWmSyncRequestCounterCookie x.GetPropertyCookie
+
+func (cookie GetWmSyncRequestCounterCookie) Reply(c *Conn) (WmSyncRequestCounter, error) {
+	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
+	if err != nil {
+		return WmSyncRequestCounter{}, err
+	}
+	if reply.Type != x.AtomCARDINAL {
+		return WmSyncRequestCounter{}, errors.New("bad reply")
+	}
+	return getWmSyncRequestCounterFromReply(reply)
+}
+
+type WmSyncRequestCounter struct {
+	Low, High uint32
+}
+
+func getWmSyncRequestCounterFromReply(reply *x.GetPropertyReply) (WmSyncRequestCounter, error) {
+	list, err := getCardinalsFromReply(reply)
+	if err != nil {
+		return WmSyncRequestCounter{}, err
+	}
+
+	if len(list) != 2 {
+		return WmSyncRequestCounter{}, errors.New("length of list is not 2")
+	}
+	return WmSyncRequestCounter{
+		Low:  list[0],
+		High: list[1],
+	}, nil
+}
+
+func SetWmSyncRequestCounterChecked(c *Conn, window x.Window, val WmSyncRequestCounter) x.VoidCookie {
+	w := x.NewWriter()
+	w.Write4b(val.Low)
+	w.Write4b(val.High)
+	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
+		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCARDINAL, 32, 2, w.Bytes())
+}
+
+func SetWmSyncRequestCounter(c *Conn, window x.Window, val WmSyncRequestCounter) x.VoidCookie {
+	w := x.NewWriter()
+	w.Write4b(val.Low)
+	w.Write4b(val.High)
+	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
+		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCARDINAL, 32, 2, w.Bytes())
 }
 
 /**
