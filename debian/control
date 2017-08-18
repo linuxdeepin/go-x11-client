@@ -6,7 +6,8 @@ Build-Depends: debhelper (>= 10),
                dh-golang,
                golang-any,
                golang-github-gavv-monotime-dev,
-               golang-gopkg-check.v1-dev
+               golang-gopkg-check.v1-dev,
+               golang-golang-x-text-dev
 Standards-Version: 4.0.0
 Homepage: https://github.com/linuxdeepin/go-x11-client
 XS-Go-Import-Path: github.com/linuxdeepin/go-x11-client
