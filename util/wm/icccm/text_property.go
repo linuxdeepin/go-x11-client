@@ -24,7 +24,7 @@ type TextProperty struct {
 }
 
 func (tp *TextProperty) GetStr() (string, error) {
-	if tp.Format != 8 || tp.Encoding != x.AtomSTRING {
+	if tp.Format != 8 || tp.Encoding != x.AtomString {
 		return "", errors.New("unsupported encoding")
 	}
 	return convertLatin1ToUTF8(tp.Value)

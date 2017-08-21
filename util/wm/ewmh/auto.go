@@ -36,7 +36,7 @@ func (cookie GetBooleanCookie) Reply(c *Conn) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return false, errors.New("bad reply")
 	}
 	return getBooleanFromReply(reply)
@@ -56,7 +56,7 @@ func (cookie GetWindowCookie) Reply(c *Conn) (x.Window, error) {
 	if err != nil {
 		return 0, err
 	}
-	if reply.Type != x.AtomWINDOW {
+	if reply.Type != x.AtomWindow {
 		return 0, errors.New("bad reply")
 	}
 	return getWindowFromReply(reply)
@@ -76,7 +76,7 @@ func (cookie GetCardinalCookie) Reply(c *Conn) (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return 0, errors.New("bad reply")
 	}
 	return getCardinalFromReply(reply)
@@ -102,7 +102,7 @@ func (cookie GetWindowsCookie) Reply(c *Conn) ([]x.Window, error) {
 	if err != nil {
 		return nil, err
 	}
-	if reply.Type != x.AtomWINDOW {
+	if reply.Type != x.AtomWindow {
 		return nil, errors.New("bad reply")
 	}
 	return getWindowsFromReply(reply)
@@ -128,7 +128,7 @@ func (cookie GetAtomsCookie) Reply(c *Conn) ([]x.Atom, error) {
 	if err != nil {
 		return nil, err
 	}
-	if reply.Type != x.AtomATOM {
+	if reply.Type != x.AtomAtom {
 		return nil, errors.New("bad reply")
 	}
 	return getAtomsFromReply(reply)
@@ -154,7 +154,7 @@ func (cookie GetCardinalsCookie) Reply(c *Conn) ([]uint32, error) {
 	if err != nil {
 		return nil, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return nil, errors.New("bad reply")
 	}
 	return getCardinalsFromReply(reply)
@@ -166,13 +166,13 @@ func (cookie GetCardinalsCookie) Reply(c *Conn) ([]uint32, error) {
 
 func (c *Conn) GetSupported() GetAtomsCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_SUPPORTED"), x.AtomATOM, 0, LENGTH_MAX)
+		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
 func (c *Conn) GetSupportedUnchecked() GetAtomsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_SUPPORTED"), x.AtomATOM, 0, LENGTH_MAX)
+		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
@@ -182,7 +182,7 @@ func (c *Conn) SetSupportedChecked(vals []x.Atom) x.VoidCookie {
 		w.Write4b(uint32(val))
 	}
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SUPPORTED"), x.AtomATOM, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 32, uint32(len(vals)), w.Bytes())
 }
 
 func (c *Conn) SetSupported(vals []x.Atom) x.VoidCookie {
@@ -191,7 +191,7 @@ func (c *Conn) SetSupported(vals []x.Atom) x.VoidCookie {
 		w.Write4b(uint32(val))
 	}
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SUPPORTED"), x.AtomATOM, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 32, uint32(len(vals)), w.Bytes())
 }
 
 /**
@@ -200,13 +200,13 @@ func (c *Conn) SetSupported(vals []x.Atom) x.VoidCookie {
 
 func (c *Conn) GetClientList() GetWindowsCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_CLIENT_LIST"), x.AtomWINDOW, 0, LENGTH_MAX)
+		c.GetAtom("_NET_CLIENT_LIST"), x.AtomWindow, 0, LENGTH_MAX)
 	return GetWindowsCookie(cookie)
 }
 
 func (c *Conn) GetClientListUnchecked() GetWindowsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_CLIENT_LIST"), x.AtomWINDOW, 0, LENGTH_MAX)
+		c.GetAtom("_NET_CLIENT_LIST"), x.AtomWindow, 0, LENGTH_MAX)
 	return GetWindowsCookie(cookie)
 }
 
@@ -216,7 +216,7 @@ func (c *Conn) SetClientListChecked(vals []x.Window) x.VoidCookie {
 		w.Write4b(uint32(val))
 	}
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SUPPORTED"), x.AtomWINDOW, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomWindow, 32, uint32(len(vals)), w.Bytes())
 }
 
 func (c *Conn) SetClientList(vals []x.Window) x.VoidCookie {
@@ -225,7 +225,7 @@ func (c *Conn) SetClientList(vals []x.Window) x.VoidCookie {
 		w.Write4b(uint32(val))
 	}
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SUPPORTED"), x.AtomWINDOW, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomWindow, 32, uint32(len(vals)), w.Bytes())
 }
 
 /**
@@ -234,13 +234,13 @@ func (c *Conn) SetClientList(vals []x.Window) x.VoidCookie {
 
 func (c *Conn) GetClientListStacking() GetWindowsCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_CLIENT_LIST_STACKING"), x.AtomWINDOW, 0, LENGTH_MAX)
+		c.GetAtom("_NET_CLIENT_LIST_STACKING"), x.AtomWindow, 0, LENGTH_MAX)
 	return GetWindowsCookie(cookie)
 }
 
 func (c *Conn) GetClientListStackingUnchecked() GetWindowsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_CLIENT_LIST_STACKING"), x.AtomWINDOW, 0, LENGTH_MAX)
+		c.GetAtom("_NET_CLIENT_LIST_STACKING"), x.AtomWindow, 0, LENGTH_MAX)
 	return GetWindowsCookie(cookie)
 }
 
@@ -250,7 +250,7 @@ func (c *Conn) SetClientListStackingChecked(vals []x.Window) x.VoidCookie {
 		w.Write4b(uint32(val))
 	}
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SUPPORTED"), x.AtomWINDOW, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomWindow, 32, uint32(len(vals)), w.Bytes())
 }
 
 func (c *Conn) SetClientListStacking(vals []x.Window) x.VoidCookie {
@@ -259,7 +259,7 @@ func (c *Conn) SetClientListStacking(vals []x.Window) x.VoidCookie {
 		w.Write4b(uint32(val))
 	}
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SUPPORTED"), x.AtomWINDOW, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomWindow, 32, uint32(len(vals)), w.Bytes())
 }
 
 /**
@@ -268,13 +268,13 @@ func (c *Conn) SetClientListStacking(vals []x.Window) x.VoidCookie {
 
 func (c *Conn) GetNumberOfDesktop() GetCardinalCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_NUMBER_OF_DESKTOPS"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_NUMBER_OF_DESKTOPS"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
 func (c *Conn) GetNumberOfDesktopUnchecked() GetCardinalCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_NUMBER_OF_DESKTOPS"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_NUMBER_OF_DESKTOPS"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
@@ -282,14 +282,14 @@ func (c *Conn) SetNumberOfDesktopChecked(val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_NUMBER_OF_DESKTOPS"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_NUMBER_OF_DESKTOPS"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 func (c *Conn) SetNumberOfDesktop(val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_NUMBER_OF_DESKTOPS"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_NUMBER_OF_DESKTOPS"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 /**
@@ -298,13 +298,13 @@ func (c *Conn) SetNumberOfDesktop(val uint32) x.VoidCookie {
 
 func (c *Conn) GetDesktopGeometry() GetDesktopGeometryCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_GEOMETRY"), x.AtomCARDINAL, 0, 2)
+		c.GetAtom("_NET_DESKTOP_GEOMETRY"), x.AtomCardinal, 0, 2)
 	return GetDesktopGeometryCookie(cookie)
 }
 
 func (c *Conn) GetDesktopGeometryUnchecked() GetDesktopGeometryCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_GEOMETRY"), x.AtomCARDINAL, 0, 2)
+		c.GetAtom("_NET_DESKTOP_GEOMETRY"), x.AtomCardinal, 0, 2)
 	return GetDesktopGeometryCookie(cookie)
 }
 
@@ -315,7 +315,7 @@ func (cookie GetDesktopGeometryCookie) Reply(c *Conn) (DesktopGeometry, error) {
 	if err != nil {
 		return DesktopGeometry{}, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return DesktopGeometry{}, errors.New("bad reply")
 	}
 	return getDesktopGeometryFromReply(reply)
@@ -345,7 +345,7 @@ func (c *Conn) SetDesktopGeometryChecked(val DesktopGeometry) x.VoidCookie {
 	w.Write4b(val.Width)
 	w.Write4b(val.Height)
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_GEOMETRY"), x.AtomCARDINAL, 32, 2, w.Bytes())
+		c.GetAtom("_NET_DESKTOP_GEOMETRY"), x.AtomCardinal, 32, 2, w.Bytes())
 }
 
 func (c *Conn) SetDesktopGeometry(val DesktopGeometry) x.VoidCookie {
@@ -353,7 +353,7 @@ func (c *Conn) SetDesktopGeometry(val DesktopGeometry) x.VoidCookie {
 	w.Write4b(val.Width)
 	w.Write4b(val.Height)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_GEOMETRY"), x.AtomCARDINAL, 32, 2, w.Bytes())
+		c.GetAtom("_NET_DESKTOP_GEOMETRY"), x.AtomCardinal, 32, 2, w.Bytes())
 }
 
 /**
@@ -362,13 +362,13 @@ func (c *Conn) SetDesktopGeometry(val DesktopGeometry) x.VoidCookie {
 
 func (c *Conn) GetDesktopViewport() GetDesktopViewportCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_VIEWPORT"), x.AtomCARDINAL, 0, LENGTH_MAX)
+		c.GetAtom("_NET_DESKTOP_VIEWPORT"), x.AtomCardinal, 0, LENGTH_MAX)
 	return GetDesktopViewportCookie(cookie)
 }
 
 func (c *Conn) GetDesktopViewportUnchecked() GetDesktopViewportCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_VIEWPORT"), x.AtomCARDINAL, 0, LENGTH_MAX)
+		c.GetAtom("_NET_DESKTOP_VIEWPORT"), x.AtomCardinal, 0, LENGTH_MAX)
 	return GetDesktopViewportCookie(cookie)
 }
 
@@ -379,7 +379,7 @@ func (cookie GetDesktopViewportCookie) Reply(c *Conn) ([]ViewportLeftTopCorner, 
 	if err != nil {
 		return nil, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return nil, errors.New("bad reply")
 	}
 	return getDesktopViewportFromReply(reply)
@@ -417,7 +417,7 @@ func (c *Conn) SetDesktopViewportChecked(vals []ViewportLeftTopCorner) x.VoidCoo
 	}
 	length := uint32(len(vals) * 2)
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_VIEWPORT"), x.AtomCARDINAL, 32, length, w.Bytes())
+		c.GetAtom("_NET_DESKTOP_VIEWPORT"), x.AtomCardinal, 32, length, w.Bytes())
 }
 
 func (c *Conn) SetDesktopViewport(vals []ViewportLeftTopCorner) x.VoidCookie {
@@ -428,7 +428,7 @@ func (c *Conn) SetDesktopViewport(vals []ViewportLeftTopCorner) x.VoidCookie {
 	}
 	length := uint32(len(vals) * 2)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_VIEWPORT"), x.AtomCARDINAL, 32, length, w.Bytes())
+		c.GetAtom("_NET_DESKTOP_VIEWPORT"), x.AtomCardinal, 32, length, w.Bytes())
 }
 
 /**
@@ -437,13 +437,13 @@ func (c *Conn) SetDesktopViewport(vals []ViewportLeftTopCorner) x.VoidCookie {
 
 func (c *Conn) GetCurrentDesktop() GetCardinalCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_CURRENT_DESKTOP"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_CURRENT_DESKTOP"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
 func (c *Conn) GetCurrentDesktopUnchecked() GetCardinalCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_CURRENT_DESKTOP"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_CURRENT_DESKTOP"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
@@ -451,14 +451,14 @@ func (c *Conn) SetCurrentDesktopChecked(val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_CURRENT_DESKTOP"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_CURRENT_DESKTOP"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 func (c *Conn) SetCurrentDesktop(val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_CURRENT_DESKTOP"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_CURRENT_DESKTOP"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 /**
@@ -507,13 +507,13 @@ func (c *Conn) SetDesktopNames(vals []string) x.VoidCookie {
 
 func (c *Conn) GetActiveWindow() GetWindowCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_ACTIVE_WINDOW"), x.AtomWINDOW, 0, 1)
+		c.GetAtom("_NET_ACTIVE_WINDOW"), x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
 func (c *Conn) GetActiveWindowUnchecked() GetWindowCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_ACTIVE_WINDOW"), x.AtomWINDOW, 0, 1)
+		c.GetAtom("_NET_ACTIVE_WINDOW"), x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
@@ -521,14 +521,14 @@ func (c *Conn) SetActiveWindowChecked(val x.Window) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_ACTIVE_WINDOW"), x.AtomWINDOW, 32, 1, w.Bytes())
+		c.GetAtom("_NET_ACTIVE_WINDOW"), x.AtomWindow, 32, 1, w.Bytes())
 }
 
 func (c *Conn) SetActiveWindow(val x.Window) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_ACTIVE_WINDOW"), x.AtomWINDOW, 32, 1, w.Bytes())
+		c.GetAtom("_NET_ACTIVE_WINDOW"), x.AtomWindow, 32, 1, w.Bytes())
 }
 
 /**
@@ -537,13 +537,13 @@ func (c *Conn) SetActiveWindow(val x.Window) x.VoidCookie {
 
 func (c *Conn) GetWorkarea() GetWorkareaCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_WORKAREA"), x.AtomCARDINAL, 0, LENGTH_MAX)
+		c.GetAtom("_NET_WORKAREA"), x.AtomCardinal, 0, LENGTH_MAX)
 	return GetWorkareaCookie(cookie)
 }
 
 func (c *Conn) GetWorkareaUnchecked() GetWorkareaCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_WORKAREA"), x.AtomCARDINAL, 0, LENGTH_MAX)
+		c.GetAtom("_NET_WORKAREA"), x.AtomCardinal, 0, LENGTH_MAX)
 	return GetWorkareaCookie(cookie)
 }
 
@@ -554,7 +554,7 @@ func (cookie GetWorkareaCookie) Reply(c *Conn) ([]WorkareaGeometry, error) {
 	if err != nil {
 		return nil, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return nil, errors.New("bad reply")
 	}
 	return getWorkareaFromReply(reply)
@@ -596,7 +596,7 @@ func (c *Conn) SetWorkareaChecked(vals []WorkareaGeometry) x.VoidCookie {
 	}
 	length := uint32(len(vals) * 4)
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_WORKAREA"), x.AtomCARDINAL, 32, length, w.Bytes())
+		c.GetAtom("_NET_WORKAREA"), x.AtomCardinal, 32, length, w.Bytes())
 }
 
 func (c *Conn) SetWorkarea(vals []WorkareaGeometry) x.VoidCookie {
@@ -609,7 +609,7 @@ func (c *Conn) SetWorkarea(vals []WorkareaGeometry) x.VoidCookie {
 	}
 	length := uint32(len(vals) * 4)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_WORKAREA"), x.AtomCARDINAL, 32, length, w.Bytes())
+		c.GetAtom("_NET_WORKAREA"), x.AtomCardinal, 32, length, w.Bytes())
 }
 
 /**
@@ -618,13 +618,13 @@ func (c *Conn) SetWorkarea(vals []WorkareaGeometry) x.VoidCookie {
 
 func (c *Conn) GetSupportingWmCheck(window x.Window) GetWindowCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWINDOW, 0, 1)
+		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
 func (c *Conn) GetSupportingWmCheckUnchecked(window x.Window) GetWindowCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWINDOW, 0, 1)
+		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
@@ -632,14 +632,14 @@ func (c *Conn) SetSupportingWmCheckChecked(window x.Window, val x.Window) x.Void
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWINDOW, 32, 1, w.Bytes())
+		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWindow, 32, 1, w.Bytes())
 }
 
 func (c *Conn) SetSupportingWmCheck(window x.Window, val x.Window) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWINDOW, 32, 1, w.Bytes())
+		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWindow, 32, 1, w.Bytes())
 }
 
 /**
@@ -648,13 +648,13 @@ func (c *Conn) SetSupportingWmCheck(window x.Window, val x.Window) x.VoidCookie 
 
 func (c *Conn) GetVirtualRoots() GetWindowsCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_VIRTUAL_ROOTS"), x.AtomWINDOW, 0, LENGTH_MAX)
+		c.GetAtom("_NET_VIRTUAL_ROOTS"), x.AtomWindow, 0, LENGTH_MAX)
 	return GetWindowsCookie(cookie)
 }
 
 func (c *Conn) GetVirtualRootsUnchecked() GetWindowsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_VIRTUAL_ROOTS"), x.AtomWINDOW, 0, LENGTH_MAX)
+		c.GetAtom("_NET_VIRTUAL_ROOTS"), x.AtomWindow, 0, LENGTH_MAX)
 	return GetWindowsCookie(cookie)
 }
 
@@ -664,7 +664,7 @@ func (c *Conn) SetVirtualRootsChecked(vals []x.Window) x.VoidCookie {
 		w.Write4b(uint32(val))
 	}
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SUPPORTED"), x.AtomWINDOW, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomWindow, 32, uint32(len(vals)), w.Bytes())
 }
 
 func (c *Conn) SetVirtualRoots(vals []x.Window) x.VoidCookie {
@@ -673,7 +673,7 @@ func (c *Conn) SetVirtualRoots(vals []x.Window) x.VoidCookie {
 		w.Write4b(uint32(val))
 	}
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SUPPORTED"), x.AtomWINDOW, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomWindow, 32, uint32(len(vals)), w.Bytes())
 }
 
 /**
@@ -682,13 +682,13 @@ func (c *Conn) SetVirtualRoots(vals []x.Window) x.VoidCookie {
 
 func (c *Conn) GetDesktopLayout() GetDesktopLayoutCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_LAYOUT"), x.AtomCARDINAL, 0, 4)
+		c.GetAtom("_NET_DESKTOP_LAYOUT"), x.AtomCardinal, 0, 4)
 	return GetDesktopLayoutCookie(cookie)
 }
 
 func (c *Conn) GetDesktopLayoutUnchecked() GetDesktopLayoutCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_LAYOUT"), x.AtomCARDINAL, 0, 4)
+		c.GetAtom("_NET_DESKTOP_LAYOUT"), x.AtomCardinal, 0, 4)
 	return GetDesktopLayoutCookie(cookie)
 }
 
@@ -699,7 +699,7 @@ func (cookie GetDesktopLayoutCookie) Reply(c *Conn) (DesktopLayout, error) {
 	if err != nil {
 		return DesktopLayout{}, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return DesktopLayout{}, errors.New("bad reply")
 	}
 	return getDesktopLayoutFromReply(reply)
@@ -733,7 +733,7 @@ func (c *Conn) SetDesktopLayoutChecked(val DesktopLayout) x.VoidCookie {
 	w.Write4b(val.Rows)
 	w.Write4b(val.StartingCorner)
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_LAYOUT"), x.AtomCARDINAL, 32, 4, w.Bytes())
+		c.GetAtom("_NET_DESKTOP_LAYOUT"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
 func (c *Conn) SetDesktopLayout(val DesktopLayout) x.VoidCookie {
@@ -743,7 +743,7 @@ func (c *Conn) SetDesktopLayout(val DesktopLayout) x.VoidCookie {
 	w.Write4b(val.Rows)
 	w.Write4b(val.StartingCorner)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_LAYOUT"), x.AtomCARDINAL, 32, 4, w.Bytes())
+		c.GetAtom("_NET_DESKTOP_LAYOUT"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
 /**
@@ -752,13 +752,13 @@ func (c *Conn) SetDesktopLayout(val DesktopLayout) x.VoidCookie {
 
 func (c *Conn) GetShowingDesktop() GetBooleanCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCardinal, 0, 1)
 	return GetBooleanCookie(cookie)
 }
 
 func (c *Conn) GetShowingDesktopUnchecked() GetBooleanCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(),
-		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCardinal, 0, 1)
 	return GetBooleanCookie(cookie)
 }
 
@@ -872,13 +872,13 @@ func (c *Conn) SetWmVisibleIconName(window x.Window, val string) x.VoidCookie {
 
 func (c *Conn) GetWmDesktop(window x.Window) GetCardinalCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_DESKTOP"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_WM_DESKTOP"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
 func (c *Conn) GetWmDesktopUnchecked(window x.Window) GetCardinalCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_DESKTOP"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_WM_DESKTOP"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
@@ -886,14 +886,14 @@ func (c *Conn) SetWmDesktopChecked(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_DESKTOP"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_WM_DESKTOP"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 func (c *Conn) SetWmDesktop(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_DESKTOP"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_WM_DESKTOP"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 /**
@@ -902,13 +902,13 @@ func (c *Conn) SetWmDesktop(window x.Window, val uint32) x.VoidCookie {
 
 func (c *Conn) GetWmWindowType(window x.Window) GetAtomsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_WINDOW_TYPE"), x.AtomATOM, 0, LENGTH_MAX)
+		c.GetAtom("_NET_WM_WINDOW_TYPE"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
 func (c *Conn) GetWmWindowTypeUnchecked(window x.Window) GetAtomsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_WINDOW_TYPE"), x.AtomATOM, 0, LENGTH_MAX)
+		c.GetAtom("_NET_WM_WINDOW_TYPE"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
@@ -918,7 +918,7 @@ func (c *Conn) SetWmWindowTypeChecked(window x.Window, vals []x.Atom) x.VoidCook
 		w.Write4b(uint32(val))
 	}
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_SUPPORTED"), x.AtomATOM, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 32, uint32(len(vals)), w.Bytes())
 }
 
 func (c *Conn) SetWmWindowType(window x.Window, vals []x.Atom) x.VoidCookie {
@@ -927,7 +927,7 @@ func (c *Conn) SetWmWindowType(window x.Window, vals []x.Atom) x.VoidCookie {
 		w.Write4b(uint32(val))
 	}
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_SUPPORTED"), x.AtomATOM, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 32, uint32(len(vals)), w.Bytes())
 }
 
 /**
@@ -936,13 +936,13 @@ func (c *Conn) SetWmWindowType(window x.Window, vals []x.Atom) x.VoidCookie {
 
 func (c *Conn) GetWmState(window x.Window) GetAtomsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_STATE"), x.AtomATOM, 0, LENGTH_MAX)
+		c.GetAtom("_NET_WM_STATE"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
 func (c *Conn) GetWmStateUnchecked(window x.Window) GetAtomsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_STATE"), x.AtomATOM, 0, LENGTH_MAX)
+		c.GetAtom("_NET_WM_STATE"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
@@ -952,7 +952,7 @@ func (c *Conn) SetWmStateChecked(window x.Window, vals []x.Atom) x.VoidCookie {
 		w.Write4b(uint32(val))
 	}
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_SUPPORTED"), x.AtomATOM, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 32, uint32(len(vals)), w.Bytes())
 }
 
 func (c *Conn) SetWmState(window x.Window, vals []x.Atom) x.VoidCookie {
@@ -961,7 +961,7 @@ func (c *Conn) SetWmState(window x.Window, vals []x.Atom) x.VoidCookie {
 		w.Write4b(uint32(val))
 	}
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_SUPPORTED"), x.AtomATOM, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 32, uint32(len(vals)), w.Bytes())
 }
 
 /**
@@ -970,13 +970,13 @@ func (c *Conn) SetWmState(window x.Window, vals []x.Atom) x.VoidCookie {
 
 func (c *Conn) GetWmAllowedActions(window x.Window) GetAtomsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_ALLOWED_ACTIONS"), x.AtomATOM, 0, LENGTH_MAX)
+		c.GetAtom("_NET_WM_ALLOWED_ACTIONS"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
 func (c *Conn) GetWmAllowedActionsUnchecked(window x.Window) GetAtomsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_ALLOWED_ACTIONS"), x.AtomATOM, 0, LENGTH_MAX)
+		c.GetAtom("_NET_WM_ALLOWED_ACTIONS"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
@@ -986,7 +986,7 @@ func (c *Conn) SetWmAllowedActionsChecked(window x.Window, vals []x.Atom) x.Void
 		w.Write4b(uint32(val))
 	}
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_SUPPORTED"), x.AtomATOM, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 32, uint32(len(vals)), w.Bytes())
 }
 
 func (c *Conn) SetWmAllowedActions(window x.Window, vals []x.Atom) x.VoidCookie {
@@ -995,7 +995,7 @@ func (c *Conn) SetWmAllowedActions(window x.Window, vals []x.Atom) x.VoidCookie 
 		w.Write4b(uint32(val))
 	}
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_SUPPORTED"), x.AtomATOM, 32, uint32(len(vals)), w.Bytes())
+		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 32, uint32(len(vals)), w.Bytes())
 }
 
 /**
@@ -1004,13 +1004,13 @@ func (c *Conn) SetWmAllowedActions(window x.Window, vals []x.Atom) x.VoidCookie 
 
 func (c *Conn) GetWmStrut(window x.Window) GetWmStrutCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_STRUT"), x.AtomCARDINAL, 0, 4)
+		c.GetAtom("_NET_WM_STRUT"), x.AtomCardinal, 0, 4)
 	return GetWmStrutCookie(cookie)
 }
 
 func (c *Conn) GetWmStrutUnchecked(window x.Window) GetWmStrutCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_STRUT"), x.AtomCARDINAL, 0, 4)
+		c.GetAtom("_NET_WM_STRUT"), x.AtomCardinal, 0, 4)
 	return GetWmStrutCookie(cookie)
 }
 
@@ -1021,7 +1021,7 @@ func (cookie GetWmStrutCookie) Reply(c *Conn) (WmStrut, error) {
 	if err != nil {
 		return WmStrut{}, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return WmStrut{}, errors.New("bad reply")
 	}
 	return getWmStrutFromReply(reply)
@@ -1055,7 +1055,7 @@ func (c *Conn) SetWmStrutChecked(window x.Window, val WmStrut) x.VoidCookie {
 	w.Write4b(val.Top)
 	w.Write4b(val.Bottom)
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_STRUT"), x.AtomCARDINAL, 32, 4, w.Bytes())
+		c.GetAtom("_NET_WM_STRUT"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
 func (c *Conn) SetWmStrut(window x.Window, val WmStrut) x.VoidCookie {
@@ -1065,7 +1065,7 @@ func (c *Conn) SetWmStrut(window x.Window, val WmStrut) x.VoidCookie {
 	w.Write4b(val.Top)
 	w.Write4b(val.Bottom)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_STRUT"), x.AtomCARDINAL, 32, 4, w.Bytes())
+		c.GetAtom("_NET_WM_STRUT"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
 /**
@@ -1074,13 +1074,13 @@ func (c *Conn) SetWmStrut(window x.Window, val WmStrut) x.VoidCookie {
 
 func (c *Conn) GetWmStrutPartial(window x.Window) GetWmStrutPartialCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_STRUT_PARTIAL"), x.AtomCARDINAL, 0, 12)
+		c.GetAtom("_NET_WM_STRUT_PARTIAL"), x.AtomCardinal, 0, 12)
 	return GetWmStrutPartialCookie(cookie)
 }
 
 func (c *Conn) GetWmStrutPartialUnchecked(window x.Window) GetWmStrutPartialCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_STRUT_PARTIAL"), x.AtomCARDINAL, 0, 12)
+		c.GetAtom("_NET_WM_STRUT_PARTIAL"), x.AtomCardinal, 0, 12)
 	return GetWmStrutPartialCookie(cookie)
 }
 
@@ -1091,7 +1091,7 @@ func (cookie GetWmStrutPartialCookie) Reply(c *Conn) (WmStrutPartial, error) {
 	if err != nil {
 		return WmStrutPartial{}, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return WmStrutPartial{}, errors.New("bad reply")
 	}
 	return getWmStrutPartialFromReply(reply)
@@ -1141,7 +1141,7 @@ func (c *Conn) SetWmStrutPartialChecked(window x.Window, val WmStrutPartial) x.V
 	w.Write4b(val.BottomStartX)
 	w.Write4b(val.BottomEndX)
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_STRUT_PARTIAL"), x.AtomCARDINAL, 32, 12, w.Bytes())
+		c.GetAtom("_NET_WM_STRUT_PARTIAL"), x.AtomCardinal, 32, 12, w.Bytes())
 }
 
 func (c *Conn) SetWmStrutPartial(window x.Window, val WmStrutPartial) x.VoidCookie {
@@ -1159,7 +1159,7 @@ func (c *Conn) SetWmStrutPartial(window x.Window, val WmStrutPartial) x.VoidCook
 	w.Write4b(val.BottomStartX)
 	w.Write4b(val.BottomEndX)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_STRUT_PARTIAL"), x.AtomCARDINAL, 32, 12, w.Bytes())
+		c.GetAtom("_NET_WM_STRUT_PARTIAL"), x.AtomCardinal, 32, 12, w.Bytes())
 }
 
 /**
@@ -1168,13 +1168,13 @@ func (c *Conn) SetWmStrutPartial(window x.Window, val WmStrutPartial) x.VoidCook
 
 func (c *Conn) GetWmIconGeometry(window x.Window) GetWmIconGeometryCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_ICON_GEOMETRY"), x.AtomCARDINAL, 0, 4)
+		c.GetAtom("_NET_WM_ICON_GEOMETRY"), x.AtomCardinal, 0, 4)
 	return GetWmIconGeometryCookie(cookie)
 }
 
 func (c *Conn) GetWmIconGeometryUnchecked(window x.Window) GetWmIconGeometryCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_ICON_GEOMETRY"), x.AtomCARDINAL, 0, 4)
+		c.GetAtom("_NET_WM_ICON_GEOMETRY"), x.AtomCardinal, 0, 4)
 	return GetWmIconGeometryCookie(cookie)
 }
 
@@ -1185,7 +1185,7 @@ func (cookie GetWmIconGeometryCookie) Reply(c *Conn) (WmIconGeometry, error) {
 	if err != nil {
 		return WmIconGeometry{}, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return WmIconGeometry{}, errors.New("bad reply")
 	}
 	return getWmIconGeometryFromReply(reply)
@@ -1219,7 +1219,7 @@ func (c *Conn) SetWmIconGeometryChecked(window x.Window, val WmIconGeometry) x.V
 	w.Write4b(val.Width)
 	w.Write4b(val.Height)
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_ICON_GEOMETRY"), x.AtomCARDINAL, 32, 4, w.Bytes())
+		c.GetAtom("_NET_WM_ICON_GEOMETRY"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
 func (c *Conn) SetWmIconGeometry(window x.Window, val WmIconGeometry) x.VoidCookie {
@@ -1229,7 +1229,7 @@ func (c *Conn) SetWmIconGeometry(window x.Window, val WmIconGeometry) x.VoidCook
 	w.Write4b(val.Width)
 	w.Write4b(val.Height)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_ICON_GEOMETRY"), x.AtomCARDINAL, 32, 4, w.Bytes())
+		c.GetAtom("_NET_WM_ICON_GEOMETRY"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
 /**
@@ -1238,13 +1238,13 @@ func (c *Conn) SetWmIconGeometry(window x.Window, val WmIconGeometry) x.VoidCook
 
 func (c *Conn) GetWmIcon(window x.Window) GetWmIconCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_ICON"), x.AtomCARDINAL, 0, LENGTH_MAX)
+		c.GetAtom("_NET_WM_ICON"), x.AtomCardinal, 0, LENGTH_MAX)
 	return GetWmIconCookie(cookie)
 }
 
 func (c *Conn) GetWmIconUnchecked(window x.Window) GetWmIconCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_ICON"), x.AtomCARDINAL, 0, LENGTH_MAX)
+		c.GetAtom("_NET_WM_ICON"), x.AtomCardinal, 0, LENGTH_MAX)
 	return GetWmIconCookie(cookie)
 }
 
@@ -1255,7 +1255,7 @@ func (cookie GetWmIconCookie) Reply(c *Conn) ([]WmIcon, error) {
 	if err != nil {
 		return nil, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return nil, errors.New("bad reply")
 	}
 	return getWmIconFromReply(reply)
@@ -1267,13 +1267,13 @@ func (cookie GetWmIconCookie) Reply(c *Conn) ([]WmIcon, error) {
 
 func (c *Conn) GetWmPid(window x.Window) GetCardinalCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_PID"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_WM_PID"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
 func (c *Conn) GetWmPidUnchecked(window x.Window) GetCardinalCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_PID"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_WM_PID"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
@@ -1281,14 +1281,14 @@ func (c *Conn) SetWmPidChecked(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_PID"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_WM_PID"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 func (c *Conn) SetWmPid(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_PID"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_WM_PID"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 /**
@@ -1297,13 +1297,13 @@ func (c *Conn) SetWmPid(window x.Window, val uint32) x.VoidCookie {
 
 func (c *Conn) GetWmHandledIcons(window x.Window) GetCardinalCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_HANDLED_ICONS"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_WM_HANDLED_ICONS"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
 func (c *Conn) GetWmHandledIconsUnchecked(window x.Window) GetCardinalCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_HANDLED_ICONS"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_WM_HANDLED_ICONS"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
@@ -1311,14 +1311,14 @@ func (c *Conn) SetWmHandledIconsChecked(window x.Window, val uint32) x.VoidCooki
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_HANDLED_ICONS"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_WM_HANDLED_ICONS"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 func (c *Conn) SetWmHandledIcons(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_HANDLED_ICONS"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_WM_HANDLED_ICONS"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 /**
@@ -1327,13 +1327,13 @@ func (c *Conn) SetWmHandledIcons(window x.Window, val uint32) x.VoidCookie {
 
 func (c *Conn) GetWmUserTime(window x.Window) GetCardinalCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_USER_TIME"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_WM_USER_TIME"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
 func (c *Conn) GetWmUserTimeUnchecked(window x.Window) GetCardinalCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_USER_TIME"), x.AtomCARDINAL, 0, 1)
+		c.GetAtom("_NET_WM_USER_TIME"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
@@ -1341,14 +1341,14 @@ func (c *Conn) SetWmUserTimeChecked(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_USER_TIME"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_WM_USER_TIME"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 func (c *Conn) SetWmUserTime(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_USER_TIME"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_WM_USER_TIME"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 /**
@@ -1357,13 +1357,13 @@ func (c *Conn) SetWmUserTime(window x.Window, val uint32) x.VoidCookie {
 
 func (c *Conn) GetWmUserTimeWindow(window x.Window) GetWindowCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_USER_TIME_WINDOW"), x.AtomWINDOW, 0, 1)
+		c.GetAtom("_NET_WM_USER_TIME_WINDOW"), x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
 func (c *Conn) GetWmUserTimeWindowUnchecked(window x.Window) GetWindowCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_USER_TIME_WINDOW"), x.AtomWINDOW, 0, 1)
+		c.GetAtom("_NET_WM_USER_TIME_WINDOW"), x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
@@ -1371,14 +1371,14 @@ func (c *Conn) SetWmUserTimeWindowChecked(window x.Window, val x.Window) x.VoidC
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_USER_TIME_WINDOW"), x.AtomWINDOW, 32, 1, w.Bytes())
+		c.GetAtom("_NET_WM_USER_TIME_WINDOW"), x.AtomWindow, 32, 1, w.Bytes())
 }
 
 func (c *Conn) SetWmUserTimeWindow(window x.Window, val x.Window) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_USER_TIME_WINDOW"), x.AtomWINDOW, 32, 1, w.Bytes())
+		c.GetAtom("_NET_WM_USER_TIME_WINDOW"), x.AtomWindow, 32, 1, w.Bytes())
 }
 
 /**
@@ -1387,13 +1387,13 @@ func (c *Conn) SetWmUserTimeWindow(window x.Window, val x.Window) x.VoidCookie {
 
 func (c *Conn) GetFrameExtents(window x.Window) GetFrameExtentsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_FRAME_EXTENTS"), x.AtomCARDINAL, 0, 4)
+		c.GetAtom("_NET_FRAME_EXTENTS"), x.AtomCardinal, 0, 4)
 	return GetFrameExtentsCookie(cookie)
 }
 
 func (c *Conn) GetFrameExtentsUnchecked(window x.Window) GetFrameExtentsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_FRAME_EXTENTS"), x.AtomCARDINAL, 0, 4)
+		c.GetAtom("_NET_FRAME_EXTENTS"), x.AtomCardinal, 0, 4)
 	return GetFrameExtentsCookie(cookie)
 }
 
@@ -1404,7 +1404,7 @@ func (cookie GetFrameExtentsCookie) Reply(c *Conn) (FrameExtents, error) {
 	if err != nil {
 		return FrameExtents{}, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return FrameExtents{}, errors.New("bad reply")
 	}
 	return getFrameExtentsFromReply(reply)
@@ -1438,7 +1438,7 @@ func (c *Conn) SetFrameExtentsChecked(window x.Window, val FrameExtents) x.VoidC
 	w.Write4b(val.Top)
 	w.Write4b(val.Bottom)
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_FRAME_EXTENTS"), x.AtomCARDINAL, 32, 4, w.Bytes())
+		c.GetAtom("_NET_FRAME_EXTENTS"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
 func (c *Conn) SetFrameExtents(window x.Window, val FrameExtents) x.VoidCookie {
@@ -1448,7 +1448,7 @@ func (c *Conn) SetFrameExtents(window x.Window, val FrameExtents) x.VoidCookie {
 	w.Write4b(val.Top)
 	w.Write4b(val.Bottom)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_FRAME_EXTENTS"), x.AtomCARDINAL, 32, 4, w.Bytes())
+		c.GetAtom("_NET_FRAME_EXTENTS"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
 /**
@@ -1457,13 +1457,13 @@ func (c *Conn) SetFrameExtents(window x.Window, val FrameExtents) x.VoidCookie {
 
 func (c *Conn) GetWmSyncRequestCounter(window x.Window) GetWmSyncRequestCounterCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCARDINAL, 0, 2)
+		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCardinal, 0, 2)
 	return GetWmSyncRequestCounterCookie(cookie)
 }
 
 func (c *Conn) GetWmSyncRequestCounterUnchecked(window x.Window) GetWmSyncRequestCounterCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCARDINAL, 0, 2)
+		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCardinal, 0, 2)
 	return GetWmSyncRequestCounterCookie(cookie)
 }
 
@@ -1474,7 +1474,7 @@ func (cookie GetWmSyncRequestCounterCookie) Reply(c *Conn) (WmSyncRequestCounter
 	if err != nil {
 		return WmSyncRequestCounter{}, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return WmSyncRequestCounter{}, errors.New("bad reply")
 	}
 	return getWmSyncRequestCounterFromReply(reply)
@@ -1504,7 +1504,7 @@ func (c *Conn) SetWmSyncRequestCounterChecked(window x.Window, val WmSyncRequest
 	w.Write4b(val.Low)
 	w.Write4b(val.High)
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCARDINAL, 32, 2, w.Bytes())
+		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCardinal, 32, 2, w.Bytes())
 }
 
 func (c *Conn) SetWmSyncRequestCounter(window x.Window, val WmSyncRequestCounter) x.VoidCookie {
@@ -1512,7 +1512,7 @@ func (c *Conn) SetWmSyncRequestCounter(window x.Window, val WmSyncRequestCounter
 	w.Write4b(val.Low)
 	w.Write4b(val.High)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCARDINAL, 32, 2, w.Bytes())
+		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCardinal, 32, 2, w.Bytes())
 }
 
 /**
@@ -1521,13 +1521,13 @@ func (c *Conn) SetWmSyncRequestCounter(window x.Window, val WmSyncRequestCounter
 
 func (c *Conn) GetWmFullscreenMonitors(window x.Window) GetWmFullscreenMonitorsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), x.AtomCARDINAL, 0, 4)
+		c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), x.AtomCardinal, 0, 4)
 	return GetWmFullscreenMonitorsCookie(cookie)
 }
 
 func (c *Conn) GetWmFullscreenMonitorsUnchecked(window x.Window) GetWmFullscreenMonitorsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
-		c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), x.AtomCARDINAL, 0, 4)
+		c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), x.AtomCardinal, 0, 4)
 	return GetWmFullscreenMonitorsCookie(cookie)
 }
 
@@ -1538,7 +1538,7 @@ func (cookie GetWmFullscreenMonitorsCookie) Reply(c *Conn) (WmFullscreenMonitors
 	if err != nil {
 		return WmFullscreenMonitors{}, err
 	}
-	if reply.Type != x.AtomCARDINAL {
+	if reply.Type != x.AtomCardinal {
 		return WmFullscreenMonitors{}, errors.New("bad reply")
 	}
 	return getWmFullscreenMonitorsFromReply(reply)
@@ -1572,7 +1572,7 @@ func (c *Conn) SetWmFullscreenMonitorsChecked(window x.Window, val WmFullscreenM
 	w.Write4b(val.Left)
 	w.Write4b(val.Right)
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), x.AtomCARDINAL, 32, 4, w.Bytes())
+		c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
 func (c *Conn) SetWmFullscreenMonitors(window x.Window, val WmFullscreenMonitors) x.VoidCookie {
@@ -1582,5 +1582,5 @@ func (c *Conn) SetWmFullscreenMonitors(window x.Window, val WmFullscreenMonitors
 	w.Write4b(val.Left)
 	w.Write4b(val.Right)
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
-		c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), x.AtomCARDINAL, 32, 4, w.Bytes())
+		c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), x.AtomCardinal, 32, 4, w.Bytes())
 }

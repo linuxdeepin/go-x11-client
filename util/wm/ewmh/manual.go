@@ -188,7 +188,7 @@ func (c *Conn) SetShowingDesktopChecked(show bool) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 func (c *Conn) SetShowingDesktop(show bool) x.VoidCookie {
@@ -199,7 +199,7 @@ func (c *Conn) SetShowingDesktop(show bool) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCARDINAL, 32, 1, w.Bytes())
+		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
 func (c *Conn) RequestChangeShowingDesktop(show bool) x.VoidCookie {

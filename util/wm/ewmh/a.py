@@ -129,7 +129,7 @@ def DO_LIST_VALUES(sth, _property, atype, go_type, cookie_type):
 def DO_REPLY_STRUCTURE(sth, fields):
     go_type = sth
     bad_go_value = go_type + '{}'
-    DO_COOKIE_REPLY(sth, 'x.AtomCARDINAL', go_type, bad_go_value)
+    DO_COOKIE_REPLY(sth, 'x.AtomCardinal', go_type, bad_go_value)
 
     # fields is str list
     # all field type is uint32
@@ -161,7 +161,7 @@ def DO_REPLY_STRUCTURE(sth, fields):
 
 def DO_REPLY_STRUCTURES(sth, go_type, fields):
     n_fields = len(fields)
-    DO_COOKIE_REPLY(sth, 'x.AtomCARDINAL', '[]' + go_type, 'nil')
+    DO_COOKIE_REPLY(sth, 'x.AtomCardinal', '[]' + go_type, 'nil')
 
     l('type %s struct {', go_type)
     l('    %s uint32', ', '.join(fields))
@@ -254,7 +254,7 @@ def DO_SET_ROOT_STRUCTURES(sth, _property, go_type, fields):
         l('    }')  # end for
         l('    length := uint32(len(vals) * %d)', n_fields)
         l('    return x.ChangeProperty%s(c.conn, x.PropModeReplace, c.GetRootWin(),\n'
-          + 'c.GetAtom("%s"), x.AtomCARDINAL, 32, length, w.Bytes())', checked,
+          + 'c.GetAtom("%s"), x.AtomCardinal, 32, length, w.Bytes())', checked,
           _property)
         l('}')  # end func
 
@@ -272,7 +272,7 @@ def DO_SET_ROOT_STRUCTURE(sth, _property, go_type, fields):
             l('    w.Write4b(val.%s)', field)
 
         l('    return x.ChangeProperty%s(c.conn, x.PropModeReplace, c.GetRootWin(),\nc.GetAtom("%s"),'
-          + 'x.AtomCARDINAL, 32, %d, w.Bytes())', checked, _property,
+          + 'x.AtomCardinal, 32, %d, w.Bytes())', checked, _property,
           len(fields))
         l('}')  # end func
 
@@ -286,7 +286,7 @@ def DO_SET_STRUCTURE(sth, _property, go_type, fields):
             l('    w.Write4b(val.%s)', field)
 
         l('    return x.ChangeProperty%s(c.conn, x.PropModeReplace, window,\nc.GetAtom("%s"),'
-          + 'x.AtomCARDINAL, 32, %d, w.Bytes())', checked, _property,
+          + 'x.AtomCardinal, 32, %d, w.Bytes())', checked, _property,
           len(fields))
         l('}')  # end func
 
@@ -333,39 +333,39 @@ def main():
 
     DO_COOKIE_REPLY('UTF8Str', 'c.GetAtom("UTF8_STRING")', 'string', '""')
     DO_COOKIE_REPLY('UTF8Strs', 'c.GetAtom("UTF8_STRING")', '[]string', 'nil')
-    DO_COOKIE_REPLY('Boolean', 'x.AtomCARDINAL', 'bool', 'false')
+    DO_COOKIE_REPLY('Boolean', 'x.AtomCardinal', 'bool', 'false')
 
-    DO_REPLY_SINGLE_VALUE('Window', 'x.AtomWINDOW', 'x.Window', 'Window')
-    DO_REPLY_SINGLE_VALUE('Cardinal', 'x.AtomCARDINAL', 'uint32', 'Cardinal')
+    DO_REPLY_SINGLE_VALUE('Window', 'x.AtomWindow', 'x.Window', 'Window')
+    DO_REPLY_SINGLE_VALUE('Cardinal', 'x.AtomCardinal', 'uint32', 'Cardinal')
 
-    DO_REPLY_LIST_VALUES('Windows', 'x.AtomWINDOW', 'x.Window')
-    DO_REPLY_LIST_VALUES('Atoms', 'x.AtomATOM', 'x.Atom')
-    DO_REPLY_LIST_VALUES('Cardinals', 'x.AtomCARDINAL', 'uint32')
+    DO_REPLY_LIST_VALUES('Windows', 'x.AtomWindow', 'x.Window')
+    DO_REPLY_LIST_VALUES('Atoms', 'x.AtomAtom', 'x.Atom')
+    DO_REPLY_LIST_VALUES('Cardinals', 'x.AtomCardinal', 'uint32')
 
     #> _NET_SUPPORTED
     do_header('_NET_SUPPORTED')
-    DO_ROOT_LIST_VALUES('Supported', '_NET_SUPPORTED', 'x.AtomATOM', 'x.Atom',
+    DO_ROOT_LIST_VALUES('Supported', '_NET_SUPPORTED', 'x.AtomAtom', 'x.Atom',
                         'Atoms')
 
     #> _NET_CLIENT_LIST
     do_header('_NET_CLIENT_LIST')
-    DO_ROOT_LIST_VALUES('ClientList', '_NET_CLIENT_LIST', 'x.AtomWINDOW',
+    DO_ROOT_LIST_VALUES('ClientList', '_NET_CLIENT_LIST', 'x.AtomWindow',
                         'x.Window', 'Windows')
 
     #> _NET_CLIENT_LIST_STACKING
     do_header('_NET_CLIENT_LIST_STACKING')
     DO_ROOT_LIST_VALUES('ClientListStacking', '_NET_CLIENT_LIST_STACKING',
-                        'x.AtomWINDOW', 'x.Window', 'Windows')
+                        'x.AtomWindow', 'x.Window', 'Windows')
 
     #> _NET_NUMBER_OF_DESKTOPS
     do_header('_NET_NUMBER_OF_DESKTOPS')
     DO_ROOT_SINGLE_VALUE('NumberOfDesktop', '_NET_NUMBER_OF_DESKTOPS',
-                         'x.AtomCARDINAL', 'uint32', 'Cardinal')
+                         'x.AtomCardinal', 'uint32', 'Cardinal')
 
     #> _NET_DESKTOP_GEOMETRY
     do_header('_NET_DESKTOP_GEOMETRY')
     DO_GET_ROOT_PROPERTY('DesktopGeometry', '_NET_DESKTOP_GEOMETRY',
-                         'x.AtomCARDINAL', '2', 'DesktopGeometry')
+                         'x.AtomCardinal', '2', 'DesktopGeometry')
     desktop_geometry_fields = ['Width', 'Height']
     DO_REPLY_STRUCTURE('DesktopGeometry', desktop_geometry_fields)
     DO_SET_ROOT_STRUCTURE('DesktopGeometry', '_NET_DESKTOP_GEOMETRY',
@@ -374,7 +374,7 @@ def main():
     #> _NET_DESKTOP_VIEWPORT
     do_header('_NET_DESKTOP_VIEWPORT')
     DO_GET_ROOT_PROPERTY('DesktopViewport', '_NET_DESKTOP_VIEWPORT',
-                         'x.AtomCARDINAL', 'LENGTH_MAX', 'DesktopViewport')
+                         'x.AtomCardinal', 'LENGTH_MAX', 'DesktopViewport')
     viewport_fields = ['X', 'Y']
     DO_REPLY_STRUCTURES('DesktopViewport', 'ViewportLeftTopCorner',
                         viewport_fields)
@@ -384,7 +384,7 @@ def main():
     #> _NET_CURRENT_DESKTOP
     do_header('_NET_CURRENT_DESKTOP')
     DO_ROOT_SINGLE_VALUE('CurrentDesktop', '_NET_CURRENT_DESKTOP',
-                         'x.AtomCARDINAL', 'uint32', 'Cardinal')
+                         'x.AtomCardinal', 'uint32', 'Cardinal')
 
     #> _NET_DESKTOP_NAMES
     do_header('_NET_DESKTOP_NAMES')
@@ -392,12 +392,12 @@ def main():
 
     #> _NET_ACTIVE_WINDOW
     do_header('_NET_ACTIVE_WINDOW')
-    DO_ROOT_SINGLE_VALUE('ActiveWindow', '_NET_ACTIVE_WINDOW', 'x.AtomWINDOW',
+    DO_ROOT_SINGLE_VALUE('ActiveWindow', '_NET_ACTIVE_WINDOW', 'x.AtomWindow',
                          'x.Window', 'Window')
 
     #> _NET_WORKAREA
     do_header('_NET_WORKAREA')
-    DO_GET_ROOT_PROPERTY('Workarea', '_NET_WORKAREA', 'x.AtomCARDINAL',
+    DO_GET_ROOT_PROPERTY('Workarea', '_NET_WORKAREA', 'x.AtomCardinal',
                          'LENGTH_MAX', 'Workarea')
     workarea_geo_fields = ['X', 'Y', 'Width', 'Height']
     DO_REPLY_STRUCTURES('Workarea', 'WorkareaGeometry', workarea_geo_fields)
@@ -407,17 +407,17 @@ def main():
     #> _NET_SUPPORTING_WM_CHECK
     do_header('_NET_SUPPORTING_WM_CHECK')
     DO_SINGLE_VALUE('SupportingWmCheck', '_NET_SUPPORTING_WM_CHECK',
-                    'x.AtomWINDOW', 'x.Window', 'Window')
+                    'x.AtomWindow', 'x.Window', 'Window')
 
     #>  _NET_VIRTUAL_ROOTS
     do_header('_NET_VIRTUAL_ROOTS')
-    DO_ROOT_LIST_VALUES('VirtualRoots', '_NET_VIRTUAL_ROOTS', 'x.AtomWINDOW',
+    DO_ROOT_LIST_VALUES('VirtualRoots', '_NET_VIRTUAL_ROOTS', 'x.AtomWindow',
                         'x.Window', 'Windows')
 
     #> _NET_DESKTOP_LAYOUT
     do_header('_NET_DESKTOP_LAYOUT')
     DO_GET_ROOT_PROPERTY('DesktopLayout', '_NET_DESKTOP_LAYOUT',
-                         'x.AtomCARDINAL', '4', 'DesktopLayout')
+                         'x.AtomCardinal', '4', 'DesktopLayout')
     desktop_layout_fields = [
         'Orientation', 'Columns', 'Rows', 'StartingCorner'
     ]
@@ -428,7 +428,7 @@ def main():
     #> _NET_SHOWING_DESKTOP
     do_header('_NET_SHOWING_DESKTOP')
     DO_GET_ROOT_PROPERTY('ShowingDesktop', '_NET_SHOWING_DESKTOP',
-                         'x.AtomCARDINAL', '1', 'Boolean')
+                         'x.AtomCardinal', '1', 'Boolean')
 
     #> _NET_WM_NAME
     do_header('_NET_WM_NAME')
@@ -448,26 +448,26 @@ def main():
 
     #> _NET_WM_DESKTOP
     do_header('_NET_WM_DESKTOP')
-    DO_SINGLE_VALUE('WmDesktop', '_NET_WM_DESKTOP', 'x.AtomCARDINAL', 'uint32',
+    DO_SINGLE_VALUE('WmDesktop', '_NET_WM_DESKTOP', 'x.AtomCardinal', 'uint32',
                     'Cardinal')
 
     #> _NET_WM_WINDOW_TYPE
     do_header('_NET_WM_WINDOW_TYPE')
-    DO_LIST_VALUES('WmWindowType', '_NET_WM_WINDOW_TYPE', 'x.AtomATOM',
+    DO_LIST_VALUES('WmWindowType', '_NET_WM_WINDOW_TYPE', 'x.AtomAtom',
                    'x.Atom', 'Atoms')
 
     #> _NET_WM_STATE
     do_header('_NET_WM_STATE')
-    DO_LIST_VALUES('WmState', '_NET_WM_STATE', 'x.AtomATOM', 'x.Atom', 'Atoms')
+    DO_LIST_VALUES('WmState', '_NET_WM_STATE', 'x.AtomAtom', 'x.Atom', 'Atoms')
 
     #> _NET_WM_ALLOWED_ACTIONS
     do_header('_NET_WM_ALLOWED_ACTIONS')
-    DO_LIST_VALUES('WmAllowedActions', '_NET_WM_ALLOWED_ACTIONS', 'x.AtomATOM',
+    DO_LIST_VALUES('WmAllowedActions', '_NET_WM_ALLOWED_ACTIONS', 'x.AtomAtom',
                    'x.Atom', 'Atoms')
 
     #> _NET_WM_STRUT
     do_header('_NET_WM_STRUT')
-    DO_GET_PROPERTY('WmStrut', '_NET_WM_STRUT', 'x.AtomCARDINAL', '4',
+    DO_GET_PROPERTY('WmStrut', '_NET_WM_STRUT', 'x.AtomCardinal', '4',
                     'WmStrut')
     strut_fields = ['Left', 'Right', 'Top', 'Bottom']
     DO_REPLY_STRUCTURE('WmStrut', strut_fields)
@@ -476,7 +476,7 @@ def main():
     #> _NET_WM_STRUT_PARTIAL
     do_header('_NET_WM_STRUT_PARTIAL')
     DO_GET_PROPERTY('WmStrutPartial', '_NET_WM_STRUT_PARTIAL',
-                    'x.AtomCARDINAL', '12', 'WmStrutPartial')
+                    'x.AtomCardinal', '12', 'WmStrutPartial')
     strut_partial_fields = strut_fields + [
         'LeftStartY', 'LeftEndY', 'RightStartY', 'RightEndY', 'TopStartX',
         'TopEndX', 'BottomStartX', 'BottomEndX'
@@ -488,7 +488,7 @@ def main():
     #> _NET_WM_ICON_GEOMETRY
     do_header('_NET_WM_ICON_GEOMETRY')
     DO_GET_PROPERTY('WmIconGeometry', '_NET_WM_ICON_GEOMETRY',
-                    'x.AtomCARDINAL', '4', 'WmIconGeometry')
+                    'x.AtomCardinal', '4', 'WmIconGeometry')
     icon_geometry = ['X', 'Y', 'Width', 'Height']
     DO_REPLY_STRUCTURE('WmIconGeometry', icon_geometry)
     DO_SET_STRUCTURE('WmIconGeometry', '_NET_WM_ICON_GEOMETRY',
@@ -496,33 +496,33 @@ def main():
 
     #> _NET_WM_ICON
     do_header('_NET_WM_ICON')
-    DO_GET_PROPERTY('WmIcon', '_NET_WM_ICON', 'x.AtomCARDINAL', 'LENGTH_MAX',
+    DO_GET_PROPERTY('WmIcon', '_NET_WM_ICON', 'x.AtomCardinal', 'LENGTH_MAX',
                     'WmIcon')
-    DO_COOKIE_REPLY('WmIcon', 'x.AtomCARDINAL', '[]WmIcon', 'nil')
+    DO_COOKIE_REPLY('WmIcon', 'x.AtomCardinal', '[]WmIcon', 'nil')
 
     #> _NET_WM_PID
     do_header('_NET_WM_PID')
-    DO_SINGLE_VALUE('WmPid', '_NET_WM_PID', 'x.AtomCARDINAL', 'uint32',
+    DO_SINGLE_VALUE('WmPid', '_NET_WM_PID', 'x.AtomCardinal', 'uint32',
                     'Cardinal')
 
     #> _NET_WM_HANDLED_ICONS
     do_header('_NET_WM_HANDLED_ICONS')
     DO_SINGLE_VALUE('WmHandledIcons', '_NET_WM_HANDLED_ICONS',
-                    'x.AtomCARDINAL', 'uint32', 'Cardinal')
+                    'x.AtomCardinal', 'uint32', 'Cardinal')
 
     #> _NET_WM_USER_TIME
     do_header('_NET_WM_USER_TIME')
-    DO_SINGLE_VALUE('WmUserTime', '_NET_WM_USER_TIME', 'x.AtomCARDINAL',
+    DO_SINGLE_VALUE('WmUserTime', '_NET_WM_USER_TIME', 'x.AtomCardinal',
                     'uint32', 'Cardinal')
 
     #> _NET_WM_USER_TIME_WINDOW
     do_header('_NET_WM_USER_TIME_WINDOW')
     DO_SINGLE_VALUE('WmUserTimeWindow', '_NET_WM_USER_TIME_WINDOW',
-                    'x.AtomWINDOW', 'x.Window', 'Window')
+                    'x.AtomWindow', 'x.Window', 'Window')
 
     #> _NET_FRAME_EXTENTS
     do_header('_NET_FRAME_EXTENTS')
-    DO_GET_PROPERTY('FrameExtents', '_NET_FRAME_EXTENTS', 'x.AtomCARDINAL',
+    DO_GET_PROPERTY('FrameExtents', '_NET_FRAME_EXTENTS', 'x.AtomCardinal',
                     '4', 'FrameExtents')
     frame_extents_fields = ['Left', 'Right', 'Top', 'Bottom']
     DO_REPLY_STRUCTURE('FrameExtents', frame_extents_fields)
@@ -532,7 +532,7 @@ def main():
     #> _NET_WM_SYNC_REQUEST_COUNTER
     do_header('_NET_WM_SYNC_REQUEST_COUNTER')
     DO_GET_PROPERTY('WmSyncRequestCounter', '_NET_WM_SYNC_REQUEST_COUNTER',
-                    'x.AtomCARDINAL', '2', 'WmSyncRequestCounter')
+                    'x.AtomCardinal', '2', 'WmSyncRequestCounter')
     request_counter_fields = ['Low', 'High']
     DO_REPLY_STRUCTURE('WmSyncRequestCounter', request_counter_fields)
     DO_SET_STRUCTURE('WmSyncRequestCounter', '_NET_WM_SYNC_REQUEST_COUNTER',
@@ -541,7 +541,7 @@ def main():
     #> _NET_WM_FULLSCREEN_MONITORS
     do_header('_NET_WM_FULLSCREEN_MONITORS')
     DO_GET_PROPERTY('WmFullscreenMonitors', '_NET_WM_FULLSCREEN_MONITORS',
-                    'x.AtomCARDINAL', '4', 'WmFullscreenMonitors')
+                    'x.AtomCardinal', '4', 'WmFullscreenMonitors')
     fullscreen_monitors_fields = ['Top', 'Bottom', 'Left', 'Right']
     DO_REPLY_STRUCTURE('WmFullscreenMonitors', fullscreen_monitors_fields)
     DO_SET_STRUCTURE('WmFullscreenMonitors', '_NET_WM_FULLSCREEN_MONITORS',
