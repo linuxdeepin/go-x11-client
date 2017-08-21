@@ -53,6 +53,11 @@ func (in *In) addError(e *GenericError) bool {
 	}
 }
 
+func (in *In) close() {
+	close(in.errorCh)
+	close(in.eventCh)
+}
+
 type ReplyReader struct {
 	request uint64
 	cond    *sync.Cond

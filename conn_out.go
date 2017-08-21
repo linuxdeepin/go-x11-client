@@ -76,7 +76,7 @@ type ProtocolRequest struct {
 	IsVoid bool
 }
 
-// return sequencue id
+// return sequence id
 func (c *Conn) SendRequest(flags uint, data []byte, req *ProtocolRequest) uint64 {
 	// process data auto field
 	// set the major opcode, and the minor opcode for extensions

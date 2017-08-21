@@ -49,5 +49,6 @@ func (c *Conn) GetDefaultScreen() *Screen {
 }
 
 func (c *Conn) Close() {
-	// TODO
+	c.conn.Close()
+	c.in.close()
 }

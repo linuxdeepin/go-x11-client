@@ -10,7 +10,6 @@ func (ge GenericEvent) GetEventCode() uint8 {
 	return ge[0] &^ 0x80
 }
 
-// TODO
 func (ge GenericEvent) Real() bool {
 	return ge[0]&0x80 == 0
 }
@@ -56,30 +55,3 @@ func (conn *Conn) EventLoop() {
 		eh.Run(ge)
 	}
 }
-
-//type Event interface {
-//GetBytes() []byte
-//GetNumber() uint8
-//}
-
-//// Event is an interface that can contain any of the events returned by the
-//// server. Use a type assertion switch to extract the Event structs.
-//type Event interface {
-//Bytes() []byte
-//String() string
-//}
-
-//// NewEventFun is the type of function use to construct events from raw bytes.
-//// It should not be used. It is exported for use in the extension sub-packages.
-//type NewEventFun func(buf []byte) Event
-
-//// NewEventFuncs is a map from event numbers to functions that create
-//// the corresponding event. It should not be used. It is exported for use
-//// in the extension sub-packages.
-//var NewEventFuncs = make(map[int]NewEventFun)
-
-//// NewExtEventFuncs is a temporary map that stores event constructor functions
-//// for each extension. When an extension is initialized, each event for that
-//// extension is added to the 'NewEventFuncs' map. It should not be used. It is
-//// exported for use in the extension sub-packages.
-//var NewExtEventFuncs = make(map[string]map[int]NewEventFun)
