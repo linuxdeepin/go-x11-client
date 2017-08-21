@@ -94,59 +94,59 @@ func (cookie GetAtomsCookie) Reply(c *Conn) ([]x.Atom, error) {
 }
 
 /* WM_NAME */
-func (c *Conn) GetWmName(window x.Window) GetTextCookie {
+func (c *Conn) GetWMName(window x.Window) GetTextCookie {
 	return c.getTextProperty(window, x.AtomWMName)
 }
 
-func (c *Conn) GetWmNameUnchecked(window x.Window) GetTextCookie {
+func (c *Conn) GetWMNameUnchecked(window x.Window) GetTextCookie {
 	return c.getTextPropertyUnchecked(window, x.AtomWMName)
 }
 
 /* WM_ICON_NAME */
-func (c *Conn) GetWmIconName(window x.Window) GetTextCookie {
+func (c *Conn) GetWMIconName(window x.Window) GetTextCookie {
 	return c.getTextProperty(window, x.AtomWMIconName)
 }
 
-func (c *Conn) GetWmIconNameUnchecked(window x.Window) GetTextCookie {
+func (c *Conn) GetWMIconNameUnchecked(window x.Window) GetTextCookie {
 	return c.getTextPropertyUnchecked(window, x.AtomWMIconName)
 }
 
 /* WM_COLORMAP_WINDOWS */
-func (c *Conn) GetWmColormapWindows(window x.Window) GetWindowsCookie {
+func (c *Conn) GetWMColormapWindows(window x.Window) GetWindowsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window, c.GetAtom("WM_COLORMAP_WINDOWS"),
 		x.AtomWindow, 0, getPropertyMaxLength)
 	return GetWindowsCookie(cookie)
 }
 
-func (c *Conn) GetWmColormapWindowsUnchecked(window x.Window) GetWindowsCookie {
+func (c *Conn) GetWMColormapWindowsUnchecked(window x.Window) GetWindowsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window, c.GetAtom("WM_COLORMAP_WINDOWS"),
 		x.AtomWindow, 0, getPropertyMaxLength)
 	return GetWindowsCookie(cookie)
 }
 
 /* WM_CLIENT_MACHINE  */
-func (c *Conn) GetWmClientMachine(window x.Window) GetTextCookie {
+func (c *Conn) GetWMClientMachine(window x.Window) GetTextCookie {
 	return c.getTextProperty(window, x.AtomWMClientMachine)
 }
 
-func (c *Conn) GetWmClientMachineUnchecked(window x.Window) GetTextCookie {
+func (c *Conn) GetWMClientMachineUnchecked(window x.Window) GetTextCookie {
 	return c.getTextPropertyUnchecked(window, x.AtomWMClientMachine)
 }
 
 /* WM_CLASS */
-type GetWmClassCookie x.GetPropertyCookie
+type GetWMClassCookie x.GetPropertyCookie
 
-func (cookie GetWmClassCookie) Reply(c *Conn) (WmClass, error) {
+func (cookie GetWMClassCookie) Reply(c *Conn) (WMClass, error) {
 	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
 	if err != nil {
-		return WmClass{}, err
+		return WMClass{}, err
 	}
-	return getWmClassFromReply(reply)
+	return getWMClassFromReply(reply)
 }
 
-func getWmClassFromReply(reply *x.GetPropertyReply) (WmClass, error) {
+func getWMClassFromReply(reply *x.GetPropertyReply) (WMClass, error) {
 	if reply.Type != x.AtomString || reply.Format != 8 {
-		return WmClass{}, errors.New("bad reply")
+		return WMClass{}, errors.New("bad reply")
 	}
 
 	data := reply.Value
@@ -163,51 +163,51 @@ func getWmClassFromReply(reply *x.GetPropertyReply) (WmClass, error) {
 	}
 
 	if len(parts) != 2 {
-		return WmClass{}, errors.New("length of parts is not 2")
+		return WMClass{}, errors.New("length of parts is not 2")
 	}
 
 	// convert parts to utf8str
 	instance, err := convertLatin1ToUTF8(parts[0])
 	if err != nil {
-		return WmClass{}, err
+		return WMClass{}, err
 	}
 	class, err := convertLatin1ToUTF8(parts[1])
 	if err != nil {
-		return WmClass{}, err
+		return WMClass{}, err
 	}
-	return WmClass{
+	return WMClass{
 		Instance: instance,
 		Class:    class,
 	}, nil
 }
 
-type WmClass struct {
+type WMClass struct {
 	Class, Instance string
 }
 
-func (c *Conn) GetWmClass(window x.Window) GetWmClassCookie {
+func (c *Conn) GetWMClass(window x.Window) GetWMClassCookie {
 	cookie := x.GetProperty(c.conn, x.False, window, x.AtomWMClass, x.AtomString, 0, 2048)
-	return GetWmClassCookie(cookie)
+	return GetWMClassCookie(cookie)
 }
 
-func (c *Conn) GetWmClassUnchecked(window x.Window) GetWmClassCookie {
+func (c *Conn) GetWMClassUnchecked(window x.Window) GetWMClassCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window, x.AtomWMClass, x.AtomString, 0, 2048)
-	return GetWmClassCookie(cookie)
+	return GetWMClassCookie(cookie)
 }
 
 /* WM_TRANSIENT_FOR */
-func (c *Conn) GetWmTransientFor(window x.Window) GetWindowCookie {
+func (c *Conn) GetWMTransientFor(window x.Window) GetWindowCookie {
 	cookie := x.GetProperty(c.conn, x.False, window, x.AtomWMTransientFor, x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
-func (c *Conn) GetWmTransientForUnchecked(window x.Window) GetWindowCookie {
+func (c *Conn) GetWMTransientForUnchecked(window x.Window) GetWindowCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window, x.AtomWMTransientFor, x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
 /* WM_SIZE_HINTS */
-type WmSizeHints struct {
+type WMSizeHints struct {
 	Flags                 SizeHintsFlags
 	X                     int32
 	Y                     int32
@@ -263,9 +263,9 @@ func (flags SizeHintsFlags) String() string {
 	return "[" + strings.Join(ret, ",") + "]"
 }
 
-type GetWmSizeHintsCookie x.GetPropertyCookie
+type GetWMSizeHintsCookie x.GetPropertyCookie
 
-func (cookie GetWmSizeHintsCookie) Reply(c *Conn) (*WmSizeHints, error) {
+func (cookie GetWMSizeHintsCookie) Reply(c *Conn) (*WMSizeHints, error) {
 	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
 	if err != nil {
 		return nil, err
@@ -274,10 +274,10 @@ func (cookie GetWmSizeHintsCookie) Reply(c *Conn) (*WmSizeHints, error) {
 	if reply.Type != x.AtomWMSizeHints {
 		return nil, errors.New("bad reply")
 	}
-	return getWmSizeHintsFromReply(reply)
+	return getWMSizeHintsFromReply(reply)
 }
 
-func getWmSizeHintsFromReply(reply *x.GetPropertyReply) (*WmSizeHints, error) {
+func getWMSizeHintsFromReply(reply *x.GetPropertyReply) (*WMSizeHints, error) {
 	list, err := getCardinalsFromReply(reply)
 	if err != nil {
 		return nil, err
@@ -287,7 +287,7 @@ func getWmSizeHintsFromReply(reply *x.GetPropertyReply) (*WmSizeHints, error) {
 		return nil, errors.New("length of list is incorrect")
 	}
 
-	var v WmSizeHints
+	var v WMSizeHints
 	v.Flags = SizeHintsFlags(list[0])
 
 	v.X = int32(list[1])
@@ -320,18 +320,18 @@ func getWmSizeHintsFromReply(reply *x.GetPropertyReply) (*WmSizeHints, error) {
 const wmSizeHintsElements = 18
 
 /* WM_NORMAL_HINTS */
-func (c *Conn) GetWmNormalHints(window x.Window) GetWmSizeHintsCookie {
+func (c *Conn) GetWMNormalHints(window x.Window) GetWMSizeHintsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window, x.AtomWMNormalHints, x.AtomWMSizeHints, 0, wmSizeHintsElements)
-	return GetWmSizeHintsCookie(cookie)
+	return GetWMSizeHintsCookie(cookie)
 }
 
-func (c *Conn) GetWmNormalHintsUnchecked(window x.Window) GetWmSizeHintsCookie {
+func (c *Conn) GetWMNormalHintsUnchecked(window x.Window) GetWMSizeHintsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window, x.AtomWMNormalHints, x.AtomWMSizeHints, 0, wmSizeHintsElements)
-	return GetWmSizeHintsCookie(cookie)
+	return GetWMSizeHintsCookie(cookie)
 }
 
 /* WM_HINTS */
-type WmHints struct {
+type WMHints struct {
 	Flags        HintsFlags
 	Input        uint32
 	InitialState uint32
@@ -379,9 +379,9 @@ func (flags HintsFlags) String() string {
 
 const wmHintsElements = 9
 
-type GetWmHintsCookie x.GetPropertyCookie
+type GetWMHintsCookie x.GetPropertyCookie
 
-func (cookie GetWmHintsCookie) Reply(c *Conn) (*WmHints, error) {
+func (cookie GetWMHintsCookie) Reply(c *Conn) (*WMHints, error) {
 	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
 	if err != nil {
 		return nil, err
@@ -390,10 +390,10 @@ func (cookie GetWmHintsCookie) Reply(c *Conn) (*WmHints, error) {
 	if reply.Type != x.AtomWMHints {
 		return nil, errors.New("bad reply")
 	}
-	return getWmHintsFromReply(reply)
+	return getWMHintsFromReply(reply)
 }
 
-func getWmHintsFromReply(reply *x.GetPropertyReply) (*WmHints, error) {
+func getWMHintsFromReply(reply *x.GetPropertyReply) (*WMHints, error) {
 	list, err := getCardinalsFromReply(reply)
 	if err != nil {
 		return nil, err
@@ -403,7 +403,7 @@ func getWmHintsFromReply(reply *x.GetPropertyReply) (*WmHints, error) {
 		return nil, errors.New("length of list is incorrect")
 	}
 
-	var v WmHints
+	var v WMHints
 	v.Flags = HintsFlags(list[0])
 	v.Input = list[1]
 	v.InitialState = list[2]
@@ -416,33 +416,33 @@ func getWmHintsFromReply(reply *x.GetPropertyReply) (*WmHints, error) {
 	return &v, nil
 }
 
-func (c *Conn) GetWmHints(window x.Window) GetWmHintsCookie {
+func (c *Conn) GetWMHints(window x.Window) GetWMHintsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window, x.AtomWMHints, x.AtomWMHints,
 		0, wmHintsElements)
-	return GetWmHintsCookie(cookie)
+	return GetWMHintsCookie(cookie)
 }
 
-func (c *Conn) GetWmHintsUnchecked(window x.Window) GetWmHintsCookie {
+func (c *Conn) GetWMHintsUnchecked(window x.Window) GetWMHintsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window, x.AtomWMHints, x.AtomWMHints,
 		0, wmHintsElements)
-	return GetWmHintsCookie(cookie)
+	return GetWMHintsCookie(cookie)
 }
 
 /* WM_PROTOCOLS */
-func (c *Conn) GetWmProtocols(window x.Window) GetAtomsCookie {
+func (c *Conn) GetWMProtocols(window x.Window) GetAtomsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window, c.GetAtom("WM_PROTOCOLS"), x.AtomAtom,
 		0, getPropertyMaxLength)
 	return GetAtomsCookie(cookie)
 }
 
-func (c *Conn) GetWmProtocolsUnchecked(window x.Window) GetAtomsCookie {
+func (c *Conn) GetWMProtocolsUnchecked(window x.Window) GetAtomsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window, c.GetAtom("WM_PROTOCOLS"), x.AtomAtom,
 		0, getPropertyMaxLength)
 	return GetAtomsCookie(cookie)
 }
 
 /* WM_STATE */
-type WmState struct {
+type WMState struct {
 	State  uint32
 	Window x.Window
 }
@@ -455,44 +455,44 @@ const (
 	StateIconic    = 3
 )
 
-type GetWmStateCookie x.GetPropertyCookie
+type GetWMStateCookie x.GetPropertyCookie
 
-func (cookie GetWmStateCookie) Reply(c *Conn) (WmState, error) {
+func (cookie GetWMStateCookie) Reply(c *Conn) (WMState, error) {
 	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
 	if err != nil {
-		return WmState{}, err
+		return WMState{}, err
 	}
-	return getWmStateFromReply(reply)
+	return getWMStateFromReply(reply)
 }
 
-func getWmStateFromReply(reply *x.GetPropertyReply) (WmState, error) {
+func getWMStateFromReply(reply *x.GetPropertyReply) (WMState, error) {
 	list, err := getCardinalsFromReply(reply)
 	if err != nil {
-		return WmState{}, err
+		return WMState{}, err
 	}
 
 	if len(list) != wmStateElements {
-		return WmState{}, errors.New("length of list is incorrect")
+		return WMState{}, errors.New("length of list is incorrect")
 	}
 
-	var v WmState
+	var v WMState
 	v.State = list[0]
 	v.Window = x.Window(list[1])
 	return v, nil
 }
 
-func (c *Conn) GetWmState(window x.Window) GetWmStateCookie {
-	atomWmState := c.GetAtom("WM_STATE")
-	cookie := x.GetProperty(c.conn, x.False, window, atomWmState, atomWmState,
+func (c *Conn) GetWMState(window x.Window) GetWMStateCookie {
+	atomWMState := c.GetAtom("WM_STATE")
+	cookie := x.GetProperty(c.conn, x.False, window, atomWMState, atomWMState,
 		0, wmStateElements)
-	return GetWmStateCookie(cookie)
+	return GetWMStateCookie(cookie)
 }
 
-func (c *Conn) GetWmStateUnchecked(window x.Window) GetWmStateCookie {
-	atomWmState := c.GetAtom("WM_STATE")
-	cookie := x.GetPropertyUnchecked(c.conn, x.False, window, atomWmState, atomWmState,
+func (c *Conn) GetWMStateUnchecked(window x.Window) GetWMStateCookie {
+	atomWMState := c.GetAtom("WM_STATE")
+	cookie := x.GetPropertyUnchecked(c.conn, x.False, window, atomWMState, atomWMState,
 		0, wmStateElements)
-	return GetWmStateCookie(cookie)
+	return GetWMStateCookie(cookie)
 }
 
 func (c *Conn) sendClientMessage(win, dest x.Window, msgType x.Atom, pArray *[5]uint32) x.VoidCookie {
@@ -511,13 +511,13 @@ func (c *Conn) sendClientMessage(win, dest x.Window, msgType x.Atom, pArray *[5]
 	return x.SendEvent(c.conn, x.False, dest, evMask, w.Bytes())
 }
 
-func (c *Conn) RequestChangeWmState(window x.Window, state uint32) x.VoidCookie {
+func (c *Conn) RequestChangeWMState(window x.Window, state uint32) x.VoidCookie {
 	array := [5]uint32{state}
 	return c.sendClientMessage(window, c.GetRootWin(), c.GetAtom("WM_CHANGE_STATE"), &array)
 }
 
 /* WM_ICON_SIZE */
-type WmIconSize struct {
+type WMIconSize struct {
 	MinWidth, MinHeight uint32
 	MaxWidth, MaxHeight uint32
 	WidthInc, HeightInc uint32
@@ -525,17 +525,17 @@ type WmIconSize struct {
 
 const wmIconSizeElements = 6
 
-type GetWmIconSizeCookie x.GetPropertyCookie
+type GetWMIconSizeCookie x.GetPropertyCookie
 
-func (cookie GetWmIconSizeCookie) Reply(c *Conn) (*WmIconSize, error) {
+func (cookie GetWMIconSizeCookie) Reply(c *Conn) (*WMIconSize, error) {
 	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
 	if err != nil {
 		return nil, err
 	}
-	return getWmIconSizeFromReply(reply)
+	return getWMIconSizeFromReply(reply)
 }
 
-func getWmIconSizeFromReply(reply *x.GetPropertyReply) (*WmIconSize, error) {
+func getWMIconSizeFromReply(reply *x.GetPropertyReply) (*WMIconSize, error) {
 	list, err := getCardinalsFromReply(reply)
 	if err != nil {
 		return nil, err
@@ -545,7 +545,7 @@ func getWmIconSizeFromReply(reply *x.GetPropertyReply) (*WmIconSize, error) {
 		return nil, errors.New("length of list is incorrect")
 	}
 
-	var v WmIconSize
+	var v WMIconSize
 	v.MinWidth = list[0]
 	v.MinHeight = list[1]
 	v.MaxWidth = list[2]
@@ -555,12 +555,12 @@ func getWmIconSizeFromReply(reply *x.GetPropertyReply) (*WmIconSize, error) {
 	return &v, nil
 }
 
-func (c *Conn) GetWmIconSize() GetWmIconSizeCookie {
+func (c *Conn) GetWMIconSize() GetWMIconSizeCookie {
 	cookie := x.GetProperty(c.conn, x.False, c.GetRootWin(), x.AtomWMIconSize, x.AtomCardinal, 0, wmIconSizeElements)
-	return GetWmIconSizeCookie(cookie)
+	return GetWMIconSizeCookie(cookie)
 }
 
-func (c *Conn) GetWmIconSizeUnchecked() GetWmIconSizeCookie {
+func (c *Conn) GetWMIconSizeUnchecked() GetWMIconSizeCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, c.GetRootWin(), x.AtomWMIconSize, x.AtomCardinal, 0, wmIconSizeElements)
-	return GetWmIconSizeCookie(cookie)
+	return GetWMIconSizeCookie(cookie)
 }

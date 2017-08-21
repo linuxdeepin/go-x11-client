@@ -616,26 +616,26 @@ func (c *Conn) SetWorkarea(vals []WorkareaGeometry) x.VoidCookie {
  *    _NET_SUPPORTING_WM_CHECK
  */
 
-func (c *Conn) GetSupportingWmCheck(window x.Window) GetWindowCookie {
+func (c *Conn) GetSupportingWMCheck(window x.Window) GetWindowCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
-func (c *Conn) GetSupportingWmCheckUnchecked(window x.Window) GetWindowCookie {
+func (c *Conn) GetSupportingWMCheckUnchecked(window x.Window) GetWindowCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
-func (c *Conn) SetSupportingWmCheckChecked(window x.Window, val x.Window) x.VoidCookie {
+func (c *Conn) SetSupportingWMCheckChecked(window x.Window, val x.Window) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWindow, 32, 1, w.Bytes())
 }
 
-func (c *Conn) SetSupportingWmCheck(window x.Window, val x.Window) x.VoidCookie {
+func (c *Conn) SetSupportingWMCheck(window x.Window, val x.Window) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
@@ -766,24 +766,24 @@ func (c *Conn) GetShowingDesktopUnchecked() GetBooleanCookie {
  *    _NET_WM_NAME
  */
 
-func (c *Conn) GetWmName(window x.Window) GetUTF8StrCookie {
+func (c *Conn) GetWMName(window x.Window) GetUTF8StrCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_NAME"), c.GetAtom("UTF8_STRING"), 0, LENGTH_MAX)
 	return GetUTF8StrCookie(cookie)
 }
 
-func (c *Conn) GetWmNameUnchecked(window x.Window) GetUTF8StrCookie {
+func (c *Conn) GetWMNameUnchecked(window x.Window) GetUTF8StrCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_NAME"), c.GetAtom("UTF8_STRING"), 0, LENGTH_MAX)
 	return GetUTF8StrCookie(cookie)
 }
 
-func (c *Conn) SetWmNameChecked(window x.Window, val string) x.VoidCookie {
+func (c *Conn) SetWMNameChecked(window x.Window, val string) x.VoidCookie {
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_NAME"), c.GetAtom("UTF8_STRING"), 8, uint32(len(val)), []byte(val))
 }
 
-func (c *Conn) SetWmName(window x.Window, val string) x.VoidCookie {
+func (c *Conn) SetWMName(window x.Window, val string) x.VoidCookie {
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_NAME"), c.GetAtom("UTF8_STRING"), 8, uint32(len(val)), []byte(val))
 }
@@ -792,24 +792,24 @@ func (c *Conn) SetWmName(window x.Window, val string) x.VoidCookie {
  *    _NET_WM_VISIBLE_NAME
  */
 
-func (c *Conn) GetWmVisibleName(window x.Window) GetUTF8StrCookie {
+func (c *Conn) GetWMVisibleName(window x.Window) GetUTF8StrCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_VISIBLE_NAME"), c.GetAtom("UTF8_STRING"), 0, LENGTH_MAX)
 	return GetUTF8StrCookie(cookie)
 }
 
-func (c *Conn) GetWmVisibleNameUnchecked(window x.Window) GetUTF8StrCookie {
+func (c *Conn) GetWMVisibleNameUnchecked(window x.Window) GetUTF8StrCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_VISIBLE_NAME"), c.GetAtom("UTF8_STRING"), 0, LENGTH_MAX)
 	return GetUTF8StrCookie(cookie)
 }
 
-func (c *Conn) SetWmVisibleNameChecked(window x.Window, val string) x.VoidCookie {
+func (c *Conn) SetWMVisibleNameChecked(window x.Window, val string) x.VoidCookie {
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_VISIBLE_NAME"), c.GetAtom("UTF8_STRING"), 8, uint32(len(val)), []byte(val))
 }
 
-func (c *Conn) SetWmVisibleName(window x.Window, val string) x.VoidCookie {
+func (c *Conn) SetWMVisibleName(window x.Window, val string) x.VoidCookie {
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_VISIBLE_NAME"), c.GetAtom("UTF8_STRING"), 8, uint32(len(val)), []byte(val))
 }
@@ -818,24 +818,24 @@ func (c *Conn) SetWmVisibleName(window x.Window, val string) x.VoidCookie {
  *    _NET_WM_ICON_NAME
  */
 
-func (c *Conn) GetWmIconName(window x.Window) GetUTF8StrCookie {
+func (c *Conn) GetWMIconName(window x.Window) GetUTF8StrCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_ICON_NAME"), c.GetAtom("UTF8_STRING"), 0, LENGTH_MAX)
 	return GetUTF8StrCookie(cookie)
 }
 
-func (c *Conn) GetWmIconNameUnchecked(window x.Window) GetUTF8StrCookie {
+func (c *Conn) GetWMIconNameUnchecked(window x.Window) GetUTF8StrCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_ICON_NAME"), c.GetAtom("UTF8_STRING"), 0, LENGTH_MAX)
 	return GetUTF8StrCookie(cookie)
 }
 
-func (c *Conn) SetWmIconNameChecked(window x.Window, val string) x.VoidCookie {
+func (c *Conn) SetWMIconNameChecked(window x.Window, val string) x.VoidCookie {
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_ICON_NAME"), c.GetAtom("UTF8_STRING"), 8, uint32(len(val)), []byte(val))
 }
 
-func (c *Conn) SetWmIconName(window x.Window, val string) x.VoidCookie {
+func (c *Conn) SetWMIconName(window x.Window, val string) x.VoidCookie {
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_ICON_NAME"), c.GetAtom("UTF8_STRING"), 8, uint32(len(val)), []byte(val))
 }
@@ -844,24 +844,24 @@ func (c *Conn) SetWmIconName(window x.Window, val string) x.VoidCookie {
  *    _NET_WM_VISIBLE_ICON_NAME
  */
 
-func (c *Conn) GetWmVisibleIconName(window x.Window) GetUTF8StrCookie {
+func (c *Conn) GetWMVisibleIconName(window x.Window) GetUTF8StrCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_VISIBLE_ICON_NAME"), c.GetAtom("UTF8_STRING"), 0, LENGTH_MAX)
 	return GetUTF8StrCookie(cookie)
 }
 
-func (c *Conn) GetWmVisibleIconNameUnchecked(window x.Window) GetUTF8StrCookie {
+func (c *Conn) GetWMVisibleIconNameUnchecked(window x.Window) GetUTF8StrCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_VISIBLE_ICON_NAME"), c.GetAtom("UTF8_STRING"), 0, LENGTH_MAX)
 	return GetUTF8StrCookie(cookie)
 }
 
-func (c *Conn) SetWmVisibleIconNameChecked(window x.Window, val string) x.VoidCookie {
+func (c *Conn) SetWMVisibleIconNameChecked(window x.Window, val string) x.VoidCookie {
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_VISIBLE_ICON_NAME"), c.GetAtom("UTF8_STRING"), 8, uint32(len(val)), []byte(val))
 }
 
-func (c *Conn) SetWmVisibleIconName(window x.Window, val string) x.VoidCookie {
+func (c *Conn) SetWMVisibleIconName(window x.Window, val string) x.VoidCookie {
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_VISIBLE_ICON_NAME"), c.GetAtom("UTF8_STRING"), 8, uint32(len(val)), []byte(val))
 }
@@ -870,26 +870,26 @@ func (c *Conn) SetWmVisibleIconName(window x.Window, val string) x.VoidCookie {
  *    _NET_WM_DESKTOP
  */
 
-func (c *Conn) GetWmDesktop(window x.Window) GetCardinalCookie {
+func (c *Conn) GetWMDesktop(window x.Window) GetCardinalCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_DESKTOP"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
-func (c *Conn) GetWmDesktopUnchecked(window x.Window) GetCardinalCookie {
+func (c *Conn) GetWMDesktopUnchecked(window x.Window) GetCardinalCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_DESKTOP"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
-func (c *Conn) SetWmDesktopChecked(window x.Window, val uint32) x.VoidCookie {
+func (c *Conn) SetWMDesktopChecked(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_DESKTOP"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
-func (c *Conn) SetWmDesktop(window x.Window, val uint32) x.VoidCookie {
+func (c *Conn) SetWMDesktop(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
@@ -900,19 +900,19 @@ func (c *Conn) SetWmDesktop(window x.Window, val uint32) x.VoidCookie {
  *    _NET_WM_WINDOW_TYPE
  */
 
-func (c *Conn) GetWmWindowType(window x.Window) GetAtomsCookie {
+func (c *Conn) GetWMWindowType(window x.Window) GetAtomsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_WINDOW_TYPE"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
-func (c *Conn) GetWmWindowTypeUnchecked(window x.Window) GetAtomsCookie {
+func (c *Conn) GetWMWindowTypeUnchecked(window x.Window) GetAtomsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_WINDOW_TYPE"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
-func (c *Conn) SetWmWindowTypeChecked(window x.Window, vals []x.Atom) x.VoidCookie {
+func (c *Conn) SetWMWindowTypeChecked(window x.Window, vals []x.Atom) x.VoidCookie {
 	w := x.NewWriter()
 	for _, val := range vals {
 		w.Write4b(uint32(val))
@@ -921,7 +921,7 @@ func (c *Conn) SetWmWindowTypeChecked(window x.Window, vals []x.Atom) x.VoidCook
 		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 32, uint32(len(vals)), w.Bytes())
 }
 
-func (c *Conn) SetWmWindowType(window x.Window, vals []x.Atom) x.VoidCookie {
+func (c *Conn) SetWMWindowType(window x.Window, vals []x.Atom) x.VoidCookie {
 	w := x.NewWriter()
 	for _, val := range vals {
 		w.Write4b(uint32(val))
@@ -934,19 +934,19 @@ func (c *Conn) SetWmWindowType(window x.Window, vals []x.Atom) x.VoidCookie {
  *    _NET_WM_STATE
  */
 
-func (c *Conn) GetWmState(window x.Window) GetAtomsCookie {
+func (c *Conn) GetWMState(window x.Window) GetAtomsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_STATE"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
-func (c *Conn) GetWmStateUnchecked(window x.Window) GetAtomsCookie {
+func (c *Conn) GetWMStateUnchecked(window x.Window) GetAtomsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_STATE"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
-func (c *Conn) SetWmStateChecked(window x.Window, vals []x.Atom) x.VoidCookie {
+func (c *Conn) SetWMStateChecked(window x.Window, vals []x.Atom) x.VoidCookie {
 	w := x.NewWriter()
 	for _, val := range vals {
 		w.Write4b(uint32(val))
@@ -955,7 +955,7 @@ func (c *Conn) SetWmStateChecked(window x.Window, vals []x.Atom) x.VoidCookie {
 		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 32, uint32(len(vals)), w.Bytes())
 }
 
-func (c *Conn) SetWmState(window x.Window, vals []x.Atom) x.VoidCookie {
+func (c *Conn) SetWMState(window x.Window, vals []x.Atom) x.VoidCookie {
 	w := x.NewWriter()
 	for _, val := range vals {
 		w.Write4b(uint32(val))
@@ -968,19 +968,19 @@ func (c *Conn) SetWmState(window x.Window, vals []x.Atom) x.VoidCookie {
  *    _NET_WM_ALLOWED_ACTIONS
  */
 
-func (c *Conn) GetWmAllowedActions(window x.Window) GetAtomsCookie {
+func (c *Conn) GetWMAllowedActions(window x.Window) GetAtomsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_ALLOWED_ACTIONS"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
-func (c *Conn) GetWmAllowedActionsUnchecked(window x.Window) GetAtomsCookie {
+func (c *Conn) GetWMAllowedActionsUnchecked(window x.Window) GetAtomsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_ALLOWED_ACTIONS"), x.AtomAtom, 0, LENGTH_MAX)
 	return GetAtomsCookie(cookie)
 }
 
-func (c *Conn) SetWmAllowedActionsChecked(window x.Window, vals []x.Atom) x.VoidCookie {
+func (c *Conn) SetWMAllowedActionsChecked(window x.Window, vals []x.Atom) x.VoidCookie {
 	w := x.NewWriter()
 	for _, val := range vals {
 		w.Write4b(uint32(val))
@@ -989,7 +989,7 @@ func (c *Conn) SetWmAllowedActionsChecked(window x.Window, vals []x.Atom) x.Void
 		c.GetAtom("_NET_SUPPORTED"), x.AtomAtom, 32, uint32(len(vals)), w.Bytes())
 }
 
-func (c *Conn) SetWmAllowedActions(window x.Window, vals []x.Atom) x.VoidCookie {
+func (c *Conn) SetWMAllowedActions(window x.Window, vals []x.Atom) x.VoidCookie {
 	w := x.NewWriter()
 	for _, val := range vals {
 		w.Write4b(uint32(val))
@@ -1002,45 +1002,45 @@ func (c *Conn) SetWmAllowedActions(window x.Window, vals []x.Atom) x.VoidCookie 
  *    _NET_WM_STRUT
  */
 
-func (c *Conn) GetWmStrut(window x.Window) GetWmStrutCookie {
+func (c *Conn) GetWMStrut(window x.Window) GetWMStrutCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_STRUT"), x.AtomCardinal, 0, 4)
-	return GetWmStrutCookie(cookie)
+	return GetWMStrutCookie(cookie)
 }
 
-func (c *Conn) GetWmStrutUnchecked(window x.Window) GetWmStrutCookie {
+func (c *Conn) GetWMStrutUnchecked(window x.Window) GetWMStrutCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_STRUT"), x.AtomCardinal, 0, 4)
-	return GetWmStrutCookie(cookie)
+	return GetWMStrutCookie(cookie)
 }
 
-type GetWmStrutCookie x.GetPropertyCookie
+type GetWMStrutCookie x.GetPropertyCookie
 
-func (cookie GetWmStrutCookie) Reply(c *Conn) (WmStrut, error) {
+func (cookie GetWMStrutCookie) Reply(c *Conn) (WMStrut, error) {
 	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
 	if err != nil {
-		return WmStrut{}, err
+		return WMStrut{}, err
 	}
 	if reply.Type != x.AtomCardinal {
-		return WmStrut{}, errors.New("bad reply")
+		return WMStrut{}, errors.New("bad reply")
 	}
-	return getWmStrutFromReply(reply)
+	return getWMStrutFromReply(reply)
 }
 
-type WmStrut struct {
+type WMStrut struct {
 	Left, Right, Top, Bottom uint32
 }
 
-func getWmStrutFromReply(reply *x.GetPropertyReply) (WmStrut, error) {
+func getWMStrutFromReply(reply *x.GetPropertyReply) (WMStrut, error) {
 	list, err := getCardinalsFromReply(reply)
 	if err != nil {
-		return WmStrut{}, err
+		return WMStrut{}, err
 	}
 
 	if len(list) != 4 {
-		return WmStrut{}, errors.New("length of list is not 4")
+		return WMStrut{}, errors.New("length of list is not 4")
 	}
-	return WmStrut{
+	return WMStrut{
 		Left:   list[0],
 		Right:  list[1],
 		Top:    list[2],
@@ -1048,7 +1048,7 @@ func getWmStrutFromReply(reply *x.GetPropertyReply) (WmStrut, error) {
 	}, nil
 }
 
-func (c *Conn) SetWmStrutChecked(window x.Window, val WmStrut) x.VoidCookie {
+func (c *Conn) SetWMStrutChecked(window x.Window, val WMStrut) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(val.Left)
 	w.Write4b(val.Right)
@@ -1058,7 +1058,7 @@ func (c *Conn) SetWmStrutChecked(window x.Window, val WmStrut) x.VoidCookie {
 		c.GetAtom("_NET_WM_STRUT"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
-func (c *Conn) SetWmStrut(window x.Window, val WmStrut) x.VoidCookie {
+func (c *Conn) SetWMStrut(window x.Window, val WMStrut) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(val.Left)
 	w.Write4b(val.Right)
@@ -1072,45 +1072,45 @@ func (c *Conn) SetWmStrut(window x.Window, val WmStrut) x.VoidCookie {
  *    _NET_WM_STRUT_PARTIAL
  */
 
-func (c *Conn) GetWmStrutPartial(window x.Window) GetWmStrutPartialCookie {
+func (c *Conn) GetWMStrutPartial(window x.Window) GetWMStrutPartialCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_STRUT_PARTIAL"), x.AtomCardinal, 0, 12)
-	return GetWmStrutPartialCookie(cookie)
+	return GetWMStrutPartialCookie(cookie)
 }
 
-func (c *Conn) GetWmStrutPartialUnchecked(window x.Window) GetWmStrutPartialCookie {
+func (c *Conn) GetWMStrutPartialUnchecked(window x.Window) GetWMStrutPartialCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_STRUT_PARTIAL"), x.AtomCardinal, 0, 12)
-	return GetWmStrutPartialCookie(cookie)
+	return GetWMStrutPartialCookie(cookie)
 }
 
-type GetWmStrutPartialCookie x.GetPropertyCookie
+type GetWMStrutPartialCookie x.GetPropertyCookie
 
-func (cookie GetWmStrutPartialCookie) Reply(c *Conn) (WmStrutPartial, error) {
+func (cookie GetWMStrutPartialCookie) Reply(c *Conn) (WMStrutPartial, error) {
 	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
 	if err != nil {
-		return WmStrutPartial{}, err
+		return WMStrutPartial{}, err
 	}
 	if reply.Type != x.AtomCardinal {
-		return WmStrutPartial{}, errors.New("bad reply")
+		return WMStrutPartial{}, errors.New("bad reply")
 	}
-	return getWmStrutPartialFromReply(reply)
+	return getWMStrutPartialFromReply(reply)
 }
 
-type WmStrutPartial struct {
+type WMStrutPartial struct {
 	Left, Right, Top, Bottom, LeftStartY, LeftEndY, RightStartY, RightEndY, TopStartX, TopEndX, BottomStartX, BottomEndX uint32
 }
 
-func getWmStrutPartialFromReply(reply *x.GetPropertyReply) (WmStrutPartial, error) {
+func getWMStrutPartialFromReply(reply *x.GetPropertyReply) (WMStrutPartial, error) {
 	list, err := getCardinalsFromReply(reply)
 	if err != nil {
-		return WmStrutPartial{}, err
+		return WMStrutPartial{}, err
 	}
 
 	if len(list) != 12 {
-		return WmStrutPartial{}, errors.New("length of list is not 12")
+		return WMStrutPartial{}, errors.New("length of list is not 12")
 	}
-	return WmStrutPartial{
+	return WMStrutPartial{
 		Left:         list[0],
 		Right:        list[1],
 		Top:          list[2],
@@ -1126,7 +1126,7 @@ func getWmStrutPartialFromReply(reply *x.GetPropertyReply) (WmStrutPartial, erro
 	}, nil
 }
 
-func (c *Conn) SetWmStrutPartialChecked(window x.Window, val WmStrutPartial) x.VoidCookie {
+func (c *Conn) SetWMStrutPartialChecked(window x.Window, val WMStrutPartial) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(val.Left)
 	w.Write4b(val.Right)
@@ -1144,7 +1144,7 @@ func (c *Conn) SetWmStrutPartialChecked(window x.Window, val WmStrutPartial) x.V
 		c.GetAtom("_NET_WM_STRUT_PARTIAL"), x.AtomCardinal, 32, 12, w.Bytes())
 }
 
-func (c *Conn) SetWmStrutPartial(window x.Window, val WmStrutPartial) x.VoidCookie {
+func (c *Conn) SetWMStrutPartial(window x.Window, val WMStrutPartial) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(val.Left)
 	w.Write4b(val.Right)
@@ -1166,45 +1166,45 @@ func (c *Conn) SetWmStrutPartial(window x.Window, val WmStrutPartial) x.VoidCook
  *    _NET_WM_ICON_GEOMETRY
  */
 
-func (c *Conn) GetWmIconGeometry(window x.Window) GetWmIconGeometryCookie {
+func (c *Conn) GetWMIconGeometry(window x.Window) GetWMIconGeometryCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_ICON_GEOMETRY"), x.AtomCardinal, 0, 4)
-	return GetWmIconGeometryCookie(cookie)
+	return GetWMIconGeometryCookie(cookie)
 }
 
-func (c *Conn) GetWmIconGeometryUnchecked(window x.Window) GetWmIconGeometryCookie {
+func (c *Conn) GetWMIconGeometryUnchecked(window x.Window) GetWMIconGeometryCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_ICON_GEOMETRY"), x.AtomCardinal, 0, 4)
-	return GetWmIconGeometryCookie(cookie)
+	return GetWMIconGeometryCookie(cookie)
 }
 
-type GetWmIconGeometryCookie x.GetPropertyCookie
+type GetWMIconGeometryCookie x.GetPropertyCookie
 
-func (cookie GetWmIconGeometryCookie) Reply(c *Conn) (WmIconGeometry, error) {
+func (cookie GetWMIconGeometryCookie) Reply(c *Conn) (WMIconGeometry, error) {
 	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
 	if err != nil {
-		return WmIconGeometry{}, err
+		return WMIconGeometry{}, err
 	}
 	if reply.Type != x.AtomCardinal {
-		return WmIconGeometry{}, errors.New("bad reply")
+		return WMIconGeometry{}, errors.New("bad reply")
 	}
-	return getWmIconGeometryFromReply(reply)
+	return getWMIconGeometryFromReply(reply)
 }
 
-type WmIconGeometry struct {
+type WMIconGeometry struct {
 	X, Y, Width, Height uint32
 }
 
-func getWmIconGeometryFromReply(reply *x.GetPropertyReply) (WmIconGeometry, error) {
+func getWMIconGeometryFromReply(reply *x.GetPropertyReply) (WMIconGeometry, error) {
 	list, err := getCardinalsFromReply(reply)
 	if err != nil {
-		return WmIconGeometry{}, err
+		return WMIconGeometry{}, err
 	}
 
 	if len(list) != 4 {
-		return WmIconGeometry{}, errors.New("length of list is not 4")
+		return WMIconGeometry{}, errors.New("length of list is not 4")
 	}
-	return WmIconGeometry{
+	return WMIconGeometry{
 		X:      list[0],
 		Y:      list[1],
 		Width:  list[2],
@@ -1212,7 +1212,7 @@ func getWmIconGeometryFromReply(reply *x.GetPropertyReply) (WmIconGeometry, erro
 	}, nil
 }
 
-func (c *Conn) SetWmIconGeometryChecked(window x.Window, val WmIconGeometry) x.VoidCookie {
+func (c *Conn) SetWMIconGeometryChecked(window x.Window, val WMIconGeometry) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(val.X)
 	w.Write4b(val.Y)
@@ -1222,7 +1222,7 @@ func (c *Conn) SetWmIconGeometryChecked(window x.Window, val WmIconGeometry) x.V
 		c.GetAtom("_NET_WM_ICON_GEOMETRY"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
-func (c *Conn) SetWmIconGeometry(window x.Window, val WmIconGeometry) x.VoidCookie {
+func (c *Conn) SetWMIconGeometry(window x.Window, val WMIconGeometry) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(val.X)
 	w.Write4b(val.Y)
@@ -1236,21 +1236,21 @@ func (c *Conn) SetWmIconGeometry(window x.Window, val WmIconGeometry) x.VoidCook
  *    _NET_WM_ICON
  */
 
-func (c *Conn) GetWmIcon(window x.Window) GetWmIconCookie {
+func (c *Conn) GetWMIcon(window x.Window) GetWMIconCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_ICON"), x.AtomCardinal, 0, LENGTH_MAX)
-	return GetWmIconCookie(cookie)
+	return GetWMIconCookie(cookie)
 }
 
-func (c *Conn) GetWmIconUnchecked(window x.Window) GetWmIconCookie {
+func (c *Conn) GetWMIconUnchecked(window x.Window) GetWMIconCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_ICON"), x.AtomCardinal, 0, LENGTH_MAX)
-	return GetWmIconCookie(cookie)
+	return GetWMIconCookie(cookie)
 }
 
-type GetWmIconCookie x.GetPropertyCookie
+type GetWMIconCookie x.GetPropertyCookie
 
-func (cookie GetWmIconCookie) Reply(c *Conn) ([]WmIcon, error) {
+func (cookie GetWMIconCookie) Reply(c *Conn) ([]WMIcon, error) {
 	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
 	if err != nil {
 		return nil, err
@@ -1258,33 +1258,33 @@ func (cookie GetWmIconCookie) Reply(c *Conn) ([]WmIcon, error) {
 	if reply.Type != x.AtomCardinal {
 		return nil, errors.New("bad reply")
 	}
-	return getWmIconFromReply(reply)
+	return getWMIconFromReply(reply)
 }
 
 /**
  *    _NET_WM_PID
  */
 
-func (c *Conn) GetWmPid(window x.Window) GetCardinalCookie {
+func (c *Conn) GetWMPid(window x.Window) GetCardinalCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_PID"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
-func (c *Conn) GetWmPidUnchecked(window x.Window) GetCardinalCookie {
+func (c *Conn) GetWMPidUnchecked(window x.Window) GetCardinalCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_PID"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
-func (c *Conn) SetWmPidChecked(window x.Window, val uint32) x.VoidCookie {
+func (c *Conn) SetWMPidChecked(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_PID"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
-func (c *Conn) SetWmPid(window x.Window, val uint32) x.VoidCookie {
+func (c *Conn) SetWMPid(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
@@ -1295,26 +1295,26 @@ func (c *Conn) SetWmPid(window x.Window, val uint32) x.VoidCookie {
  *    _NET_WM_HANDLED_ICONS
  */
 
-func (c *Conn) GetWmHandledIcons(window x.Window) GetCardinalCookie {
+func (c *Conn) GetWMHandledIcons(window x.Window) GetCardinalCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_HANDLED_ICONS"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
-func (c *Conn) GetWmHandledIconsUnchecked(window x.Window) GetCardinalCookie {
+func (c *Conn) GetWMHandledIconsUnchecked(window x.Window) GetCardinalCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_HANDLED_ICONS"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
-func (c *Conn) SetWmHandledIconsChecked(window x.Window, val uint32) x.VoidCookie {
+func (c *Conn) SetWMHandledIconsChecked(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_HANDLED_ICONS"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
-func (c *Conn) SetWmHandledIcons(window x.Window, val uint32) x.VoidCookie {
+func (c *Conn) SetWMHandledIcons(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
@@ -1325,26 +1325,26 @@ func (c *Conn) SetWmHandledIcons(window x.Window, val uint32) x.VoidCookie {
  *    _NET_WM_USER_TIME
  */
 
-func (c *Conn) GetWmUserTime(window x.Window) GetCardinalCookie {
+func (c *Conn) GetWMUserTime(window x.Window) GetCardinalCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_USER_TIME"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
-func (c *Conn) GetWmUserTimeUnchecked(window x.Window) GetCardinalCookie {
+func (c *Conn) GetWMUserTimeUnchecked(window x.Window) GetCardinalCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_USER_TIME"), x.AtomCardinal, 0, 1)
 	return GetCardinalCookie(cookie)
 }
 
-func (c *Conn) SetWmUserTimeChecked(window x.Window, val uint32) x.VoidCookie {
+func (c *Conn) SetWMUserTimeChecked(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_USER_TIME"), x.AtomCardinal, 32, 1, w.Bytes())
 }
 
-func (c *Conn) SetWmUserTime(window x.Window, val uint32) x.VoidCookie {
+func (c *Conn) SetWMUserTime(window x.Window, val uint32) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
@@ -1355,26 +1355,26 @@ func (c *Conn) SetWmUserTime(window x.Window, val uint32) x.VoidCookie {
  *    _NET_WM_USER_TIME_WINDOW
  */
 
-func (c *Conn) GetWmUserTimeWindow(window x.Window) GetWindowCookie {
+func (c *Conn) GetWMUserTimeWindow(window x.Window) GetWindowCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_USER_TIME_WINDOW"), x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
-func (c *Conn) GetWmUserTimeWindowUnchecked(window x.Window) GetWindowCookie {
+func (c *Conn) GetWMUserTimeWindowUnchecked(window x.Window) GetWindowCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_USER_TIME_WINDOW"), x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
-func (c *Conn) SetWmUserTimeWindowChecked(window x.Window, val x.Window) x.VoidCookie {
+func (c *Conn) SetWMUserTimeWindowChecked(window x.Window, val x.Window) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
 		c.GetAtom("_NET_WM_USER_TIME_WINDOW"), x.AtomWindow, 32, 1, w.Bytes())
 }
 
-func (c *Conn) SetWmUserTimeWindow(window x.Window, val x.Window) x.VoidCookie {
+func (c *Conn) SetWMUserTimeWindow(window x.Window, val x.Window) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangeProperty(c.conn, x.PropModeReplace, window,
@@ -1455,51 +1455,51 @@ func (c *Conn) SetFrameExtents(window x.Window, val FrameExtents) x.VoidCookie {
  *    _NET_WM_SYNC_REQUEST_COUNTER
  */
 
-func (c *Conn) GetWmSyncRequestCounter(window x.Window) GetWmSyncRequestCounterCookie {
+func (c *Conn) GetWMSyncRequestCounter(window x.Window) GetWMSyncRequestCounterCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCardinal, 0, 2)
-	return GetWmSyncRequestCounterCookie(cookie)
+	return GetWMSyncRequestCounterCookie(cookie)
 }
 
-func (c *Conn) GetWmSyncRequestCounterUnchecked(window x.Window) GetWmSyncRequestCounterCookie {
+func (c *Conn) GetWMSyncRequestCounterUnchecked(window x.Window) GetWMSyncRequestCounterCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCardinal, 0, 2)
-	return GetWmSyncRequestCounterCookie(cookie)
+	return GetWMSyncRequestCounterCookie(cookie)
 }
 
-type GetWmSyncRequestCounterCookie x.GetPropertyCookie
+type GetWMSyncRequestCounterCookie x.GetPropertyCookie
 
-func (cookie GetWmSyncRequestCounterCookie) Reply(c *Conn) (WmSyncRequestCounter, error) {
+func (cookie GetWMSyncRequestCounterCookie) Reply(c *Conn) (WMSyncRequestCounter, error) {
 	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
 	if err != nil {
-		return WmSyncRequestCounter{}, err
+		return WMSyncRequestCounter{}, err
 	}
 	if reply.Type != x.AtomCardinal {
-		return WmSyncRequestCounter{}, errors.New("bad reply")
+		return WMSyncRequestCounter{}, errors.New("bad reply")
 	}
-	return getWmSyncRequestCounterFromReply(reply)
+	return getWMSyncRequestCounterFromReply(reply)
 }
 
-type WmSyncRequestCounter struct {
+type WMSyncRequestCounter struct {
 	Low, High uint32
 }
 
-func getWmSyncRequestCounterFromReply(reply *x.GetPropertyReply) (WmSyncRequestCounter, error) {
+func getWMSyncRequestCounterFromReply(reply *x.GetPropertyReply) (WMSyncRequestCounter, error) {
 	list, err := getCardinalsFromReply(reply)
 	if err != nil {
-		return WmSyncRequestCounter{}, err
+		return WMSyncRequestCounter{}, err
 	}
 
 	if len(list) != 2 {
-		return WmSyncRequestCounter{}, errors.New("length of list is not 2")
+		return WMSyncRequestCounter{}, errors.New("length of list is not 2")
 	}
-	return WmSyncRequestCounter{
+	return WMSyncRequestCounter{
 		Low:  list[0],
 		High: list[1],
 	}, nil
 }
 
-func (c *Conn) SetWmSyncRequestCounterChecked(window x.Window, val WmSyncRequestCounter) x.VoidCookie {
+func (c *Conn) SetWMSyncRequestCounterChecked(window x.Window, val WMSyncRequestCounter) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(val.Low)
 	w.Write4b(val.High)
@@ -1507,7 +1507,7 @@ func (c *Conn) SetWmSyncRequestCounterChecked(window x.Window, val WmSyncRequest
 		c.GetAtom("_NET_WM_SYNC_REQUEST_COUNTER"), x.AtomCardinal, 32, 2, w.Bytes())
 }
 
-func (c *Conn) SetWmSyncRequestCounter(window x.Window, val WmSyncRequestCounter) x.VoidCookie {
+func (c *Conn) SetWMSyncRequestCounter(window x.Window, val WMSyncRequestCounter) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(val.Low)
 	w.Write4b(val.High)
@@ -1519,45 +1519,45 @@ func (c *Conn) SetWmSyncRequestCounter(window x.Window, val WmSyncRequestCounter
  *    _NET_WM_FULLSCREEN_MONITORS
  */
 
-func (c *Conn) GetWmFullscreenMonitors(window x.Window) GetWmFullscreenMonitorsCookie {
+func (c *Conn) GetWMFullscreenMonitors(window x.Window) GetWMFullscreenMonitorsCookie {
 	cookie := x.GetProperty(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), x.AtomCardinal, 0, 4)
-	return GetWmFullscreenMonitorsCookie(cookie)
+	return GetWMFullscreenMonitorsCookie(cookie)
 }
 
-func (c *Conn) GetWmFullscreenMonitorsUnchecked(window x.Window) GetWmFullscreenMonitorsCookie {
+func (c *Conn) GetWMFullscreenMonitorsUnchecked(window x.Window) GetWMFullscreenMonitorsCookie {
 	cookie := x.GetPropertyUnchecked(c.conn, x.False, window,
 		c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), x.AtomCardinal, 0, 4)
-	return GetWmFullscreenMonitorsCookie(cookie)
+	return GetWMFullscreenMonitorsCookie(cookie)
 }
 
-type GetWmFullscreenMonitorsCookie x.GetPropertyCookie
+type GetWMFullscreenMonitorsCookie x.GetPropertyCookie
 
-func (cookie GetWmFullscreenMonitorsCookie) Reply(c *Conn) (WmFullscreenMonitors, error) {
+func (cookie GetWMFullscreenMonitorsCookie) Reply(c *Conn) (WMFullscreenMonitors, error) {
 	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
 	if err != nil {
-		return WmFullscreenMonitors{}, err
+		return WMFullscreenMonitors{}, err
 	}
 	if reply.Type != x.AtomCardinal {
-		return WmFullscreenMonitors{}, errors.New("bad reply")
+		return WMFullscreenMonitors{}, errors.New("bad reply")
 	}
-	return getWmFullscreenMonitorsFromReply(reply)
+	return getWMFullscreenMonitorsFromReply(reply)
 }
 
-type WmFullscreenMonitors struct {
+type WMFullscreenMonitors struct {
 	Top, Bottom, Left, Right uint32
 }
 
-func getWmFullscreenMonitorsFromReply(reply *x.GetPropertyReply) (WmFullscreenMonitors, error) {
+func getWMFullscreenMonitorsFromReply(reply *x.GetPropertyReply) (WMFullscreenMonitors, error) {
 	list, err := getCardinalsFromReply(reply)
 	if err != nil {
-		return WmFullscreenMonitors{}, err
+		return WMFullscreenMonitors{}, err
 	}
 
 	if len(list) != 4 {
-		return WmFullscreenMonitors{}, errors.New("length of list is not 4")
+		return WMFullscreenMonitors{}, errors.New("length of list is not 4")
 	}
-	return WmFullscreenMonitors{
+	return WMFullscreenMonitors{
 		Top:    list[0],
 		Bottom: list[1],
 		Left:   list[2],
@@ -1565,7 +1565,7 @@ func getWmFullscreenMonitorsFromReply(reply *x.GetPropertyReply) (WmFullscreenMo
 	}, nil
 }
 
-func (c *Conn) SetWmFullscreenMonitorsChecked(window x.Window, val WmFullscreenMonitors) x.VoidCookie {
+func (c *Conn) SetWMFullscreenMonitorsChecked(window x.Window, val WMFullscreenMonitors) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(val.Top)
 	w.Write4b(val.Bottom)
@@ -1575,7 +1575,7 @@ func (c *Conn) SetWmFullscreenMonitorsChecked(window x.Window, val WmFullscreenM
 		c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), x.AtomCardinal, 32, 4, w.Bytes())
 }
 
-func (c *Conn) SetWmFullscreenMonitors(window x.Window, val WmFullscreenMonitors) x.VoidCookie {
+func (c *Conn) SetWMFullscreenMonitors(window x.Window, val WMFullscreenMonitors) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(val.Top)
 	w.Write4b(val.Bottom)

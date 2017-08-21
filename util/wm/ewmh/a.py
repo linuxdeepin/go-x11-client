@@ -406,7 +406,7 @@ def main():
 
     #> _NET_SUPPORTING_WM_CHECK
     do_header('_NET_SUPPORTING_WM_CHECK')
-    DO_SINGLE_VALUE('SupportingWmCheck', '_NET_SUPPORTING_WM_CHECK',
+    DO_SINGLE_VALUE('SupportingWMCheck', '_NET_SUPPORTING_WM_CHECK',
                     'x.AtomWindow', 'x.Window', 'Window')
 
     #>  _NET_VIRTUAL_ROOTS
@@ -432,92 +432,92 @@ def main():
 
     #> _NET_WM_NAME
     do_header('_NET_WM_NAME')
-    DO_UTF8_STRING('WmName', '_NET_WM_NAME')
+    DO_UTF8_STRING('WMName', '_NET_WM_NAME')
 
     #> _NET_WM_VISIBLE_NAME
     do_header('_NET_WM_VISIBLE_NAME')
-    DO_UTF8_STRING('WmVisibleName', '_NET_WM_VISIBLE_NAME')
+    DO_UTF8_STRING('WMVisibleName', '_NET_WM_VISIBLE_NAME')
 
     #> _NET_WM_ICON_NAME
     do_header('_NET_WM_ICON_NAME')
-    DO_UTF8_STRING('WmIconName', '_NET_WM_ICON_NAME')
+    DO_UTF8_STRING('WMIconName', '_NET_WM_ICON_NAME')
 
     #> _NET_WM_VISIBLE_ICON_NAME
     do_header('_NET_WM_VISIBLE_ICON_NAME')
-    DO_UTF8_STRING('WmVisibleIconName', '_NET_WM_VISIBLE_ICON_NAME')
+    DO_UTF8_STRING('WMVisibleIconName', '_NET_WM_VISIBLE_ICON_NAME')
 
     #> _NET_WM_DESKTOP
     do_header('_NET_WM_DESKTOP')
-    DO_SINGLE_VALUE('WmDesktop', '_NET_WM_DESKTOP', 'x.AtomCardinal', 'uint32',
+    DO_SINGLE_VALUE('WMDesktop', '_NET_WM_DESKTOP', 'x.AtomCardinal', 'uint32',
                     'Cardinal')
 
     #> _NET_WM_WINDOW_TYPE
     do_header('_NET_WM_WINDOW_TYPE')
-    DO_LIST_VALUES('WmWindowType', '_NET_WM_WINDOW_TYPE', 'x.AtomAtom',
+    DO_LIST_VALUES('WMWindowType', '_NET_WM_WINDOW_TYPE', 'x.AtomAtom',
                    'x.Atom', 'Atoms')
 
     #> _NET_WM_STATE
     do_header('_NET_WM_STATE')
-    DO_LIST_VALUES('WmState', '_NET_WM_STATE', 'x.AtomAtom', 'x.Atom', 'Atoms')
+    DO_LIST_VALUES('WMState', '_NET_WM_STATE', 'x.AtomAtom', 'x.Atom', 'Atoms')
 
     #> _NET_WM_ALLOWED_ACTIONS
     do_header('_NET_WM_ALLOWED_ACTIONS')
-    DO_LIST_VALUES('WmAllowedActions', '_NET_WM_ALLOWED_ACTIONS', 'x.AtomAtom',
+    DO_LIST_VALUES('WMAllowedActions', '_NET_WM_ALLOWED_ACTIONS', 'x.AtomAtom',
                    'x.Atom', 'Atoms')
 
     #> _NET_WM_STRUT
     do_header('_NET_WM_STRUT')
-    DO_GET_PROPERTY('WmStrut', '_NET_WM_STRUT', 'x.AtomCardinal', '4',
-                    'WmStrut')
+    DO_GET_PROPERTY('WMStrut', '_NET_WM_STRUT', 'x.AtomCardinal', '4',
+                    'WMStrut')
     strut_fields = ['Left', 'Right', 'Top', 'Bottom']
-    DO_REPLY_STRUCTURE('WmStrut', strut_fields)
-    DO_SET_STRUCTURE('WmStrut', '_NET_WM_STRUT', 'WmStrut', strut_fields)
+    DO_REPLY_STRUCTURE('WMStrut', strut_fields)
+    DO_SET_STRUCTURE('WMStrut', '_NET_WM_STRUT', 'WMStrut', strut_fields)
 
     #> _NET_WM_STRUT_PARTIAL
     do_header('_NET_WM_STRUT_PARTIAL')
-    DO_GET_PROPERTY('WmStrutPartial', '_NET_WM_STRUT_PARTIAL',
-                    'x.AtomCardinal', '12', 'WmStrutPartial')
+    DO_GET_PROPERTY('WMStrutPartial', '_NET_WM_STRUT_PARTIAL',
+                    'x.AtomCardinal', '12', 'WMStrutPartial')
     strut_partial_fields = strut_fields + [
         'LeftStartY', 'LeftEndY', 'RightStartY', 'RightEndY', 'TopStartX',
         'TopEndX', 'BottomStartX', 'BottomEndX'
     ]
-    DO_REPLY_STRUCTURE('WmStrutPartial', strut_partial_fields)
-    DO_SET_STRUCTURE('WmStrutPartial', '_NET_WM_STRUT_PARTIAL',
-                     'WmStrutPartial', strut_partial_fields)
+    DO_REPLY_STRUCTURE('WMStrutPartial', strut_partial_fields)
+    DO_SET_STRUCTURE('WMStrutPartial', '_NET_WM_STRUT_PARTIAL',
+                     'WMStrutPartial', strut_partial_fields)
 
     #> _NET_WM_ICON_GEOMETRY
     do_header('_NET_WM_ICON_GEOMETRY')
-    DO_GET_PROPERTY('WmIconGeometry', '_NET_WM_ICON_GEOMETRY',
-                    'x.AtomCardinal', '4', 'WmIconGeometry')
+    DO_GET_PROPERTY('WMIconGeometry', '_NET_WM_ICON_GEOMETRY',
+                    'x.AtomCardinal', '4', 'WMIconGeometry')
     icon_geometry = ['X', 'Y', 'Width', 'Height']
-    DO_REPLY_STRUCTURE('WmIconGeometry', icon_geometry)
-    DO_SET_STRUCTURE('WmIconGeometry', '_NET_WM_ICON_GEOMETRY',
-                     'WmIconGeometry', icon_geometry)
+    DO_REPLY_STRUCTURE('WMIconGeometry', icon_geometry)
+    DO_SET_STRUCTURE('WMIconGeometry', '_NET_WM_ICON_GEOMETRY',
+                     'WMIconGeometry', icon_geometry)
 
     #> _NET_WM_ICON
     do_header('_NET_WM_ICON')
-    DO_GET_PROPERTY('WmIcon', '_NET_WM_ICON', 'x.AtomCardinal', 'LENGTH_MAX',
-                    'WmIcon')
-    DO_COOKIE_REPLY('WmIcon', 'x.AtomCardinal', '[]WmIcon', 'nil')
+    DO_GET_PROPERTY('WMIcon', '_NET_WM_ICON', 'x.AtomCardinal', 'LENGTH_MAX',
+                    'WMIcon')
+    DO_COOKIE_REPLY('WMIcon', 'x.AtomCardinal', '[]WMIcon', 'nil')
 
     #> _NET_WM_PID
     do_header('_NET_WM_PID')
-    DO_SINGLE_VALUE('WmPid', '_NET_WM_PID', 'x.AtomCardinal', 'uint32',
+    DO_SINGLE_VALUE('WMPid', '_NET_WM_PID', 'x.AtomCardinal', 'uint32',
                     'Cardinal')
 
     #> _NET_WM_HANDLED_ICONS
     do_header('_NET_WM_HANDLED_ICONS')
-    DO_SINGLE_VALUE('WmHandledIcons', '_NET_WM_HANDLED_ICONS',
+    DO_SINGLE_VALUE('WMHandledIcons', '_NET_WM_HANDLED_ICONS',
                     'x.AtomCardinal', 'uint32', 'Cardinal')
 
     #> _NET_WM_USER_TIME
     do_header('_NET_WM_USER_TIME')
-    DO_SINGLE_VALUE('WmUserTime', '_NET_WM_USER_TIME', 'x.AtomCardinal',
+    DO_SINGLE_VALUE('WMUserTime', '_NET_WM_USER_TIME', 'x.AtomCardinal',
                     'uint32', 'Cardinal')
 
     #> _NET_WM_USER_TIME_WINDOW
     do_header('_NET_WM_USER_TIME_WINDOW')
-    DO_SINGLE_VALUE('WmUserTimeWindow', '_NET_WM_USER_TIME_WINDOW',
+    DO_SINGLE_VALUE('WMUserTimeWindow', '_NET_WM_USER_TIME_WINDOW',
                     'x.AtomWindow', 'x.Window', 'Window')
 
     #> _NET_FRAME_EXTENTS
@@ -531,21 +531,21 @@ def main():
 
     #> _NET_WM_SYNC_REQUEST_COUNTER
     do_header('_NET_WM_SYNC_REQUEST_COUNTER')
-    DO_GET_PROPERTY('WmSyncRequestCounter', '_NET_WM_SYNC_REQUEST_COUNTER',
-                    'x.AtomCardinal', '2', 'WmSyncRequestCounter')
+    DO_GET_PROPERTY('WMSyncRequestCounter', '_NET_WM_SYNC_REQUEST_COUNTER',
+                    'x.AtomCardinal', '2', 'WMSyncRequestCounter')
     request_counter_fields = ['Low', 'High']
-    DO_REPLY_STRUCTURE('WmSyncRequestCounter', request_counter_fields)
-    DO_SET_STRUCTURE('WmSyncRequestCounter', '_NET_WM_SYNC_REQUEST_COUNTER',
-                     'WmSyncRequestCounter', request_counter_fields)
+    DO_REPLY_STRUCTURE('WMSyncRequestCounter', request_counter_fields)
+    DO_SET_STRUCTURE('WMSyncRequestCounter', '_NET_WM_SYNC_REQUEST_COUNTER',
+                     'WMSyncRequestCounter', request_counter_fields)
 
     #> _NET_WM_FULLSCREEN_MONITORS
     do_header('_NET_WM_FULLSCREEN_MONITORS')
-    DO_GET_PROPERTY('WmFullscreenMonitors', '_NET_WM_FULLSCREEN_MONITORS',
-                    'x.AtomCardinal', '4', 'WmFullscreenMonitors')
+    DO_GET_PROPERTY('WMFullscreenMonitors', '_NET_WM_FULLSCREEN_MONITORS',
+                    'x.AtomCardinal', '4', 'WMFullscreenMonitors')
     fullscreen_monitors_fields = ['Top', 'Bottom', 'Left', 'Right']
-    DO_REPLY_STRUCTURE('WmFullscreenMonitors', fullscreen_monitors_fields)
-    DO_SET_STRUCTURE('WmFullscreenMonitors', '_NET_WM_FULLSCREEN_MONITORS',
-                     'WmFullscreenMonitors', fullscreen_monitors_fields)
+    DO_REPLY_STRUCTURE('WMFullscreenMonitors', fullscreen_monitors_fields)
+    DO_SET_STRUCTURE('WMFullscreenMonitors', '_NET_WM_FULLSCREEN_MONITORS',
+                     'WMFullscreenMonitors', fullscreen_monitors_fields)
 
     end()
 

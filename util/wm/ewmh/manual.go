@@ -54,28 +54,28 @@ func getUTF8StrsFromReply(reply *x.GetPropertyReply) ([]string, error) {
 	return strs, nil
 }
 
-func getWmIconFromReply(reply *x.GetPropertyReply) ([]WmIcon, error) {
+func getWMIconFromReply(reply *x.GetPropertyReply) ([]WMIcon, error) {
 	if reply.Format != 32 {
 		return nil, errors.New("bad reply")
 	}
 	return getIcons(reply.Value)
 }
 
-type WmIcon struct {
+type WMIcon struct {
 	Width, Height uint32
 	Data          []byte
 }
 
-func (icon *WmIcon) String() string {
+func (icon *WMIcon) String() string {
 	if icon == nil {
 		return "nil"
 	}
 
-	return fmt.Sprintf("ewmh.WmIcon{ size: %dx%d, dataLength: %d }", icon.Width, icon.Height, len(icon.Data))
+	return fmt.Sprintf("ewmh.WMIcon{ size: %dx%d, dataLength: %d }", icon.Width, icon.Height, len(icon.Data))
 }
 
-func getIcons(p []byte) ([]WmIcon, error) {
-	var icons []WmIcon
+func getIcons(p []byte) ([]WMIcon, error) {
+	var icons []WMIcon
 	for len(p) >= 2*4 {
 		width := x.Get32(p)
 		height := x.Get32(p[4:])
@@ -83,7 +83,7 @@ func getIcons(p []byte) ([]WmIcon, error) {
 
 		if len(p) >= int(2+area)*4 {
 			if area > 0 {
-				icon := WmIcon{
+				icon := WMIcon{
 					Width:  width,
 					Height: height,
 					Data:   p[2*4 : (2+area)*4],
@@ -271,7 +271,7 @@ const (
 	MoveResizeCancel
 )
 
-func (c *Conn) RequestWmMoveResize(window x.Window, xRoot, yRoot uint32, direction MoveResizeDirection,
+func (c *Conn) RequestWMMoveResize(window x.Window, xRoot, yRoot uint32, direction MoveResizeDirection,
 	button uint32, source ClientSource) x.VoidCookie {
 	array := [5]uint32{
 		xRoot, yRoot,
@@ -300,7 +300,7 @@ func (c *Conn) RequestRestackWindow(window, siblingWindow x.Window, stackMode ui
 /**
  *    _NET_WM_DESKTOP
  */
-func (c *Conn) RequestChangeWmDesktop(window x.Window, desktop uint32, source ClientSource) x.VoidCookie {
+func (c *Conn) RequestChangeWMDesktop(window x.Window, desktop uint32, source ClientSource) x.VoidCookie {
 	array := [5]uint32{
 		desktop,
 		uint32(source),
@@ -312,15 +312,15 @@ func (c *Conn) RequestChangeWmDesktop(window x.Window, desktop uint32, source Cl
  *    _NET_WM_STATE
  */
 
-type WmStateAction uint32
+type WMStateAction uint32
 
 const (
-	WmStateRemove WmStateAction = iota
-	WmStateAdd
-	WmStateToggle
+	WMStateRemove WMStateAction = iota
+	WMStateAdd
+	WMStateToggle
 )
 
-func (c *Conn) RequestChangeWmState(window x.Window, action WmStateAction, firstProperty, secondProperty x.Atom,
+func (c *Conn) RequestChangeWMState(window x.Window, action WMStateAction, firstProperty, secondProperty x.Atom,
 	source ClientSource) x.VoidCookie {
 	array := [5]uint32{
 		uint32(action),
@@ -335,7 +335,7 @@ func (c *Conn) RequestChangeWmState(window x.Window, action WmStateAction, first
  *    _NET_WM_PING
  */
 
-func (c *Conn) SendWmPing(window x.Window, timestamp x.Timestamp) x.VoidCookie {
+func (c *Conn) SendWMPing(window x.Window, timestamp x.Timestamp) x.VoidCookie {
 	array := [5]uint32{
 		uint32(c.GetAtom("_NET_WM_PING")),
 		uint32(timestamp),
@@ -348,22 +348,22 @@ func (c *Conn) SendWmPing(window x.Window, timestamp x.Timestamp) x.VoidCookie {
  *    _NET_WM_SYNC_REQUEST
  */
 
-func (counter WmSyncRequestCounter) ToUint64() uint64 {
+func (counter WMSyncRequestCounter) ToUint64() uint64 {
 	return uint64(counter.Low) | (uint64(counter.High) << 32)
 }
 
-func (counter WmSyncRequestCounter) String() string {
+func (counter WMSyncRequestCounter) String() string {
 	return strconv.FormatUint(counter.ToUint64(), 10)
 }
 
-func NewWmSyncRequestCounter(val uint64) WmSyncRequestCounter {
-	return WmSyncRequestCounter{
+func NewWMSyncRequestCounter(val uint64) WMSyncRequestCounter {
+	return WMSyncRequestCounter{
 		Low:  uint32(val),
 		High: uint32(val >> 32),
 	}
 }
 
-func (c *Conn) SendWmSyncRequest(window x.Window, timestamp x.Timestamp, counter WmSyncRequestCounter) x.VoidCookie {
+func (c *Conn) SendWMSyncRequest(window x.Window, timestamp x.Timestamp, counter WMSyncRequestCounter) x.VoidCookie {
 	array := [5]uint32{
 		uint32(c.GetAtom("_NET_WM_SYNC_REQUEST")),
 		uint32(timestamp),
@@ -376,7 +376,7 @@ func (c *Conn) SendWmSyncRequest(window x.Window, timestamp x.Timestamp, counter
 /*
  *    _NET_WM_FULLSCREEN_MONITORS
  */
-func (c *Conn) RequestChangeWmFullscreenMonitors(window x.Window, edges WmFullscreenMonitors,
+func (c *Conn) RequestChangeWMFullscreenMonitors(window x.Window, edges WMFullscreenMonitors,
 	source ClientSource) x.VoidCookie {
 	array := [5]uint32{
 		edges.Top,
