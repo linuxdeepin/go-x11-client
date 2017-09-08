@@ -5,7 +5,6 @@ Maintainer: Deepin Packages Builder <packages@deepin.com>
 Build-Depends: debhelper (>= 10),
                dh-golang,
                golang-any,
-               golang-github-gavv-monotime-dev,
                golang-gopkg-check.v1-dev,
                golang-golang-x-text-dev
 Standards-Version: 4.0.0

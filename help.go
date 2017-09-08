@@ -12,15 +12,15 @@ too. (xgbutil uses them too.)
 
 import (
 	"fmt"
-	"github.com/gavv/monotime"
+	//"github.com/gavv/monotime"
 	"strings"
 )
 
-func GetServerCurrentTime() Timestamp {
-	now := monotime.Now()
-	ns := now.Nanoseconds()
-	return Timestamp(ns / 1e6)
-}
+//func GetServerCurrentTime() Timestamp {
+//	now := monotime.Now()
+//	ns := now.Nanoseconds()
+//	return Timestamp(ns / 1e6)
+//}
 
 // StringsJoin is an alias to strings.Join. It allows us to avoid having to
 // import 'strings' in each of the generated Go files.
