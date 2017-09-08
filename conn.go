@@ -12,10 +12,11 @@ var Logger *log.Logger
 
 func init() {
 	// setup logger
-	Logger = log.New(ioutil.Discard, "[xgb]", log.Lshortfile)
+	logOut := ioutil.Discard
 	if os.Getenv("DEBUG_XGB") == "1" {
-		Logger.SetOutput(os.Stderr)
+		logOut = os.Stderr
 	}
+	Logger = log.New(logOut, "[xgb]", log.Lshortfile)
 }
 
 type Conn struct {
