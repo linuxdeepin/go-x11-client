@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	goPkgName     = "keysyms"
-	keysymdefFile = "/usr/include/X11/keysymdef.h"
+	goPkgName      = "keysyms"
+	keysymdefFile  = "/usr/include/X11/keysymdef.h"
+	xf86keysymFile = "/usr/include/X11/XF86keysym.h"
 )
 
 type Keysym struct {
@@ -25,6 +26,9 @@ var reIfDef = regexp.MustCompile(`^#ifdef\s+(\w+)`)
 var reDef0 = regexp.MustCompile(`^#define (XK_[a-zA-Z_0-9]+)\s+0x([0-9a-f]+)\s*/\* U\+([0-9A-F]{4,6}) (.*)\s*\*/`)
 var reDef1 = regexp.MustCompile(`^#define (XK_[a-zA-Z_0-9]+)\s+0x([0-9a-f]+)\s*/\*\(U\+([0-9A-F]{4,6}) (.*)\)\*/`)
 var reDef2 = regexp.MustCompile(`^#define (XK_[a-zA-Z_0-9]+)\s+0x([0-9a-f]+)\s*(/\*\s*(.*)\s*\*/)?`)
+
+// for xf86keys
+var reDef3 = regexp.MustCompile(`^#define (XF86XK_[a-zA-Z_0-9]+)\s+0x([0-9a-fA-F]+)\s*(/\*\s*(.*)\s*\*/)?`)
 
 var sections = []string{
 	"XK_MISCELLANY",
@@ -61,23 +65,12 @@ func definedSection(section string) bool {
 	return false
 }
 
-func getComment(unicode_, comment string) string {
-	if unicode_ != "" {
-		return fmt.Sprintf("U+%s %s", unicode_, comment)
-	}
-	return comment
-}
-
-func main() {
-	fmt.Println("package", goPkgName)
-	fmt.Printf("import x %q\n", "github.com/linuxdeepin/go-x11-client")
-
-	log.SetFlags(log.Lshortfile)
-
+func processKeysymdef() []Keysym {
 	fh, err := os.Open(keysymdefFile)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer fh.Close()
 
 	var currentSection string
 	var currentSectionOk bool = true
@@ -165,6 +158,66 @@ func main() {
 	log.Printf("stat:\ndef0: %d\ndef1: %d\ndef2: %d\ndef other: %d\n",
 		def0Count, def1Count, def2Count, defOtherCount)
 
+	return symbols
+}
+
+func processXF86Keysymdef() []Keysym {
+	fh, err := os.Open(xf86keysymFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fh.Close()
+	scanner := bufio.NewScanner(fh)
+	var defOtherCount int
+	var def3Count int
+	var symbols []Keysym
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		result := reDef3.FindStringSubmatch(line)
+		if len(result) > 0 {
+			def3Count++
+			log.Printf("def3 result: %#v\n", result[1:])
+			// no unicode
+			symbols = append(symbols, Keysym{
+				Name:    result[1],
+				Value:   result[2],
+				Comment: result[4],
+			})
+			continue
+		}
+
+		if strings.HasPrefix(line, "#define") {
+			defOtherCount++
+			log.Println("warn line: ", line)
+			continue
+		}
+	}
+	log.Printf("stat:\ndef3: %d\ndef other: %d\n",
+		def3Count, defOtherCount)
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return symbols
+}
+
+func getComment(unicode_, comment string) string {
+	if unicode_ != "" {
+		return fmt.Sprintf("U+%s %s", unicode_, comment)
+	}
+	return comment
+}
+
+func main() {
+	log.SetFlags(log.Lshortfile)
+	fmt.Println("package", goPkgName)
+	fmt.Printf("import x %q\n", "github.com/linuxdeepin/go-x11-client")
+
+	symbols := processKeysymdef()
+	xf86Symbols := processXF86Keysymdef()
+	symbols = append(symbols, xf86Symbols...)
+
 	// define constants
 	fmt.Println("const (")
 	for _, sym := range symbols {
@@ -200,6 +253,8 @@ func main() {
 func getEnglish(symName string) string {
 	if strings.HasPrefix(symName, "XK_") {
 		return symName[len("XK_"):]
+	} else if strings.HasPrefix(symName, "XF86XK_") {
+		return "XF86" + symName[len("XF86XK_"):]
 	} else {
 		panic("invalid symbol name:" + symName)
 	}
