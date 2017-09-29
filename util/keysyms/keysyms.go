@@ -248,3 +248,36 @@ func ConvertCase(sym x.Keysym) (lower, upper x.Keysym) {
 
 	return
 }
+
+/* Tests for classes of symbols */
+
+func IsKeypadKey(sym x.Keysym) bool {
+	return sym >= XK_KP_Space && sym <= XK_KP_Equal
+}
+
+func IsPrivateKeypadKey(sym x.Keysym) bool {
+	return (sym >= 0x11000000) && (sym <= 0x1100FFFF)
+}
+
+func IsCursorKey(sym x.Keysym) bool {
+	return sym >= XK_Home && sym <= XK_Begin
+}
+
+func IsKeypadFuncationKey(sym x.Keysym) bool {
+	return sym >= XK_KP_F1 && sym <= XK_KP_F4
+}
+
+func IsFunctionKey(sym x.Keysym) bool {
+	return sym >= XK_F1 && sym <= XK_F35
+}
+
+func IsMiscFunctionKey(sym x.Keysym) bool {
+	return sym >= XK_Select && sym <= XK_Break
+}
+
+func IsModifierKey(sym x.Keysym) bool {
+	return ((sym >= XK_Shift_L) && (sym <= XK_Hyper_R)) ||
+		((sym >= XK_ISO_Lock) && (sym <= XK_ISO_Level5_Lock)) ||
+		(sym == XK_Mode_switch) ||
+		(sym == XK_Num_Lock)
+}
