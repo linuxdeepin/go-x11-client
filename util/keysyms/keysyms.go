@@ -3,29 +3,54 @@ package keysyms
 // The algorithm is copied from xcb-util-keysyms
 
 import (
+	"errors"
+	"sync"
+
 	x "github.com/linuxdeepin/go-x11-client"
 )
 
-func StringToKeysym(str string) x.Keysym {
+func StringToKeysym(str string) (x.Keysym, bool) {
 	sym, ok := EngKeysymMap[str]
 	if !ok {
-		return XK_VoidSymbol
+		return XK_VoidSymbol, false
 	}
-	return sym
+	return sym, true
 }
 
 func KeysymToString(sym x.Keysym) string {
-	return KeysymEngMap[sym]
+	if sym == x.NoSymbol {
+		return "NoSymbol"
+	}
+	eng, ok := KeysymEngMap[sym]
+	if !ok {
+		// TODO
+		return "<unknown keysym>"
+	}
+	return eng
 }
 
+const (
+	ModMaskNumLock    = x.ModMask2
+	ModMaskModeSwitch = x.ModMask5
+	ModMaskShift      = x.ModMaskShift
+	ModMaskCapsLock   = x.ModMaskLock
+)
+
 type KeySymbols struct {
+	mu                     sync.Mutex
 	conn                   *x.Conn
 	minKeycode, maxKeycode x.Keycode
 
-	cookie   x.GetKeyboardMappingCookie
-	reply    *x.GetKeyboardMappingReply
-	hasValue bool
+	cookie     x.GetKeyboardMappingCookie
+	oldCookies []x.GetKeyboardMappingCookie
+	kbdMap     *x.GetKeyboardMappingReply
+	tag        int
 }
+
+const (
+	tagCookie = 0
+	tagReply  = 1
+)
 
 func NewKeySymbols(conn *x.Conn) *KeySymbols {
 	setup := conn.GetSetup()
@@ -38,56 +63,83 @@ func NewKeySymbols(conn *x.Conn) *KeySymbols {
 	}
 
 	ks.cookie = x.GetKeyboardMapping(conn, minKeycode, uint8(maxKeycode-minKeycode+1))
+	ks.tag = tagCookie
 	return ks
 }
 
-func (ks *KeySymbols) getReply() (*x.GetKeyboardMappingReply, error) {
-	if ks.hasValue {
-		return ks.reply, nil
+func (ks *KeySymbols) getKbdMap() *x.GetKeyboardMappingReply {
+	ks.mu.Lock()
+	defer ks.mu.Unlock()
+
+	if ks.tag == tagReply {
+		return ks.kbdMap
 	}
 	// no reply, but cookie is 0
 	if ks.cookie == 0 {
-		return nil, nil
+		return nil
 	}
+
 	reply, err := ks.cookie.Reply(ks.conn)
+	//println("cookie reply", ks.cookie)
+	// use cookie once
 	ks.cookie = 0
-	if err != nil {
-		return nil, err
+
+	// discard old replies
+	for _, ck := range ks.oldCookies {
+		ck.Reply(ks.conn)
 	}
-	ks.reply = reply
-	ks.hasValue = true
-	return reply, nil
+	ks.oldCookies = nil
+
+	if err != nil {
+		return nil
+	}
+	ks.tag = tagReply
+	ks.kbdMap = reply
+	return reply
 }
 
 func (ks *KeySymbols) RefreshKeyboardMapping(event *x.MappingNotifyEvent) bool {
-	if event.Request == x.MappingKeyboard && ks != nil {
-		if ks.hasValue {
-			ks.cookie = x.GetKeyboardMapping(ks.conn, ks.minKeycode, uint8(ks.maxKeycode-ks.minKeycode+1))
-			ks.hasValue = false
-		}
+	if event.Request == x.MappingKeyboard {
+		ks.mu.Lock()
 
+		if ks.cookie > 0 {
+			ks.oldCookies = append(ks.oldCookies, ks.cookie)
+		}
+		ks.cookie = x.GetKeyboardMapping(ks.conn, ks.minKeycode, uint8(ks.maxKeycode-ks.minKeycode+1))
+		//println("send GetKeyboardMapping request", ks.cookie)
+		ks.tag = tagCookie
+		ks.mu.Unlock()
 		return true
 	}
 	return false
 }
 
-func (ks *KeySymbols) GetKeycode(sym x.Keysym) []x.Keycode {
-	kbdMapping, _ := ks.getReply()
-	if kbdMapping == nil {
+func (ks *KeySymbols) GetKeycodes(sym x.Keysym) []x.Keycode {
+	kbdMap := ks.getKbdMap()
+	if kbdMap == nil {
 		return nil
 	}
-	return getKeycode(kbdMapping, ks.minKeycode, ks.maxKeycode, sym)
+	return getKeycodes(kbdMap, ks.minKeycode, ks.maxKeycode, sym)
 }
 
 func (ks *KeySymbols) GetKeysym(code x.Keycode, col int) x.Keysym {
-	kbdMapping, _ := ks.getReply()
-	if kbdMapping == nil {
+	kbdMap := ks.getKbdMap()
+	if kbdMap == nil {
 		return x.NoSymbol
 	}
-	return getKeysym(kbdMapping, ks.minKeycode, ks.maxKeycode, code, col)
+	return getKeysym(kbdMap, ks.minKeycode, ks.maxKeycode, code, col)
 }
 
-func getKeycode(kbdMapping *x.GetKeyboardMappingReply, minKeycode, maxKeycode x.Keycode, sym x.Keysym) (result []x.Keycode) {
+func (ks *KeySymbols) StringToKeycodes(str string) ([]x.Keycode, error) {
+	sym, ok := EngKeysymMap[str]
+	if !ok {
+		return nil, errors.New("failed to get keysym")
+	}
+
+	return ks.GetKeycodes(sym), nil
+}
+
+func getKeycodes(kbdMapping *x.GetKeyboardMappingReply, minKeycode, maxKeycode x.Keycode, sym x.Keysym) (result []x.Keycode) {
 	per := kbdMapping.KeysymsPerKeycode
 	// i keycode
 	// j col
@@ -102,6 +154,82 @@ func getKeycode(kbdMapping *x.GetKeyboardMappingReply, minKeycode, maxKeycode x.
 		}
 	}
 	return
+}
+
+func (ks *KeySymbols) LookupString(keycode x.Keycode, modifier uint16) string {
+	sym := ks.translateKey(keycode, modifier)
+	return KeysymToString(sym)
+}
+
+func (ks *KeySymbols) translateKey(keycode x.Keycode, modifiers uint16) (result x.Keysym) {
+
+	if (keycode < ks.minKeycode) || (keycode > ks.maxKeycode) {
+		return x.NoSymbol
+	}
+
+	kbdMap := ks.getKbdMap()
+	if kbdMap == nil {
+		return x.NoSymbol
+	}
+
+	syms := kbdMap.Keysyms
+	per := int(kbdMap.KeysymsPerKeycode)
+	syms = syms[int(keycode-ks.minKeycode)*per:]
+
+	for per > 2 && syms[per-1] == x.NoSymbol {
+		per--
+	}
+	if (per > 2) && (modifiers&ModMaskModeSwitch) != 0 {
+		syms = syms[2:]
+		per -= 2
+	}
+
+	shiftOn := (modifiers & ModMaskShift) != 0
+	capsLockOn := (modifiers & ModMaskCapsLock) != 0
+
+	if (modifiers&ModMaskNumLock) != 0 &&
+		(per > 1 && (IsKeypadKey(syms[1]) || IsPrivateKeypadKey(syms[1]))) {
+		// num_lock is on and key is keypad key
+		if shiftOn {
+			result = syms[0]
+		} else {
+			// shift is off
+			// syms[1] is number
+			result = syms[1]
+		}
+	} else {
+		symArr := [2]x.Keysym{syms[0]}
+		if per == 1 || syms[1] == x.NoSymbol {
+			_, usym := ConvertCase(syms[0])
+			symArr[1] = usym
+		} else {
+			symArr[1] = syms[1]
+		}
+
+		idx := 0
+		onlyCaseDiff := false
+		_, upperSym := ConvertCase(symArr[0])
+		if upperSym == symArr[1] {
+			onlyCaseDiff = true
+		}
+
+		if capsLockOn && onlyCaseDiff {
+			idx = 1
+		}
+		if shiftOn {
+			if idx == 0 {
+				idx = 1
+			} else {
+				idx = 0
+			}
+		}
+		result = symArr[idx]
+	}
+
+	if result == XK_VoidSymbol {
+		result = x.NoSymbol
+	}
+	return result
 }
 
 func getKeysym(kbdMapping *x.GetKeyboardMappingReply, minKeycode, maxKeycode, keycode x.Keycode, col int) x.Keysym {
