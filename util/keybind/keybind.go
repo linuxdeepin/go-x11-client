@@ -3,7 +3,6 @@ package keybind
 import (
 	x "github.com/linuxdeepin/go-x11-client"
 	"github.com/linuxdeepin/go-x11-client/util/keysyms"
-	"log"
 )
 
 var grabMods []uint16
@@ -11,7 +10,6 @@ var grabMods []uint16
 func init() {
 	grabMods = make([]uint16, len(keysyms.LockMods)+1)
 	copy(grabMods, keysyms.LockMods)
-	log.Println("grabMods:", grabMods)
 }
 
 func Grab(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) {
