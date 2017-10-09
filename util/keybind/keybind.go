@@ -1,0 +1,80 @@
+package keybind
+
+import (
+	x "github.com/linuxdeepin/go-x11-client"
+	"github.com/linuxdeepin/go-x11-client/util/keysyms"
+	"log"
+)
+
+var grabMods []uint16
+
+func init() {
+	grabMods = make([]uint16, len(keysyms.LockMods)+1)
+	copy(grabMods, keysyms.LockMods)
+	log.Println("grabMods:", grabMods)
+}
+
+func Grab(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) {
+	for _, m := range grabMods {
+		x.GrabKey(conn, x.True, win, mods|m,
+			key, x.GrabModeAsync, x.GrabModeAsync)
+	}
+}
+
+func Ungrab(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) {
+	for _, m := range grabMods {
+		x.UngrabKey(conn, key, win, mods|m)
+	}
+}
+
+func GrabChecked(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) error {
+	for _, m := range grabMods {
+		err := x.GrabKeyChecked(conn, x.True, win, mods|m,
+			key, x.GrabModeAsync, x.GrabModeAsync).Check(conn)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// GrabKeyboard grabs the entire keyboard.
+func GrabKeyboard(conn *x.Conn, win x.Window) error {
+	reply, err := x.GrabKeyboard(conn, x.True, win, x.CurrentTime,
+		x.GrabModeAsync, x.GrabModeAsync).Reply(conn)
+	if err != nil {
+		return err
+	}
+
+	if reply.Status == x.GrabStatusSuccess {
+		// successful
+		return nil
+	}
+	return GrabKeyboardError{reply.Status}
+}
+
+type GrabKeyboardError struct {
+	Status byte
+}
+
+func (err GrabKeyboardError) Error() string {
+	const errMsgPrefix = "GrabKeyboard Failed status: "
+
+	switch err.Status {
+	case x.GrabStatusAlreadyGrabbed:
+		return errMsgPrefix + "AlreadyGrabbed"
+	case x.GrabStatusInvalidTime:
+		return errMsgPrefix + "InvalidTime"
+	case x.GrabStatusNotViewable:
+		return errMsgPrefix + "NotViewable"
+	case x.GrabStatusFrozen:
+		return errMsgPrefix + "Frozen"
+	default:
+		return errMsgPrefix + "Unknown"
+	}
+}
+
+// UngrabKeyboard undoes GrabKeyboard.
+func UngrabKeyboard(conn *x.Conn) error {
+	return x.UngrabKeyboardChecked(conn, x.CurrentTime).Check(conn)
+}

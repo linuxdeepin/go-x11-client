@@ -30,11 +30,20 @@ func KeysymToString(sym x.Keysym) string {
 }
 
 const (
+	ModMaskAlt        = x.ModMask1
 	ModMaskNumLock    = x.ModMask2
+	ModMaskSuper      = x.ModMask4
 	ModMaskModeSwitch = x.ModMask5
 	ModMaskShift      = x.ModMaskShift
 	ModMaskCapsLock   = x.ModMaskLock
+	ModMaskControl    = x.ModMaskControl
 )
+
+var LockMods = []uint16{
+	ModMaskCapsLock,
+	ModMaskNumLock,
+	ModMaskCapsLock | ModMaskNumLock,
+}
 
 type KeySymbols struct {
 	mu                     sync.Mutex
