@@ -2,7 +2,7 @@ Source: golang-github-linuxdeepin-go-x11-client
 Section: devel
 Priority: extra
 Maintainer: Deepin Packages Builder <packages@deepin.com>
-Build-Depends: debhelper (>= 10),
+Build-Depends: debhelper,
                dh-golang,
                golang-any,
                golang-gopkg-check.v1-dev,
