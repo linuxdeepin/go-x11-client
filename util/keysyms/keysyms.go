@@ -17,16 +17,12 @@ func StringToKeysym(str string) (x.Keysym, bool) {
 	return sym, true
 }
 
-func KeysymToString(sym x.Keysym) string {
+func KeysymToString(sym x.Keysym) (string, bool) {
 	if sym == x.NoSymbol {
-		return "NoSymbol"
+		return "NoSymbol", true
 	}
 	eng, ok := KeysymEngMap[sym]
-	if !ok {
-		// TODO
-		return "<unknown keysym>"
-	}
-	return eng
+	return eng, ok
 }
 
 const (
@@ -165,7 +161,7 @@ func getKeycodes(kbdMapping *x.GetKeyboardMappingReply, minKeycode, maxKeycode x
 	return
 }
 
-func (ks *KeySymbols) LookupString(keycode x.Keycode, modifier uint16) string {
+func (ks *KeySymbols) LookupString(keycode x.Keycode, modifier uint16) (string, bool) {
 	sym := ks.translateKey(keycode, modifier)
 	return KeysymToString(sym)
 }
