@@ -8,3 +8,7 @@
 override_dh_auto_clean:
 	dh_auto_clean --
 	rm -fr obj-x86_64-linux-gnu
+
+override_dh_auto_install:
+	dh_auto_install --
+	rm -r debian/golang-github-linuxdeepin-go-x11-client-dev/usr/bin
