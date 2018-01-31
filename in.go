@@ -20,26 +20,25 @@ type In struct {
 	errorCh chan *GenericError
 }
 
+const (
+	eventChanBufferSize = 5000
+	errorChanBufferSize = 1000
+)
+
 func NewIn(mu *sync.Mutex) *In {
 	in := &In{}
 	in.replies = make(map[uint64]*list.List)
 	in.pendingReplies = list.New()
 	in.readers = list.New()
 
-	in.eventCh = make(chan GenericEvent, 100)
-	in.errorCh = make(chan *GenericError, 100)
+	in.eventCh = make(chan GenericEvent, eventChanBufferSize)
+	in.errorCh = make(chan *GenericError, errorChanBufferSize)
 	return in
 }
 
-func (in *In) addEvent(e GenericEvent) bool {
-	select {
-	case in.eventCh <- e:
-		Logger.Println("add event", e)
-		return true
-	default:
-		Logger.Println("event chan buffer full")
-		return false
-	}
+func (in *In) addEvent(e GenericEvent) {
+	Logger.Println("add event", e)
+	in.eventCh <- e
 }
 
 func (in *In) addError(e *GenericError) bool {
@@ -47,6 +46,7 @@ func (in *In) addError(e *GenericError) bool {
 	case in.errorCh <- e:
 		Logger.Println("add error", e.Error())
 		return true
+
 	default:
 		Logger.Println("error chan buffer full")
 		return false
