@@ -30,6 +30,7 @@ func (c *Conn) initAtoms() error {
 		"WM_STATE",
 		"WM_PROTOCOLS",
 		"WM_COLORMAP_WINDOWS",
+		"WM_CHANGE_STATE",
 	}
 
 	length := len(atomNames)
@@ -57,7 +58,7 @@ func (c *Conn) initAtoms() error {
 func (c *Conn) GetAtom(name string) x.Atom {
 	a, ok := c.atoms[name]
 	if !ok {
-		panic("atom not found" + name)
+		panic("atom not found " + name)
 	}
 	return a
 }
