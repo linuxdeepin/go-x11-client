@@ -96,7 +96,7 @@ func (c *Conn) dial(display string) error {
 			return errors.New("bad display string: " + display0)
 		}
 	}
-	Logger.Printf("socket: %q, protocol: %q\n", socket, protocol)
+	logPrintf("socket: %q, protocol: %q\n", socket, protocol)
 
 	// Connect to server
 	if len(socket) != 0 {
@@ -105,11 +105,11 @@ func (c *Conn) dial(display string) error {
 		if protocol == "" {
 			protocol = "tcp"
 		}
-		Logger.Println("dial tcp")
+		logPrintln("dial tcp")
 		c.conn, err = net.Dial(protocol,
 			c.host+":"+strconv.Itoa(6000+c.DisplayNumber))
 	} else {
-		Logger.Println("dial unix")
+		logPrintln("dial unix")
 		c.conn, err = net.Dial("unix", "/tmp/.X11-unix/X"+c.display)
 	}
 
@@ -125,8 +125,8 @@ func (c *Conn) postConnect() error {
 	authName, authData, err := readAuthority(c.host, c.display)
 	noAuth := false
 	if err != nil {
-		Logger.Printf("Could not get authority info: %v", err)
-		Logger.Println("Trying connection without authority info...")
+		logPrintf("Could not get authority info: %v", err)
+		logPrintln("Trying connection without authority info...")
 		authName = ""
 		authData = []byte{}
 		noAuth = true

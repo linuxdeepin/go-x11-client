@@ -110,7 +110,7 @@ func (in *In) removeErrorChan(errorChan chan<- Error) {
 }
 
 func (in *In) addEvent(e GenericEvent) {
-	Logger.Println("add event", e)
+	logPrintln("add event", e)
 	in.chansMu.Lock()
 
 	for _, ch := range in.eventChans {
@@ -169,10 +169,10 @@ func (in *In) insertNewReader(request uint64, cond *sync.Cond) *ReplyReader {
 	}
 
 	if mark != nil {
-		Logger.Printf("insertNewReader %d before %d\n", request, mark.Value.(*ReplyReader).request)
+		logPrintf("insertNewReader %d before %d\n", request, mark.Value.(*ReplyReader).request)
 		l.InsertBefore(r, mark)
 	} else {
-		Logger.Printf("insertNewReader %d at end\n", request)
+		logPrintf("insertNewReader %d at end\n", request)
 		l.PushBack(r)
 	}
 	return r
@@ -183,7 +183,7 @@ func (in *In) removeReader(r *ReplyReader) {
 	for e := l.Front(); e != nil; e = e.Next() {
 		reader := e.Value.(*ReplyReader)
 		if reader.request == r.request {
-			Logger.Println("remove reader", reader.request)
+			logPrintln("remove reader", reader.request)
 			l.Remove(e)
 			break
 		}
@@ -197,7 +197,7 @@ func (in *In) removeFinishedReaders() {
 		reader := e.Value.(*ReplyReader)
 		if reader.request <= in.requestCompleted {
 			reader.cond.Signal()
-			Logger.Println("remove finshed reader", reader.request)
+			logPrintln("remove finished reader", reader.request)
 			tmp := e
 			e = e.Next()
 			l.Remove(tmp)
@@ -210,7 +210,7 @@ func (in *In) removeFinishedReaders() {
 func (in *In) wakeUpNextReader() {
 	if in.readers.Front() != nil {
 		reader := in.readers.Front().Value.(*ReplyReader)
-		Logger.Println("wake up next reader", reader.request)
+		logPrintln("wake up next reader", reader.request)
 		reader.cond.Signal()
 	}
 }

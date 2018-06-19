@@ -64,7 +64,7 @@ func (c *Conn) readPacket() error {
 		return err
 	}
 	genReply := NewGenericReply(buf)
-	Logger.Printf("genReply: %#v\n", genReply)
+	logPrintf("genReply: %#v\n", genReply)
 
 	if genReply.responseType == ResponseTypeReply && genReply.length > 0 {
 		length += int(genReply.length) * 4
@@ -126,10 +126,10 @@ func (c *Conn) readPacket() error {
 		}
 	}
 
-	Logger.Printf("pend %#v\n", pend)
+	logPrintf("pend %#v\n", pend)
 	if pend != nil && pend.flags&RequestDiscardReply != 0 {
 		// discard reply
-		Logger.Println("discard reply", c.in.requestRead)
+		logPrintln("discard reply", c.in.requestRead)
 		return nil
 	}
 
@@ -142,13 +142,13 @@ func (c *Conn) readPacket() error {
 			c.in.currentReply = list.New()
 		}
 		c.in.currentReply.PushBack(buf)
-		Logger.Printf("pushBack buf %d len=%d\n", c.in.requestRead, len(buf))
+		logPrintf("pushBack buf %d len=%d\n", c.in.requestRead, len(buf))
 
 		front := c.in.readers.Front()
 		if front != nil {
 			reader := front.Value.(*ReplyReader)
 			if reader.request == c.in.requestRead {
-				Logger.Printf("readPacket reader %d signal\n", reader.request)
+				logPrintf("readPacket reader %d signal\n", reader.request)
 				reader.cond.Signal()
 			}
 		}
@@ -169,7 +169,7 @@ func (c *Conn) readPacket() error {
 }
 
 func (c *Conn) pollForReply(request uint64) (replyBuf []byte, isErr, stop bool) {
-	Logger.Println("pollForReply", request)
+	logPrintln("pollForReply", request)
 	var front *list.Element
 	if request == 0 {
 		//replyBuf = nil
@@ -180,7 +180,7 @@ func (c *Conn) pollForReply(request uint64) (replyBuf []byte, isErr, stop bool) 
 		/* We've read requests past the one we want, so if it has replies we have
 		 * them all and they're in the replies map. */
 		l := c.in.replies[request]
-		Logger.Println("reply in replies map")
+		logPrintln("reply in replies map")
 		if l != nil {
 			// pop front
 			front = l.Front()
@@ -194,14 +194,14 @@ func (c *Conn) pollForReply(request uint64) (replyBuf []byte, isErr, stop bool) 
 	} else if request == c.in.requestRead && c.in.currentReply != nil && c.in.currentReply.Front() != nil {
 		/* We're currently processing the responses to the request we want, and we
 		 * have a reply ready to return. So just return it without blocking. */
-		Logger.Println("reply in currentReply")
+		logPrintln("reply in currentReply")
 		front = c.in.currentReply.Front()
 		c.in.currentReply.Remove(front)
 
 	} else if request == c.in.requestCompleted {
 		/* We know this request can't have any more replies, and we've already
 		 * established it doesn't have a reply now. Don't bother blocking. */
-		Logger.Println("request completed")
+		logPrintln("request completed")
 		stop = true
 		return
 	} else {
@@ -233,7 +233,7 @@ func (c *Conn) waitForReply(request uint64) (replyBuf []byte, isErr bool) {
 			break
 		}
 
-		Logger.Printf("waitForReply reader %d wait\n", request)
+		logPrintf("waitForReply reader %d wait\n", request)
 		r.cond.Wait()
 	}
 	c.in.removeReader(r)

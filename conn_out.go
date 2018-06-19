@@ -68,10 +68,10 @@ func (c *Conn) sendRequest(noReply bool, workaround uint, flags uint, data []byt
 	if workaround != 0 || flags != 0 {
 		c.in.expectReply(c.out.request, workaround, flags)
 	}
-	Logger.Println("sendRequest seq:", c.out.request)
+	logPrintln("sendRequest seq:", c.out.request)
 	_, err := c.out.write(c.out.request, data)
 	if err != nil {
-		Logger.Println("write error:", err)
+		logPrintln("write error:", err)
 	}
 }
 
@@ -188,6 +188,6 @@ func (o *Out) flush() error {
 
 	o.n = 0
 
-	Logger.Println("flush done")
+	logPrintln("flush done")
 	return nil
 }

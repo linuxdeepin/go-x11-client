@@ -2,7 +2,6 @@ package x
 
 import (
 	"bufio"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -10,14 +9,24 @@ import (
 )
 
 var Logger *log.Logger
+var debugEnabled bool
 
 func init() {
-	// setup logger
-	logOut := ioutil.Discard
-	if os.Getenv("DEBUG_XGB") == "1" {
-		logOut = os.Stderr
+	if os.Getenv("DEBUG_X11_CLIENT") == "1" {
+		debugEnabled = true
+		Logger = log.New(os.Stderr, "[x] ", log.Lshortfile)
 	}
-	Logger = log.New(logOut, "[xgb]", log.Lshortfile)
+}
+
+func logPrintln(v ...interface{}) {
+	if debugEnabled {
+		Logger.Println(v...)
+	}
+}
+func logPrintf(format string, v ...interface{}) {
+	if debugEnabled {
+		Logger.Printf(format, v...)
+	}
 }
 
 type Conn struct {
