@@ -5,7 +5,7 @@ import (
 )
 
 func GetVal(conn *x.Conn, name string) (x.Atom, error) {
-	reply, err := x.InternAtom(conn, x.False, uint16(len(name)), name).Reply(conn)
+	reply, err := x.InternAtom(conn, false, name).Reply(conn)
 	if err != nil {
 		return 0, err
 	}
@@ -13,7 +13,7 @@ func GetVal(conn *x.Conn, name string) (x.Atom, error) {
 }
 
 func GetExistingVal(conn *x.Conn, name string) (x.Atom, error) {
-	reply, err := x.InternAtom(conn, x.True, uint16(len(name)), name).Reply(conn)
+	reply, err := x.InternAtom(conn, true, name).Reply(conn)
 	if err != nil {
 		return 0, err
 	}

@@ -5,7 +5,7 @@ import (
 )
 
 func GrabPointer(conn *x.Conn, win x.Window, eventMask uint16, confineTo x.Window, cursor x.Cursor) error {
-	reply, err := x.GrabPointer(conn, x.True, win, eventMask,
+	reply, err := x.GrabPointer(conn, true, win, eventMask,
 		x.GrabModeAsync, x.GrabModeAsync,
 		confineTo, cursor, x.CurrentTime).Reply(conn)
 	if err != nil {

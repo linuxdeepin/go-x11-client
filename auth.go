@@ -1,4 +1,4 @@
-package client
+package x
 
 /*
 auth.go contains functions to facilitate the parsing of .Xauthority files.

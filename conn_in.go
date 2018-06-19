@@ -1,4 +1,4 @@
-package client
+package x
 
 import (
 	"container/list"
@@ -46,10 +46,6 @@ func NewGenericReply(buf []byte) *GenericReply {
 	return r
 }
 
-func (c *Conn) DebugIn() *InExported {
-	return c.in.Export()
-}
-
 // go c.readLoop
 func (c *Conn) readLoop() {
 	for {
@@ -63,31 +59,33 @@ func (c *Conn) readLoop() {
 func (c *Conn) readPacket() error {
 	length := 32
 	buf := make([]byte, length)
-	_, err := io.ReadFull(c.conn, buf)
+	_, err := io.ReadFull(c.bufReader, buf)
 	if err != nil {
 		return err
 	}
-	genrep := NewGenericReply(buf)
-	Logger.Printf("genrep: %#v\n", genrep)
+	genReply := NewGenericReply(buf)
+	Logger.Printf("genReply: %#v\n", genReply)
 
-	if genrep.responseType == ResponseTypeReply && genrep.length > 0 {
-		length += int(genrep.length) * 4
+	if genReply.responseType == ResponseTypeReply && genReply.length > 0 {
+		length += int(genReply.length) * 4
 		// grow buf
 		biggerBuf := make([]byte, length)
 		copy(biggerBuf[:32], buf)
-		_, err = io.ReadFull(c.conn, biggerBuf[32:])
+		_, err = io.ReadFull(c.bufReader, biggerBuf[32:])
 		if err != nil {
 			return err
 		}
 		buf = biggerBuf
 	}
 
-	c.iolock.Lock()
-	defer c.iolock.Unlock()
+	c.ioMu.Lock()
+	defer c.ioMu.Unlock()
 	// update c.in.request*
-	if genrep.responseType != 11 /*XCB_KEYMAP_NOTIFY*/ {
+
+	// KeymapNotifyEvent 没有 sequence
+	if genReply.responseType != KeymapNotifyEventCode {
 		lastRead := c.in.requestRead
-		c.in.requestRead = (lastRead & 0xffffffffffff0000) | uint64(genrep.sequence)
+		c.in.requestRead = (lastRead & 0xffffffffffff0000) | uint64(genReply.sequence)
 		if c.in.requestRead < lastRead {
 			c.in.requestRead += 0x10000
 		}
@@ -97,6 +95,7 @@ func (c *Conn) readPacket() error {
 		}
 
 		if c.in.requestRead != lastRead {
+			// 这个 reply 是对一个新的请求的 reply
 			curReply := c.in.currentReply
 			if curReply != nil && curReply.Len() != 0 {
 				c.in.replies[lastRead] = curReply
@@ -107,15 +106,15 @@ func (c *Conn) readPacket() error {
 
 		c.in.removeFinishedPendingReplies()
 
-		if genrep.responseType == ResponseTypeError {
+		if genReply.responseType == ResponseTypeError {
 			c.in.requestCompleted = c.in.requestRead
 		}
 		c.in.removeFinishedReaders()
 	}
 
 	var pend *PendingReply
-	if genrep.responseType == ResponseTypeReply ||
-		genrep.responseType == ResponseTypeError {
+	if genReply.responseType == ResponseTypeReply ||
+		genReply.responseType == ResponseTypeError {
 
 		if prFront := c.in.pendingReplies.Front(); prFront != nil {
 			pend = prFront.Value.(*PendingReply)
@@ -135,8 +134,8 @@ func (c *Conn) readPacket() error {
 	}
 
 	/* reply, or checked error */
-	if genrep.responseType == ResponseTypeReply ||
-		(genrep.responseType == ResponseTypeError &&
+	if genReply.responseType == ResponseTypeReply ||
+		(genReply.responseType == ResponseTypeError &&
 			pend != nil && pend.flags&RequestChecked != 0) {
 
 		if c.in.currentReply == nil {
@@ -158,9 +157,9 @@ func (c *Conn) readPacket() error {
 
 	/* event, or unchecked error */
 	// not special event
-	if genrep.responseType == ResponseTypeError {
+	if genReply.responseType == ResponseTypeError {
 		// is unchecked error
-		c.in.addError(NewGenericError(buf))
+		c.in.addError(NewError(buf))
 	} else {
 		// is event
 		c.in.addEvent(GenericEvent(buf))
@@ -223,8 +222,10 @@ func (c *Conn) pollForReply(request uint64) (replyBuf []byte, isErr, stop bool) 
 }
 
 func (c *Conn) waitForReply(request uint64) (replyBuf []byte, isErr bool) {
+	c.out.flushTo(request)
+
 	var stop bool
-	cond := sync.NewCond(&c.iolock)
+	cond := sync.NewCond(&c.ioMu)
 	r := c.in.insertNewReader(request, cond)
 	for {
 		replyBuf, isErr, stop = c.pollForReply(request)
@@ -241,16 +242,9 @@ func (c *Conn) waitForReply(request uint64) (replyBuf []byte, isErr bool) {
 }
 
 func (c *Conn) WaitForReply(request uint64) (replyBuf []byte, isErr bool) {
-	c.iolock.Lock()
+	c.ioMu.Lock()
 	replyBuf, isErr = c.waitForReply(request)
-	c.iolock.Unlock()
-	return
-}
-
-func (c *Conn) PollForReply(request uint64) (replyBuf []byte, isErr, stop bool) {
-	c.iolock.Lock()
-	replyBuf, isErr, stop = c.pollForReply(request)
-	c.iolock.Unlock()
+	c.ioMu.Unlock()
 	return
 }
 
@@ -261,7 +255,7 @@ func (cookie VoidCookie) Check(c *Conn) error {
 }
 
 func (c *Conn) requestCheck(request uint64) error {
-	c.iolock.Lock()
+	c.ioMu.Lock()
 	if request >= c.in.requestExpected &&
 		request > c.in.requestCompleted {
 
@@ -269,10 +263,11 @@ func (c *Conn) requestCheck(request uint64) error {
 		c.sendSync()
 	}
 	replyBuf, isErr := c.waitForReply(request)
-	c.iolock.Unlock()
+	c.ioMu.Unlock()
 
 	if isErr {
-		return NewGenericError(replyBuf)
+		return NewError(replyBuf)
+
 	} else {
 		// if not err, replyBuf must be nil
 		if replyBuf != nil {
@@ -281,65 +276,3 @@ func (c *Conn) requestCheck(request uint64) error {
 	}
 	return nil
 }
-
-//func (c *Conn) getEvent() []byte {
-//l := c.in.events
-
-//if l != nil {
-//front := l.Front()
-//if front != nil {
-//buf := front.Value.([]byte)
-//l.Remove(front)
-//// buf is event or unchecked error
-//return buf
-//}
-//}
-//return nil
-//}
-
-//func (c *Conn) getEvent() *GenericEvent {
-//select {
-//case e := <-c.in.eventCh:
-//return e
-//default:
-//return nil
-//}
-//}
-
-//func (c *Conn) pollForNextEvent(queued bool) *GenericEvent {
-//ret := c.getEvent()
-//if ret == nil && !queued {
-//// wait event come
-//ret = c.getEvent()
-//}
-//return ret
-//}
-
-//func (c *Conn) pollForNextEvent(queued bool) []byte {
-//c.iolock.Lock()
-//ret := c.getEvent()
-//if ret == nil && !queued {
-//// wait event come
-//c.in.eventCond.Wait()
-//ret = c.getEvent()
-//}
-//c.iolock.Unlock()
-//return ret
-//}
-
-func (c *Conn) PollForEvent() GenericEvent {
-	select {
-	case e := <-c.in.eventCh:
-		return e
-	default:
-		return nil
-	}
-}
-
-func (c *Conn) WaitForEvent() GenericEvent {
-	return <-c.in.eventCh
-}
-
-//func (c *Conn) PollForQueuedEvent() []byte {
-//return c.pollForNextEvent(true)
-//}

@@ -110,16 +110,15 @@ func (c *Conn) sendClientMessage(win, dest x.Window, msgType x.Atom, pArray *[5]
 	var data x.ClientMessageData
 	data.SetData32(pArray)
 	event := x.ClientMessageEvent{
-		ResponseType: x.ClientMessageEventCode,
-		Format:       32,
-		Window:       win,
-		Type:         msgType,
-		Data:         data,
+		Format: 32,
+		Window: win,
+		Type:   msgType,
+		Data:   data,
 	}
 	w := x.NewWriter()
-	x.ClientMessageEventWrite(w, &event)
+	x.WriteClientMessageEvent(w, &event)
 	const evMask = x.EventMaskSubstructureNotify | x.EventMaskSubstructureRedirect
-	return x.SendEvent(c.conn, x.False, dest, evMask, w.Bytes())
+	return x.SendEventChecked(c.conn, false, dest, evMask, w.Bytes())
 }
 
 /**
@@ -188,18 +187,18 @@ func (c *Conn) SetShowingDesktopChecked(show bool) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
 	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCardinal, 32, 1, w.Bytes())
+		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCardinal, 32, w.Bytes())
 }
 
-func (c *Conn) SetShowingDesktop(show bool) x.VoidCookie {
+func (c *Conn) SetShowingDesktop(show bool) {
 	val := uint32(0)
 	if show {
 		val = 1
 	}
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
-	return x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCardinal, 32, 1, w.Bytes())
+	x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
+		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCardinal, 32, w.Bytes())
 }
 
 func (c *Conn) RequestChangeShowingDesktop(show bool) x.VoidCookie {

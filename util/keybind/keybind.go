@@ -14,7 +14,7 @@ func init() {
 
 func Grab(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) {
 	for _, m := range grabMods {
-		x.GrabKey(conn, x.True, win, mods|m,
+		x.GrabKey(conn, true, win, mods|m,
 			key, x.GrabModeAsync, x.GrabModeAsync)
 	}
 }
@@ -27,7 +27,7 @@ func Ungrab(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) {
 
 func GrabChecked(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) error {
 	for _, m := range grabMods {
-		err := x.GrabKeyChecked(conn, x.True, win, mods|m,
+		err := x.GrabKeyChecked(conn, true, win, mods|m,
 			key, x.GrabModeAsync, x.GrabModeAsync).Check(conn)
 		if err != nil {
 			return err
@@ -38,7 +38,7 @@ func GrabChecked(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) error {
 
 // GrabKeyboard grabs the entire keyboard.
 func GrabKeyboard(conn *x.Conn, win x.Window) error {
-	reply, err := x.GrabKeyboard(conn, x.True, win, x.CurrentTime,
+	reply, err := x.GrabKeyboard(conn, true, win, x.CurrentTime,
 		x.GrabModeAsync, x.GrabModeAsync).Reply(conn)
 	if err != nil {
 		return err

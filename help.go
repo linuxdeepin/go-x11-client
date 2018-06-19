@@ -1,4 +1,4 @@
-package client
+package x
 
 /*
 help.go is meant to contain a rough hodge podge of functions that are mainly
@@ -39,9 +39,9 @@ func Errorf(format string, v ...interface{}) error {
 	return fmt.Errorf(format, v...)
 }
 
-// Pad a length to align on 4 bytes.
-func Pad(n int) int {
-	return (n + 3) & ^3
+func Pad(e int) int {
+	// pad(E) = (4 - (E mod 4)) mod 4
+	return (4 - (e % 4)) % 4
 }
 
 // PopCount counts the number of bits set in a value list mask.
@@ -109,4 +109,18 @@ func Get64(buf []byte) uint64 {
 	v |= uint64(buf[6]) << 48
 	v |= uint64(buf[7]) << 56
 	return v
+}
+
+func BoolToUint8(b bool) uint8 {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func Uint8ToBool(v uint8) bool {
+	if v == 0 {
+		return false
+	}
+	return true
 }

@@ -2,6 +2,7 @@ package icccm
 
 import (
 	"errors"
+
 	x "github.com/linuxdeepin/go-x11-client"
 	"golang.org/x/text/encoding/charmap"
 )
@@ -31,12 +32,12 @@ func (tp *TextProperty) GetStr() (string, error) {
 }
 
 func (c *Conn) getTextProperty(window x.Window, property x.Atom) GetTextCookie {
-	cookie := x.GetProperty(c.conn, x.False, window, property, x.AtomAny, 0, getPropertyMaxLength)
+	cookie := x.GetProperty(c.conn, false, window, property, x.AtomAny, 0, getPropertyMaxLength)
 	return GetTextCookie(cookie)
 }
 
 func (c *Conn) getTextPropertyUnchecked(window x.Window, property x.Atom) GetTextCookie {
-	cookie := x.GetProperty(c.conn, x.False, window, property, x.AtomAny, 0, getPropertyMaxLength)
+	cookie := x.GetProperty(c.conn, false, window, property, x.AtomAny, 0, getPropertyMaxLength)
 	return GetTextCookie(cookie)
 }
 

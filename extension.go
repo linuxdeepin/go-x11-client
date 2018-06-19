@@ -1,4 +1,4 @@
-package client
+package x
 
 import (
 	"sync"
@@ -80,7 +80,7 @@ func (exts *exts) getLazyReply(conn *Conn, ext *Extension) (lzr *lazyReply) {
 	// lazyNone -> lazyCookie
 	if lzr.tag == lazyNone {
 		lzr.tag = lazyCookie
-		lzr.cookie = QueryExtension(conn, uint16(len(ext.name)), ext.name)
+		lzr.cookie = QueryExtension(conn, ext.name)
 	}
 	return
 }

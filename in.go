@@ -1,4 +1,4 @@
-package client
+package x
 
 import (
 	"container/list"
@@ -16,46 +16,135 @@ type In struct {
 
 	readers *list.List
 
-	eventCh chan GenericEvent
-	errorCh chan *GenericError
+	eventChans []chan<- GenericEvent
+	errorChans []chan<- Error
+	chansMu    sync.Mutex
 }
 
-const (
-	eventChanBufferSize = 5000
-	errorChanBufferSize = 1000
-)
-
-func NewIn(mu *sync.Mutex) *In {
+func newIn() *In {
 	in := &In{}
 	in.replies = make(map[uint64]*list.List)
 	in.pendingReplies = list.New()
 	in.readers = list.New()
-
-	in.eventCh = make(chan GenericEvent, eventChanBufferSize)
-	in.errorCh = make(chan *GenericError, errorChanBufferSize)
 	return in
+}
+
+func (in *In) addEventChan(eventChan chan<- GenericEvent) {
+	in.chansMu.Lock()
+
+	for _, ch := range in.eventChans {
+		if ch == eventChan {
+			// exist
+			in.chansMu.Unlock()
+			return
+		}
+	}
+
+	in.eventChans = append(in.eventChans, eventChan)
+	in.chansMu.Unlock()
+}
+
+func (in *In) removeEventChan(eventChan chan<- GenericEvent) {
+	in.chansMu.Lock()
+
+	chans := in.eventChans
+	idx := -1
+	for i, ch := range chans {
+		if ch == eventChan {
+			idx = i
+			break
+		}
+	}
+
+	if idx == -1 {
+		// not found
+		in.chansMu.Unlock()
+		return
+	}
+
+	chans[idx] = chans[len(chans)-1]
+	chans[len(chans)-1] = nil
+	chans = chans[:len(chans)-1]
+
+	in.chansMu.Unlock()
+}
+
+func (in *In) addErrorChan(errorChan chan<- Error) {
+	in.chansMu.Lock()
+
+	for _, ch := range in.errorChans {
+		if ch == errorChan {
+			// exist
+			in.chansMu.Unlock()
+			return
+		}
+	}
+
+	in.errorChans = append(in.errorChans, errorChan)
+	in.chansMu.Unlock()
+}
+
+func (in *In) removeErrorChan(errorChan chan<- Error) {
+	in.chansMu.Lock()
+
+	chans := in.errorChans
+	idx := -1
+	for i, ch := range chans {
+		if ch == errorChan {
+			idx = i
+			break
+		}
+	}
+
+	if idx == -1 {
+		// not found
+		in.chansMu.Unlock()
+		return
+	}
+
+	chans[idx] = chans[len(chans)-1]
+	chans[len(chans)-1] = nil
+	chans = chans[:len(chans)-1]
+
+	in.chansMu.Unlock()
 }
 
 func (in *In) addEvent(e GenericEvent) {
 	Logger.Println("add event", e)
-	in.eventCh <- e
+	in.chansMu.Lock()
+
+	for _, ch := range in.eventChans {
+		ch <- e
+	}
+
+	in.chansMu.Unlock()
 }
 
-func (in *In) addError(e *GenericError) bool {
-	select {
-	case in.errorCh <- e:
-		Logger.Println("add error", e.Error())
-		return true
+func (in *In) addError(e Error) {
+	in.chansMu.Lock()
 
-	default:
-		Logger.Println("error chan buffer full")
-		return false
+	for _, ch := range in.errorChans {
+		select {
+		case ch <- e:
+		default:
+		}
 	}
+
+	in.chansMu.Unlock()
 }
 
 func (in *In) close() {
-	close(in.errorCh)
-	close(in.eventCh)
+	in.chansMu.Lock()
+
+	for _, ch := range in.eventChans {
+		close(ch)
+	}
+
+	for _, ch := range in.errorChans {
+		close(ch)
+	}
+
+	in.chansMu.Unlock()
 }
 
 type ReplyReader struct {
@@ -156,28 +245,5 @@ func (in *In) removeFinishedPendingReplies() {
 		} else {
 			break
 		}
-	}
-}
-
-type InExported struct {
-	RequestExpected  uint64
-	RequestRead      uint64
-	RequestCompleted uint64
-
-	CurrentReply *list.List
-	Replies      map[uint64]*list.List
-
-	Readers *list.List
-}
-
-func (in *In) Export() *InExported {
-	return &InExported{
-		RequestExpected:  in.requestExpected,
-		RequestRead:      in.requestRead,
-		RequestCompleted: in.requestCompleted,
-
-		CurrentReply: in.currentReply,
-		Replies:      in.replies,
-		Readers:      in.readers,
 	}
 }

@@ -1,6 +1,7 @@
-package client
+package x
 
 import (
+	"bufio"
 	"io/ioutil"
 	"log"
 	"net"
@@ -20,7 +21,8 @@ func init() {
 }
 
 type Conn struct {
-	conn net.Conn
+	conn      net.Conn
+	bufReader *bufio.Reader
 
 	host          string
 	display       string
@@ -28,17 +30,12 @@ type Conn struct {
 	ScreenNumber  int
 	setup         *Setup
 
-	writeChan chan []byte
+	ioMu sync.Mutex
+	in   *In
+	out  *Out
 
-	iolock sync.Mutex
-	in     *In
-	out    *Out
-
-	exts *exts
-	xg   *xidGenerator
-
-	EventHandlers   map[uint8]EventHandler
-	EventHandlersMu sync.RWMutex
+	exts   *exts
+	xidGen *xidGenerator
 }
 
 func (c *Conn) GetSetup() *Setup {
@@ -52,4 +49,20 @@ func (c *Conn) GetDefaultScreen() *Screen {
 func (c *Conn) Close() {
 	c.conn.Close()
 	c.in.close()
+}
+
+func (c *Conn) AddEventChan(eventChan chan<- GenericEvent) {
+	c.in.addEventChan(eventChan)
+}
+
+func (c *Conn) RemoveEventChan(eventChan chan<- GenericEvent) {
+	c.in.removeEventChan(eventChan)
+}
+
+func (c *Conn) AddErrorChan(errorChan chan<- Error) {
+	c.in.addErrorChan(errorChan)
+}
+
+func (c *Conn) RemoveErrorChan(errorChan chan<- Error) {
+	c.in.removeErrorChan(errorChan)
 }

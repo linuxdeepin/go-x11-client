@@ -1,4 +1,4 @@
-package client
+package x
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 )
 
 func (c *Conn) GenerateID() (uint32, error) {
-	return c.xg.generate()
+	return c.xidGen.generate()
 }
 
 type xidGenerator struct {

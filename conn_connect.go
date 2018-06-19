@@ -1,6 +1,7 @@
-package client
+package x
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
@@ -16,18 +17,17 @@ func NewConn() (*Conn, error) {
 
 func NewConnDisplay(display string) (*Conn, error) {
 	c := new(Conn)
-	c.in = NewIn(&c.iolock)
-	c.out = NewOut()
-	c.exts = newExts()
-	c.EventHandlers = make(map[uint8]EventHandler)
 	err := c.connectDisplay(display)
 	if err != nil {
 		return nil, err
 	}
-	c.xg = newXidGenerator(c.setup.ResourceIdBase, c.setup.ResourceIdMask)
+
+	c.bufReader = bufio.NewReader(c.conn)
+	c.in = newIn()
+	c.out = newOut(c.conn)
+	c.exts = newExts()
+	c.xidGen = newXidGenerator(c.setup.ResourceIdBase, c.setup.ResourceIdMask)
 	go c.readLoop()
-	c.writeChan = make(chan []byte, 10)
-	go c.writeLoop()
 	return c, nil
 }
 
@@ -36,6 +36,7 @@ func (c *Conn) connectDisplay(display string) error {
 	if err != nil {
 		return err
 	}
+
 	return c.postConnect()
 }
 
@@ -122,21 +123,22 @@ func (c *Conn) dial(display string) error {
 func (c *Conn) postConnect() error {
 	// Get authentication data
 	authName, authData, err := readAuthority(c.host, c.display)
-	noauth := false
+	noAuth := false
 	if err != nil {
 		Logger.Printf("Could not get authority info: %v", err)
 		Logger.Println("Trying connection without authority info...")
 		authName = ""
 		authData = []byte{}
-		noauth = true
+		noAuth = true
 	}
 
 	// Assume that the authentication protocol is "MIT-MAGIC-COOKIE-1".
-	if !noauth && (authName != "MIT-MAGIC-COOKIE-1" || len(authData) != 16) {
+	if !noAuth && (authName != "MIT-MAGIC-COOKIE-1" || len(authData) != 16) {
 		return errors.New("unsupported auth protocol " + authName)
 	}
 
-	buf := make([]byte, 12+Pad(len(authName))+Pad(len(authData)))
+	bufLen := 12 + len(authName) + Pad(len(authName)) + len(authData) + Pad(len(authData))
+	buf := make([]byte, bufLen)
 	buf[0] = 0x6c
 	buf[1] = 0
 	Put16(buf[2:], 11)
@@ -145,7 +147,7 @@ func (c *Conn) postConnect() error {
 	Put16(buf[8:], uint16(len(authData)))
 	Put16(buf[10:], 0)
 	copy(buf[12:], []byte(authName))
-	copy(buf[12+Pad(len(authName)):], authData)
+	copy(buf[12+len(authName)+Pad(len(authName)):], authData)
 	if _, err = c.conn.Write(buf); err != nil {
 		return err
 	}
@@ -178,14 +180,14 @@ func (c *Conn) postConnect() error {
 
 	var setup Setup
 	r := NewReaderFromData(buf)
-	SetupRead(r, &setup)
+	readSetup(r, &setup)
 	if err := r.Err(); err != nil {
 		return err
 	}
 	c.setup = &setup
 
 	/* Make sure requested screen number is in bounds for this server */
-	if c.ScreenNumber >= int(setup.RootsLen) {
+	if c.ScreenNumber >= len(setup.Roots) {
 		return errors.New("invalid screen")
 	}
 

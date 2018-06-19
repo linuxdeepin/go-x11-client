@@ -118,7 +118,7 @@ func (c *Conn) initAtoms() error {
 	cookies := make([]x.InternAtomCookie, length)
 	for i := 0; i < length; i++ {
 		name := atomNames[i]
-		cookies[i] = x.InternAtom(c.conn, x.False, uint16(len(name)), name)
+		cookies[i] = x.InternAtom(c.conn, false, name)
 	}
 
 	for i := 0; i < length; i++ {

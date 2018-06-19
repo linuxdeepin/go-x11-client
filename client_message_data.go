@@ -1,4 +1,4 @@
-package client
+package x
 
 type ClientMessageData struct {
 	data []byte
@@ -9,7 +9,7 @@ func ClientMessageDataRead(r *Reader, v *ClientMessageData) int {
 	return 20
 }
 
-func ClientMessageDataWrite(w *Writer, v *ClientMessageData) int {
+func writeClientMessageData(w *Writer, v *ClientMessageData) int {
 	w.WriteNBytes(20, v.data)
 	return 20
 }

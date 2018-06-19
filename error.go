@@ -1,4 +1,4 @@
-package client
+package x
 
 import (
 	"fmt"
@@ -41,6 +41,22 @@ type GenericError struct {
 	Data       []byte
 }
 
+func (err *GenericError) GetCode() uint8 {
+	return err.ErrorCode
+}
+
+func (err *GenericError) GetSequenceNumber() uint16 {
+	return err.Sequence
+}
+
+func (err *GenericError) GetMajorOpcode() uint8 {
+	return err.MajorCode
+}
+
+func (err *GenericError) GetMinorOpcode() uint16 {
+	return err.MinorCode
+}
+
 func (err *GenericError) Error() string {
 	return fmt.Sprintf("GenericError{ ErrorCode: %d, Sequence: %d, ResourceID: %d, MajorCode: %d, MinorCode: %d }",
 		err.ErrorCode, err.Sequence, err.ResourceID, err.MajorCode, err.MinorCode)
@@ -73,4 +89,16 @@ func NewGenericError(data []byte) *GenericError {
 	v.Data = data
 
 	return &v
+}
+
+func NewError(data []byte) Error {
+	genericErr := NewGenericError(data)
+	// TODO:
+	readErrFunc, ok := readErrorFuncMap[genericErr.ErrorCode]
+	if ok {
+		r := NewReaderFromData(data)
+		return readErrFunc(r)
+	} else {
+		return genericErr
+	}
 }
