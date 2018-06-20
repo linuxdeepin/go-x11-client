@@ -2879,6 +2879,87 @@ func readGetKeyboardMappingReply(r *Reader, v *GetKeyboardMappingReply) error {
 }
 
 // #WREQ
+func writeSetScreenSaver(w *Writer, timeout, interval int16, preferBlanking, allowExposures uint8) {
+	w.WritePad(4)
+	w.Write2b(uint16(timeout))
+	w.Write2b(uint16(interval))
+
+	w.Write1b(preferBlanking)
+	w.Write1b(allowExposures)
+	w.WritePad(2)
+}
+
+// #WREQ
+func writeGetScreenSaver(w *Writer) {
+	w.WritePad(4)
+}
+
+type GetScreenSaverReply struct {
+	Timeout        uint16
+	Interval       uint16
+	PreferBlanking uint8
+	AllowExposures uint8
+}
+
+func readGetScreenSaverReply(r *Reader, v *GetScreenSaverReply) error {
+	r.Read1b()
+	if r.Err() != nil {
+		return r.Err()
+	}
+
+	r.Read1b()
+	if r.Err() != nil {
+		return r.Err()
+	}
+
+	// seq
+	r.Read2b()
+	if r.Err() != nil {
+		return r.Err()
+	}
+
+	// length
+	r.Read4b()
+	if r.Err() != nil {
+		return r.Err()
+	}
+
+	v.Timeout = r.Read2b()
+	if r.Err() != nil {
+		return r.Err()
+	}
+
+	v.Interval = r.Read2b()
+	if r.Err() != nil {
+		return r.Err()
+	}
+
+	v.PreferBlanking = r.Read1b()
+	if r.Err() != nil {
+		return r.Err()
+	}
+
+	v.AllowExposures = r.Read1b()
+	if r.Err() != nil {
+		return r.Err()
+	}
+
+	r.ReadPad(18)
+	if r.Err() != nil {
+		return r.Err()
+	}
+
+	return nil
+}
+
+// #WREQ
+func writeForceScreenSaver(w *Writer, mode uint8) {
+	w.WritePad(1)
+	w.Write1b(mode)
+	w.WritePad(2)
+}
+
+// #WREQ
 func writeNoOperation(w *Writer, n int) {
 	w.WritePad(4)
 	for i := 0; i < n; i++ {

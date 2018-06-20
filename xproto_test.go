@@ -496,3 +496,28 @@ func TestGetKeyboardMapping(t *testing.T) {
 	t.Logf("%#v\n", kbdMapping)
 	assert.Len(t, kbdMapping.Keysyms, int(count)*int(kbdMapping.KeysymsPerKeycode))
 }
+
+func TestForceScreenSaver(t *testing.T) {
+	c := getConn(t)
+	err := ForceScreenSaverChecked(c, ScreenSaverReset).Check(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// SetScreenSaver + GetScreenSaver
+func TestSetScreenSaver(t *testing.T) {
+	c := getConn(t)
+	err := SetScreenSaverChecked(c, 900, 0, BlankingNotPreferred, ExposuresNotAllowed).Check(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reply, err := GetScreenSaver(c).Reply(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, uint16(900), reply.Timeout)
+	assert.Equal(t, uint16(0), reply.Interval)
+	assert.Equal(t, uint8(BlankingNotPreferred), reply.PreferBlanking)
+	assert.Equal(t, uint8(ExposuresNotAllowed), reply.AllowExposures)
+}

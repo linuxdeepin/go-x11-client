@@ -1794,6 +1794,77 @@ func (cookie GetKeyboardMappingCookie) Reply(conn *Conn) (*GetKeyboardMappingRep
 	return &reply, nil
 }
 
+func SetScreenSaver(conn *Conn, timeout, interval int16, preferBlanking, allowExposures uint8) {
+	w := NewWriter()
+	writeSetScreenSaver(w, timeout, interval, preferBlanking, allowExposures)
+	d := w.Bytes()
+	req := &ProtocolRequest{
+		NoReply: true,
+		Opcode:  SetScreenSaverOpcode,
+	}
+	conn.SendRequest(0, d, req)
+}
+
+func SetScreenSaverChecked(conn *Conn, timeout, interval int16, preferBlanking, allowExposures uint8) VoidCookie {
+	w := NewWriter()
+	writeSetScreenSaver(w, timeout, interval, preferBlanking, allowExposures)
+	d := w.Bytes()
+	req := &ProtocolRequest{
+		NoReply: true,
+		Opcode:  SetScreenSaverOpcode,
+	}
+	seq := conn.SendRequest(RequestChecked, d, req)
+	return VoidCookie(seq)
+}
+
+func GetScreenSaver(conn *Conn) GetScreenSaverCookie {
+	w := NewWriter()
+	writeGetScreenSaver(w)
+	d := w.Bytes()
+	req := &ProtocolRequest{
+		Opcode: GetScreenSaverOpcode,
+	}
+	seq := conn.SendRequest(RequestChecked, d, req)
+	return GetScreenSaverCookie(seq)
+}
+
+func (cookie GetScreenSaverCookie) Reply(conn *Conn) (*GetScreenSaverReply, error) {
+	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
+	if isErr {
+		return nil, NewError(replyBuf)
+	}
+	r := NewReaderFromData(replyBuf)
+	var reply GetScreenSaverReply
+	err := readGetScreenSaverReply(r, &reply)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func ForceScreenSaver(conn *Conn, mode uint8) {
+	w := NewWriter()
+	writeForceScreenSaver(w, mode)
+	d := w.Bytes()
+	req := &ProtocolRequest{
+		NoReply: true,
+		Opcode:  ForceScreenSaverOpcode,
+	}
+	conn.SendRequest(0, d, req)
+}
+
+func ForceScreenSaverChecked(conn *Conn, mode uint8) VoidCookie {
+	w := NewWriter()
+	writeForceScreenSaver(w, mode)
+	d := w.Bytes()
+	req := &ProtocolRequest{
+		NoReply: true,
+		Opcode:  ForceScreenSaverOpcode,
+	}
+	seq := conn.SendRequest(RequestChecked, d, req)
+	return VoidCookie(seq)
+}
+
 func NoOperation(conn *Conn, n int) {
 	w := NewWriter()
 	writeNoOperation(w, n)
