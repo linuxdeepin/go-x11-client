@@ -4,6 +4,8 @@ import (
 	"sync"
 )
 
+type ReadErrorFunc func(*Reader) Error
+
 type lazyReplyTag uint
 
 const (
@@ -13,17 +15,28 @@ const (
 )
 
 type Extension struct {
-	name     string // extension-xname
-	globalID int    // get from query extension request
+	id               int
+	name             string // extension-xname
+	maxErrCode       uint8
+	readErrorFuncMap map[uint8]ReadErrorFunc
 }
 
 func (ext *Extension) Name() string {
 	return ext.name
 }
 
-func NewExtension(name string) *Extension {
+var nextExtId = 1
+
+// only call it in init() func
+func NewExtension(name string, maxErrCode uint8,
+	readErrorFuncMap map[uint8]ReadErrorFunc) *Extension {
+	id := nextExtId
+	nextExtId++
 	return &Extension{
-		name: name,
+		id:               id,
+		name:             name,
+		maxErrCode:       maxErrCode,
+		readErrorFuncMap: readErrorFuncMap,
 	}
 }
 
@@ -33,51 +46,76 @@ type lazyReply struct {
 	cookie QueryExtensionCookie
 }
 
-type exts struct {
-	mu      sync.Mutex
-	replies []lazyReply
+type extAndData struct {
+	ext   *Extension
+	reply *lazyReply
 }
 
-func newExts() *exts {
-	return &exts{
-		replies: make([]lazyReply, 3),
-	}
+type ext struct {
+	mu         sync.RWMutex
+	extensions []extAndData
 }
 
-func (exts *exts) grow(n int) {
-	if n <= len(exts.replies) {
+func (e *ext) grow(n int) {
+	if n <= len(e.extensions) {
 		return
 	}
 
-	//Logger.Println("exts grow", len(exts.replies), " -> ", n)
-	bigger := make([]lazyReply, n)
-	copy(bigger, exts.replies)
-	exts.replies = bigger
+	logPrintf("ext grow %d -> %d\n", len(e.extensions), n)
+	bigger := make([]extAndData, n)
+	copy(bigger, e.extensions)
+	e.extensions = bigger
 }
 
-func (exts *exts) getByIndex(idx int) *lazyReply {
-	// idx is extension globalID
-	if idx > len(exts.replies) {
-		exts.grow(idx * 2)
+func (e *ext) getById(id int) *extAndData {
+	if id > len(e.extensions) {
+		e.grow(id * 2)
 	}
-
-	return &exts.replies[idx-1]
+	return &e.extensions[id-1]
 }
 
-var nextGlobalID int
-var globalIDMu sync.Mutex
+func (e *ext) newError(errCode uint8, data []byte) Error {
+	e.mu.RLock()
+	ext, code := e.getExtAndErrorCode(errCode)
+	e.mu.RUnlock()
 
-func (exts *exts) getLazyReply(conn *Conn, ext *Extension) (lzr *lazyReply) {
-	globalIDMu.Lock()
-	if ext.globalID == 0 {
-		nextGlobalID++
-		ext.globalID = nextGlobalID
-		//Logger.Println("ext", ext.name, "gloabl ID", ext.globalID)
+	if ext != nil {
+		fn, ok := ext.readErrorFuncMap[code]
+		if ok {
+			r := NewReaderFromData(data)
+			return fn(r)
+		}
 	}
-	globalIDMu.Unlock()
+	return nil
+}
 
-	lzr = exts.getByIndex(ext.globalID)
-	// lazyNone -> lazyCookie
+func (e *ext) getExtAndErrorCode(errCode uint8) (*Extension, uint8) {
+	for _, extAndData := range e.extensions {
+		ext := extAndData.ext
+		lzr := extAndData.reply
+		if ext != nil && lzr.reply != nil {
+			base := lzr.reply.FirstError
+			max := lzr.reply.FirstError + ext.maxErrCode
+
+			if base <= errCode && errCode <= max {
+				return ext, errCode - base
+			}
+		}
+	}
+	return nil, 0
+}
+
+func (e *ext) getLazyReply(conn *Conn, ext *Extension) (lzr *lazyReply) {
+	extAndData := e.getById(ext.id)
+
+	if extAndData.ext == nil {
+		// init extAndData
+		extAndData.ext = ext
+		extAndData.reply = &lazyReply{tag: lazyNone}
+	}
+	lzr = extAndData.reply
+
+	// lazyReply tag: lazyNone -> lazyCookie
 	if lzr.tag == lazyNone {
 		lzr.tag = lazyCookie
 		lzr.cookie = QueryExtension(conn, ext.name)
@@ -85,22 +123,26 @@ func (exts *exts) getLazyReply(conn *Conn, ext *Extension) (lzr *lazyReply) {
 	return
 }
 
-func (c *Conn) GetExtensionData(ext *Extension) (data *QueryExtensionReply) {
-	c.exts.mu.Lock()
-	lzr := c.exts.getLazyReply(c, ext)
+func (e *ext) getExtData(c *Conn, ext *Extension) *QueryExtensionReply {
+	lzr := e.getLazyReply(c, ext)
 
-	// lazyCookie -> lazyForced
+	// lazyReply tag: lazyCookie -> lazyForced
 	if lzr.tag == lazyCookie {
 		lzr.tag = lazyForced
 		lzr.reply, _ = lzr.cookie.Reply(c)
 	}
-	data = lzr.reply
-	c.exts.mu.Unlock()
-	return
+	return lzr.reply
+}
+
+func (c *Conn) GetExtensionData(ext *Extension) *QueryExtensionReply {
+	c.ext.mu.Lock()
+	data := c.ext.getExtData(c, ext)
+	c.ext.mu.Unlock()
+	return data
 }
 
 func (c *Conn) PrefetchExtensionData(ext *Extension) {
-	c.exts.mu.Lock()
-	c.exts.getLazyReply(c, ext)
-	c.exts.mu.Unlock()
+	c.ext.mu.Lock()
+	c.ext.getLazyReply(c, ext)
+	c.ext.mu.Unlock()
 }

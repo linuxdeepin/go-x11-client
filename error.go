@@ -4,32 +4,6 @@ import (
 	"fmt"
 )
 
-// Error is an interface that can contain any of the errors returned by
-// the server. Use a type assertion switch to extract the Error structs.
-//type Error interface {
-//SequenceId() uint16
-//BadId() uint32
-//Error() string
-//}
-
-//// NewErrorFun is the type of function use to construct errors from raw bytes.
-//// It should not be used. It is exported for use in the extension sub-packages.
-//type NewErrorFun func(buf []byte) Error
-
-//// NewErrorFuncs is a map from error numbers to functions that create
-//// the corresponding error. It should not be used. It is exported for use in
-//// the extension sub-packages.
-//var NewErrorFuncs = make(map[int]NewErrorFun)
-
-//// NewExtErrorFuncs is a temporary map that stores error constructor functions
-//// for each extension. When an extension is initialized, each error for that
-//// extension is added to the 'NewErrorFuncs' map. It should not be used. It is
-//// exported for use in the extension sub-packages.
-//var NewExtErrorFuncs = make(map[string]map[int]NewErrorFun)
-
-// eventOrError corresponds to values that can be either an event or an
-// error.
-
 // generic error
 type GenericError struct {
 	// ResponseType uint8  // type of the response === 0
@@ -101,4 +75,25 @@ func NewError(data []byte) Error {
 	} else {
 		return genericErr
 	}
+}
+
+func (c *Conn) NewError(data []byte) Error {
+	genericErr := NewGenericError(data)
+	errCode := genericErr.ErrorCode
+
+	if 1 <= errCode && errCode <= 127 {
+		// core error code in range [1,127]
+		fn, ok := readErrorFuncMap[errCode]
+		if ok {
+			r := NewReaderFromData(data)
+			return fn(r)
+		}
+	} else {
+		// ext error code in range [128,255]
+		err := c.ext.newError(errCode, data)
+		if err != nil {
+			return err
+		}
+	}
+	return genericErr
 }

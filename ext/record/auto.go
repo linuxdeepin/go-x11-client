@@ -6,7 +6,7 @@ import x "github.com/linuxdeepin/go-x11-client"
 const MajorVersion = 1
 const MinorVersion = 13
 
-var _ext = x.NewExtension("RECORD")
+var _ext *x.Extension
 
 func Ext() *x.Extension {
 	return _ext
@@ -54,9 +54,9 @@ type EnableContextCookie uint64
 const DisableContextOpcode = 6
 const FreeContextOpcode = 7
 
-// x_prefix is x.
-var readErrorFuncMap = make(map[uint8]func(r *x.Reader) x.Error)
+var readErrorFuncMap = make(map[uint8]x.ReadErrorFunc, 1)
 
 func init() {
 	readErrorFuncMap[BadContextErrorCode] = readBadContextError
+	_ext = x.NewExtension("RECORD", 0, readErrorFuncMap)
 }

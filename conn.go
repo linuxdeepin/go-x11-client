@@ -40,10 +40,10 @@ type Conn struct {
 	setup         *Setup
 
 	ioMu sync.Mutex
-	in   *In
-	out  *Out
+	in   *in
+	out  *out
 
-	exts   *exts
+	ext    ext
 	xidGen *xidGenerator
 }
 

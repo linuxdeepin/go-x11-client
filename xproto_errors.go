@@ -62,7 +62,7 @@ type ResourceErrorBase struct {
 	MajorOpcode uint8
 }
 
-func readResourceErrorBase(r *Reader) ResourceErrorBase {
+func ReadResourceErrorBase(r *Reader) ResourceErrorBase {
 	var e ResourceErrorBase
 	// Error
 	r.Read1b()
@@ -94,7 +94,7 @@ func (e ResourceErrorBase) GetMajorOpcode() uint8 {
 	return e.MajorOpcode
 }
 
-func (e ResourceErrorBase) msg() string {
+func (e ResourceErrorBase) Msg() string {
 	return fmt.Sprintf("{code=%d, seq=%d, major=%d, minor=%d, bad=%d}",
 		e.Code, e.Sequence, e.MajorOpcode, e.MinorOpcode, e.Bad)
 }
@@ -116,11 +116,11 @@ type ValueError struct {
 }
 
 func readValueError(r *Reader) Error {
-	return ValueError{readResourceErrorBase(r)}
+	return ValueError{ReadResourceErrorBase(r)}
 }
 
 func (e ValueError) Error() string {
-	return "ValueError" + e.msg()
+	return "ValueError" + e.Msg()
 }
 
 type WindowError struct {
@@ -128,11 +128,11 @@ type WindowError struct {
 }
 
 func readWindowError(r *Reader) Error {
-	return WindowError{readResourceErrorBase(r)}
+	return WindowError{ReadResourceErrorBase(r)}
 }
 
 func (e WindowError) Error() string {
-	return "WindowError" + e.msg()
+	return "WindowError" + e.Msg()
 }
 
 type PixmapError struct {
@@ -140,11 +140,11 @@ type PixmapError struct {
 }
 
 func readPixmapError(r *Reader) Error {
-	return PixmapError{readResourceErrorBase(r)}
+	return PixmapError{ReadResourceErrorBase(r)}
 }
 
 func (e PixmapError) Error() string {
-	return "PixmapError" + e.msg()
+	return "PixmapError" + e.Msg()
 }
 
 type AtomError struct {
@@ -152,11 +152,11 @@ type AtomError struct {
 }
 
 func readAtomError(r *Reader) Error {
-	return AtomError{readResourceErrorBase(r)}
+	return AtomError{ReadResourceErrorBase(r)}
 }
 
 func (e AtomError) Error() string {
-	return "AtomError" + e.msg()
+	return "AtomError" + e.Msg()
 }
 
 type CursorError struct {
@@ -164,11 +164,11 @@ type CursorError struct {
 }
 
 func readCursorError(r *Reader) Error {
-	return CursorError{readResourceErrorBase(r)}
+	return CursorError{ReadResourceErrorBase(r)}
 }
 
 func (e CursorError) Error() string {
-	return "CursorError" + e.msg()
+	return "CursorError" + e.Msg()
 }
 
 type FontError struct {
@@ -176,11 +176,11 @@ type FontError struct {
 }
 
 func readFontError(r *Reader) Error {
-	return FontError{readResourceErrorBase(r)}
+	return FontError{ReadResourceErrorBase(r)}
 }
 
 func (e FontError) Error() string {
-	return "FontError" + e.msg()
+	return "FontError" + e.Msg()
 }
 
 type MatchError struct {
@@ -200,11 +200,11 @@ type DrawableError struct {
 }
 
 func readDrawableError(r *Reader) Error {
-	return DrawableError{readResourceErrorBase(r)}
+	return DrawableError{ReadResourceErrorBase(r)}
 }
 
 func (e DrawableError) Error() string {
-	return "DrawableError" + e.msg()
+	return "DrawableError" + e.Msg()
 }
 
 type AccessError struct {
@@ -236,11 +236,11 @@ type ColormapError struct {
 }
 
 func readColormapError(r *Reader) Error {
-	return ColormapError{readResourceErrorBase(r)}
+	return ColormapError{ReadResourceErrorBase(r)}
 }
 
 func (e ColormapError) Error() string {
-	return "ColormapError" + e.msg()
+	return "ColormapError" + e.Msg()
 }
 
 type GContextError struct {
@@ -248,11 +248,11 @@ type GContextError struct {
 }
 
 func readGContextError(r *Reader) Error {
-	return GContextError{readResourceErrorBase(r)}
+	return GContextError{ReadResourceErrorBase(r)}
 }
 
 func (e GContextError) Error() string {
-	return "GContextError" + e.msg()
+	return "GContextError" + e.Msg()
 }
 
 type IdChoiceError struct {
@@ -260,11 +260,11 @@ type IdChoiceError struct {
 }
 
 func readIdChoiceError(r *Reader) Error {
-	return IdChoiceError{readResourceErrorBase(r)}
+	return IdChoiceError{ReadResourceErrorBase(r)}
 }
 
 func (e IdChoiceError) Error() string {
-	return "IdChoiceError" + e.msg()
+	return "IdChoiceError" + e.Msg()
 }
 
 type NameError struct {

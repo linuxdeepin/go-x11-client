@@ -6,7 +6,7 @@ import x "github.com/linuxdeepin/go-x11-client"
 const MajorVersion = 0
 const MinorVersion = 0
 
-var _ext = x.NewExtension("DPMS")
+var _ext *x.Extension
 
 func Ext() *x.Extension {
 	return _ext
@@ -40,3 +40,7 @@ const ForceLevelOpcode = 6
 const InfoOpcode = 7
 
 type InfoCookie uint64
+
+func init() {
+	_ext = x.NewExtension("DPMS", 0, nil)
+}

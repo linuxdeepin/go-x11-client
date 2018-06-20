@@ -165,7 +165,7 @@ func main() {
 				reqFunc.name, xPrefix, reqFunc.name)
 			g.p(`replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, %sNewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := %sNewReaderFromData(replyBuf)
 	var reply %sReply
@@ -175,7 +175,7 @@ func main() {
 	}
 	return &reply, nil
 }
-`, xPrefix, xPrefix, reqFunc.name, reqFunc.name)
+`, xPrefix, reqFunc.name, reqFunc.name)
 		}
 
 	}

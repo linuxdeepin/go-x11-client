@@ -1396,8 +1396,7 @@ type GetModifierMappingCookie uint64
 
 const NoOperationOpcode = 127
 
-// x_prefix is
-var readErrorFuncMap = make(map[uint8]func(r *Reader) Error)
+var readErrorFuncMap = make(map[uint8]ReadErrorFunc, 17)
 
 func init() {
 	readErrorFuncMap[RequestErrorCode] = readRequestError

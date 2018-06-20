@@ -6,7 +6,7 @@ import x "github.com/linuxdeepin/go-x11-client"
 const MajorVersion = 1
 const MinorVersion = 1
 
-var _ext = x.NewExtension("DAMAGE")
+var _ext *x.Extension
 
 func Ext() *x.Extension {
 	return _ext
@@ -44,9 +44,9 @@ func NewNotifyEvent(data []byte) (*NotifyEvent, error) {
 	return &ev, nil
 }
 
-// x_prefix is x.
-var readErrorFuncMap = make(map[uint8]func(r *x.Reader) x.Error)
+var readErrorFuncMap = make(map[uint8]x.ReadErrorFunc, 1)
 
 func init() {
 	readErrorFuncMap[BadDamageErrorCode] = readBadDamageError
+	_ext = x.NewExtension("DAMAGE", 0, readErrorFuncMap)
 }

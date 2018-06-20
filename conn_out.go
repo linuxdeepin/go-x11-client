@@ -40,7 +40,7 @@ func (c *Conn) SendSync() {
 	c.ioMu.Unlock()
 }
 
-type Out struct {
+type out struct {
 	request        uint64
 	requestWritten uint64
 
@@ -50,8 +50,8 @@ type Out struct {
 	wr  io.Writer
 }
 
-func newOut(conn net.Conn) *Out {
-	out := &Out{
+func newOut(conn net.Conn) *out {
+	out := &out{
 		buf: make([]byte, 4096),
 		wr:  conn,
 	}
@@ -114,15 +114,15 @@ func (c *Conn) SendRequest(flags uint, data []byte, req *ProtocolRequest) uint64
 	return request
 }
 
-func (o *Out) available() int {
+func (o *out) available() int {
 	return len(o.buf) - o.n
 }
 
-func (o *Out) buffered() int {
+func (o *out) buffered() int {
 	return o.n
 }
 
-func (o *Out) write(request uint64, p []byte) (nn int, err error) {
+func (o *out) write(request uint64, p []byte) (nn int, err error) {
 	for len(p) > o.available() && o.err == nil {
 		var n int
 		if o.buffered() == 0 {
@@ -152,7 +152,7 @@ func (o *Out) write(request uint64, p []byte) (nn int, err error) {
 	return nn, nil
 }
 
-func (o *Out) flushTo(request uint64) {
+func (o *out) flushTo(request uint64) {
 	if !(request <= o.request) {
 		panic("assert request < o.request failed")
 	}
@@ -166,7 +166,7 @@ func (o *Out) flushTo(request uint64) {
 }
 
 // flush writes any buffered data to the underlying io.Writer.
-func (o *Out) flush() error {
+func (o *out) flush() error {
 	if o.err != nil {
 		return o.err
 	}

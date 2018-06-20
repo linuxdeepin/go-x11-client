@@ -1066,14 +1066,14 @@ func readGetPropertyReply(r *Reader, v *GetPropertyReply) error {
 		return r.Err()
 	}
 
-	n := v.ValueLen * uint32(v.Format/8)
-	v.Value = r.ReadBytes(int(n))
+	n := int(v.ValueLen) * int(v.Format/8)
+	v.Value = r.ReadBytes(n)
 	if r.Err() != nil {
 		return r.Err()
 	}
 
 	// unused
-	r.ReadPad(Pad(int(n)))
+	r.ReadPad(Pad(n))
 	if r.Err() != nil {
 		return r.Err()
 	}

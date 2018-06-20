@@ -17,7 +17,7 @@ func QueryVersion(conn *x.Conn, majorVersion, minorVersion uint16) QueryVersionC
 func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, x.NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply QueryVersionReply
@@ -118,7 +118,7 @@ func GetContext(conn *x.Conn, context Context) GetContextCookie {
 func (cookie GetContextCookie) Reply(conn *x.Conn) (*GetContextReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, x.NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply GetContextReply
@@ -144,7 +144,7 @@ func EnableContext(conn *x.Conn, context Context) EnableContextCookie {
 func (cookie EnableContextCookie) Reply(conn *x.Conn) (*EnableContextReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, x.NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply EnableContextReply

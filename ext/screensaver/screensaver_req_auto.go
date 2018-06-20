@@ -17,7 +17,7 @@ func QueryVersion(conn *x.Conn, clientMajorVersion, clientMinorVersion uint8) Qu
 func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, x.NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply QueryVersionReply
@@ -43,7 +43,7 @@ func QueryInfo(conn *x.Conn, drawable x.Drawable) QueryInfoCookie {
 func (cookie QueryInfoCookie) Reply(conn *x.Conn) (*QueryInfoReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, x.NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply QueryInfoReply

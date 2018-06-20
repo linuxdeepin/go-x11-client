@@ -6,7 +6,7 @@ import x "github.com/linuxdeepin/go-x11-client"
 const MajorVersion = 1
 const MinorVersion = 1
 
-var _ext = x.NewExtension("MIT-SCREEN-SAVER")
+var _ext *x.Extension
 
 func Ext() *x.Extension {
 	return _ext
@@ -55,4 +55,7 @@ func NewNotifyEvent(data []byte) (*NotifyEvent, error) {
 		return nil, err
 	}
 	return &ev, nil
+}
+func init() {
+	_ext = x.NewExtension("MIT-SCREEN-SAVER", 0, nil)
 }

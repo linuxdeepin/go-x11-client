@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-type In struct {
+type in struct {
 	requestExpected  uint64
 	requestRead      uint64
 	requestCompleted uint64
@@ -21,15 +21,15 @@ type In struct {
 	chansMu    sync.Mutex
 }
 
-func newIn() *In {
-	in := &In{}
+func newIn() *in {
+	in := &in{}
 	in.replies = make(map[uint64]*list.List)
 	in.pendingReplies = list.New()
 	in.readers = list.New()
 	return in
 }
 
-func (in *In) addEventChan(eventChan chan<- GenericEvent) {
+func (in *in) addEventChan(eventChan chan<- GenericEvent) {
 	in.chansMu.Lock()
 
 	for _, ch := range in.eventChans {
@@ -44,7 +44,7 @@ func (in *In) addEventChan(eventChan chan<- GenericEvent) {
 	in.chansMu.Unlock()
 }
 
-func (in *In) removeEventChan(eventChan chan<- GenericEvent) {
+func (in *in) removeEventChan(eventChan chan<- GenericEvent) {
 	in.chansMu.Lock()
 
 	chans := in.eventChans
@@ -69,7 +69,7 @@ func (in *In) removeEventChan(eventChan chan<- GenericEvent) {
 	in.chansMu.Unlock()
 }
 
-func (in *In) addErrorChan(errorChan chan<- Error) {
+func (in *in) addErrorChan(errorChan chan<- Error) {
 	in.chansMu.Lock()
 
 	for _, ch := range in.errorChans {
@@ -84,7 +84,7 @@ func (in *In) addErrorChan(errorChan chan<- Error) {
 	in.chansMu.Unlock()
 }
 
-func (in *In) removeErrorChan(errorChan chan<- Error) {
+func (in *in) removeErrorChan(errorChan chan<- Error) {
 	in.chansMu.Lock()
 
 	chans := in.errorChans
@@ -109,7 +109,7 @@ func (in *In) removeErrorChan(errorChan chan<- Error) {
 	in.chansMu.Unlock()
 }
 
-func (in *In) addEvent(e GenericEvent) {
+func (in *in) addEvent(e GenericEvent) {
 	logPrintln("add event", e)
 	in.chansMu.Lock()
 
@@ -120,7 +120,7 @@ func (in *In) addEvent(e GenericEvent) {
 	in.chansMu.Unlock()
 }
 
-func (in *In) addError(e Error) {
+func (in *in) addError(e Error) {
 	in.chansMu.Lock()
 
 	for _, ch := range in.errorChans {
@@ -133,7 +133,7 @@ func (in *In) addError(e Error) {
 	in.chansMu.Unlock()
 }
 
-func (in *In) close() {
+func (in *in) close() {
 	in.chansMu.Lock()
 
 	for _, ch := range in.eventChans {
@@ -152,7 +152,7 @@ type ReplyReader struct {
 	cond    *sync.Cond
 }
 
-func (in *In) insertNewReader(request uint64, cond *sync.Cond) *ReplyReader {
+func (in *in) insertNewReader(request uint64, cond *sync.Cond) *ReplyReader {
 	r := &ReplyReader{
 		request: request,
 		cond:    cond,
@@ -178,7 +178,7 @@ func (in *In) insertNewReader(request uint64, cond *sync.Cond) *ReplyReader {
 	return r
 }
 
-func (in *In) removeReader(r *ReplyReader) {
+func (in *in) removeReader(r *ReplyReader) {
 	l := in.readers
 	for e := l.Front(); e != nil; e = e.Next() {
 		reader := e.Value.(*ReplyReader)
@@ -190,7 +190,7 @@ func (in *In) removeReader(r *ReplyReader) {
 	}
 }
 
-func (in *In) removeFinishedReaders() {
+func (in *in) removeFinishedReaders() {
 	l := in.readers
 	e := l.Front()
 	for e != nil {
@@ -207,7 +207,7 @@ func (in *In) removeFinishedReaders() {
 	}
 }
 
-func (in *In) wakeUpNextReader() {
+func (in *in) wakeUpNextReader() {
 	if in.readers.Front() != nil {
 		reader := in.readers.Front().Value.(*ReplyReader)
 		logPrintln("wake up next reader", reader.request)
@@ -222,7 +222,7 @@ type PendingReply struct {
 	flags        uint
 }
 
-func (in *In) expectReply(request uint64, workaround uint, flags uint) {
+func (in *in) expectReply(request uint64, workaround uint, flags uint) {
 	pend := &PendingReply{
 		firstRequest: request,
 		lastRequest:  request,
@@ -232,7 +232,7 @@ func (in *In) expectReply(request uint64, workaround uint, flags uint) {
 	in.pendingReplies.PushBack(pend)
 }
 
-func (in *In) removeFinishedPendingReplies() {
+func (in *in) removeFinishedPendingReplies() {
 	l := in.pendingReplies
 	e := l.Front()
 	for e != nil {

@@ -6,7 +6,7 @@ import x "github.com/linuxdeepin/go-x11-client"
 const MajorVersion = 0
 const MinorVersion = 4
 
-var _ext = x.NewExtension("Composite")
+var _ext *x.Extension
 
 func Ext() *x.Extension {
 	return _ext
@@ -33,3 +33,7 @@ const GetOverlayWindowOpcode = 7
 type GetOverlayWindowCookie uint64
 
 const ReleaseOverlayWindowOpcode = 8
+
+func init() {
+	_ext = x.NewExtension("Composite", 0, nil)
+}

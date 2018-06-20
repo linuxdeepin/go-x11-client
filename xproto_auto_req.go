@@ -60,7 +60,7 @@ func GetWindowAttributes(conn *Conn, window Window) GetWindowAttributesCookie {
 func (cookie GetWindowAttributesCookie) Reply(conn *Conn) (*GetWindowAttributesReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GetWindowAttributesReply
@@ -315,7 +315,7 @@ func GetGeometry(conn *Conn, drawable Drawable) GetGeometryCookie {
 func (cookie GetGeometryCookie) Reply(conn *Conn) (*GetGeometryReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GetGeometryReply
@@ -340,7 +340,7 @@ func QueryTree(conn *Conn, window Window) QueryTreeCookie {
 func (cookie QueryTreeCookie) Reply(conn *Conn) (*QueryTreeReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply QueryTreeReply
@@ -365,7 +365,7 @@ func InternAtom(conn *Conn, onlyIfExists bool, name string) InternAtomCookie {
 func (cookie InternAtomCookie) Reply(conn *Conn) (*InternAtomReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply InternAtomReply
@@ -390,7 +390,7 @@ func GetAtomName(conn *Conn, atom Atom) GetAtomNameCookie {
 func (cookie GetAtomNameCookie) Reply(conn *Conn) (*GetAtomNameReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GetAtomNameReply
@@ -461,7 +461,7 @@ func GetProperty(conn *Conn, delete bool, window Window, property, type0 Atom, l
 func (cookie GetPropertyCookie) Reply(conn *Conn) (*GetPropertyReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GetPropertyReply
@@ -486,7 +486,7 @@ func ListProperties(conn *Conn, window Window) ListPropertiesCookie {
 func (cookie ListPropertiesCookie) Reply(conn *Conn) (*ListPropertiesReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply ListPropertiesReply
@@ -534,7 +534,7 @@ func GetSelectionOwner(conn *Conn, selection Atom) GetSelectionOwnerCookie {
 func (cookie GetSelectionOwnerCookie) Reply(conn *Conn) (*GetSelectionOwnerReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GetSelectionOwnerReply
@@ -605,7 +605,7 @@ func GrabPointer(conn *Conn, ownerEvents bool, grabWindow Window, eventMask uint
 func (cookie GrabPointerCookie) Reply(conn *Conn) (*GrabPointerReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GrabPointerReply
@@ -722,7 +722,7 @@ func GrabKeyboard(conn *Conn, ownerEvents bool, grabWindow Window, time Timestam
 func (cookie GrabKeyboardCookie) Reply(conn *Conn) (*GrabKeyboardReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GrabKeyboardReply
@@ -885,7 +885,7 @@ func QueryPointer(conn *Conn, window Window) QueryPointerCookie {
 func (cookie QueryPointerCookie) Reply(conn *Conn) (*QueryPointerReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply QueryPointerReply
@@ -910,7 +910,7 @@ func GetMotionEvents(conn *Conn, window Window, start, stop Timestamp) GetMotion
 func (cookie GetMotionEventsCookie) Reply(conn *Conn) (*GetMotionEventsReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GetMotionEventsReply
@@ -935,7 +935,7 @@ func TranslateCoordinates(conn *Conn, srcWindow, dstWindow Window, srcX, srcY in
 func (cookie TranslateCoordinatesCookie) Reply(conn *Conn) (*TranslateCoordinatesReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply TranslateCoordinatesReply
@@ -1006,7 +1006,7 @@ func GetInputFocus(conn *Conn) GetInputFocusCookie {
 func (cookie GetInputFocusCookie) Reply(conn *Conn) (*GetInputFocusReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GetInputFocusReply
@@ -1031,7 +1031,7 @@ func QueryKeymap(conn *Conn) QueryKeymapCookie {
 func (cookie QueryKeymapCookie) Reply(conn *Conn) (*QueryKeymapReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply QueryKeymapReply
@@ -1102,7 +1102,7 @@ func QueryFont(conn *Conn, font Fontable) QueryFontCookie {
 func (cookie QueryFontCookie) Reply(conn *Conn) (*QueryFontReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply QueryFontReply
@@ -1127,7 +1127,7 @@ func ListFonts(conn *Conn, maxNames uint16, pattern string) ListFontsCookie {
 func (cookie ListFontsCookie) Reply(conn *Conn) (*ListFontsReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply ListFontsReply
@@ -1152,7 +1152,7 @@ func ListFontsWithInfo(conn *Conn, maxNames uint16, pattern string) ListFontsWit
 func (cookie ListFontsWithInfoCookie) Reply(conn *Conn) (*ListFontsWithInfoReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply ListFontsWithInfoReply
@@ -1200,7 +1200,7 @@ func GetFontPath(conn *Conn) GetFontPathCookie {
 func (cookie GetFontPathCookie) Reply(conn *Conn) (*GetFontPathReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GetFontPathReply
@@ -1685,7 +1685,7 @@ func GetImage(conn *Conn, format uint8, drawable Drawable, x, y int16, width, he
 func (cookie GetImageCookie) Reply(conn *Conn) (*GetImageReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GetImageReply
@@ -1710,7 +1710,7 @@ func QueryExtension(conn *Conn, name string) QueryExtensionCookie {
 func (cookie QueryExtensionCookie) Reply(conn *Conn) (*QueryExtensionReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply QueryExtensionReply
@@ -1735,7 +1735,7 @@ func ListExtensions(conn *Conn) ListExtensionsCookie {
 func (cookie ListExtensionsCookie) Reply(conn *Conn) (*ListExtensionsReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply ListExtensionsReply
@@ -1783,7 +1783,7 @@ func GetKeyboardMapping(conn *Conn, firstKeycode Keycode, count uint8) GetKeyboa
 func (cookie GetKeyboardMappingCookie) Reply(conn *Conn) (*GetKeyboardMappingReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GetKeyboardMappingReply
@@ -1831,7 +1831,7 @@ func GetScreenSaver(conn *Conn) GetScreenSaverCookie {
 func (cookie GetScreenSaverCookie) Reply(conn *Conn) (*GetScreenSaverReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := NewReaderFromData(replyBuf)
 	var reply GetScreenSaverReply

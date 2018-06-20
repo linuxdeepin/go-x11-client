@@ -17,7 +17,7 @@ func GetVersion(conn *x.Conn, clientMajorVersion, clientMinorVersion uint16) Get
 func (cookie GetVersionCookie) Reply(conn *x.Conn) (*GetVersionReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, x.NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply GetVersionReply
@@ -43,7 +43,7 @@ func Capable(conn *x.Conn) CapableCookie {
 func (cookie CapableCookie) Reply(conn *x.Conn) (*CapableReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, x.NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply CapableReply
@@ -69,7 +69,7 @@ func GetTimeouts(conn *x.Conn) GetTimeoutsCookie {
 func (cookie GetTimeoutsCookie) Reply(conn *x.Conn) (*GetTimeoutsReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, x.NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply GetTimeoutsReply
@@ -195,7 +195,7 @@ func Info(conn *x.Conn) InfoCookie {
 func (cookie InfoCookie) Reply(conn *x.Conn) (*InfoReply, error) {
 	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
 	if isErr {
-		return nil, x.NewError(replyBuf)
+		return nil, conn.NewError(replyBuf)
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply InfoReply

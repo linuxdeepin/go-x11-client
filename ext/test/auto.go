@@ -6,7 +6,7 @@ import x "github.com/linuxdeepin/go-x11-client"
 const MajorVersion = 2
 const MinorVersion = 2
 
-var _ext = x.NewExtension("XTEST")
+var _ext *x.Extension
 
 func Ext() *x.Extension {
 	return _ext
@@ -28,3 +28,7 @@ type CompareCursorCookie uint64
 
 const FakeInputOpcode = 2
 const GrabControlOpcode = 3
+
+func init() {
+	_ext = x.NewExtension("XTEST", 0, nil)
+}

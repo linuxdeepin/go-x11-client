@@ -5,6 +5,7 @@ import argparse
 import subprocess
 
 error_types = []
+max_error_code = 0
 x_prefix = ''
 
 parser = argparse.ArgumentParser()
@@ -44,23 +45,32 @@ def go_open(self):
         l('const MajorVersion = %d', int(_ns.major_version))
         l('const MinorVersion = %d', int(_ns.minor_version))
 
-        l('var _ext = x.NewExtension("%s")', _ns.ext_xname)
+        l('var _ext *%sExtension', x_prefix)
         l('func Ext() *x.Extension {')
         l('    return _ext')
         l('}')
 
 def go_close(self):
     # handle errors
+    _ns = get_namespace()
     global error_types
     global x_prefix
     if len(error_types) > 0:
-        l("// x_prefix is %s", x_prefix)
-        l("var readErrorFuncMap = make(map[uint8]func(r *%sReader) %sError)", x_prefix, x_prefix)
+        l("var readErrorFuncMap = make(map[uint8]%sReadErrorFunc, %d)", x_prefix, len(error_types))
         l("func init() {")
         for error_type in error_types:
             l("readErrorFuncMap[%sCode] = read%s", error_type, error_type)
         
+        # new ext
+        if _ns.is_ext:
+            l('_ext = %sNewExtension("%s", %d, readErrorFuncMap)', x_prefix, _ns.ext_xname,
+             max_error_code)
         l("}") # end func init
+    else:
+        l("func init() {")
+        l('_ext = %sNewExtension("%s", 0, nil)', x_prefix, _ns.ext_xname)
+        l("}")
+
 
     # write source file
     global args
@@ -132,11 +142,14 @@ def define_go_event_new_func(go_type):
     l('}')
 
 def go_error(self, name):
+    global max_error_code
     type_name = get_type_name(name) + 'Error'
     code_name = type_name + "Code"
-    code = self.opcodes[name]
-    l('const %s = %d', code_name, int(code))
+    code = int(self.opcodes[name])
+    l('const %s = %d', code_name, code)
     error_types.append(type_name)
+    if code > max_error_code:
+        max_error_code = code
 
 output = {
     'open': go_open,
