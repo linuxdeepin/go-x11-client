@@ -548,23 +548,23 @@ func (c *Conn) SetWorkarea(vals []WorkareaGeometry) {
  *    _NET_SUPPORTING_WM_CHECK
  */
 
-func (c *Conn) GetSupportingWMCheck(window x.Window) GetWindowCookie {
-	cookie := x.GetProperty(c.conn, false, window,
+func (c *Conn) GetSupportingWMCheck() GetWindowCookie {
+	cookie := x.GetProperty(c.conn, false, c.GetRootWin(),
 		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
-func (c *Conn) SetSupportingWMCheckChecked(window x.Window, val x.Window) x.VoidCookie {
+func (c *Conn) SetSupportingWMCheckChecked(val x.Window) x.VoidCookie {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
-	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, window,
+	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
 		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWindow, 32, w.Bytes())
 }
 
-func (c *Conn) SetSupportingWMCheck(window x.Window, val x.Window) {
+func (c *Conn) SetSupportingWMCheck(val x.Window) {
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
-	x.ChangeProperty(c.conn, x.PropModeReplace, window,
+	x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
 		c.GetAtom("_NET_SUPPORTING_WM_CHECK"), x.AtomWindow, 32, w.Bytes())
 }
 

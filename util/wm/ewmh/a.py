@@ -462,7 +462,7 @@ def main():
 
     #> _NET_SUPPORTING_WM_CHECK
     do_header('_NET_SUPPORTING_WM_CHECK')
-    DO_SINGLE_VALUE('SupportingWMCheck', '_NET_SUPPORTING_WM_CHECK',
+    DO_ROOT_SINGLE_VALUE('SupportingWMCheck', '_NET_SUPPORTING_WM_CHECK',
                     'x.AtomWindow', 'x.Window', 'Window')
 
     #>  _NET_VIRTUAL_ROOTS

@@ -69,7 +69,7 @@ func (c *Conn) dial(display string) error {
 		}
 	}
 
-	display = display[colonIdx+1 : len(display)]
+	display = display[colonIdx+1:]
 	if len(display) == 0 {
 		return errors.New("bad display string: " + display0)
 	}
@@ -89,7 +89,7 @@ func (c *Conn) dial(display string) error {
 		return errors.New("bad display string: " + display0)
 	}
 
-	if len(scr) != 0 {
+	if scr != "" {
 		c.ScreenNumber, err = strconv.Atoi(scr)
 		if err != nil {
 			return errors.New("bad display string: " + display0)
