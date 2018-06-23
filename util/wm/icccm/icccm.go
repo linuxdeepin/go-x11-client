@@ -31,8 +31,8 @@ func getWindowFromReply(r *x.GetPropertyReply) (x.Window, error) {
 
 type GetWindowCookie x.GetPropertyCookie
 
-func (cookie GetWindowCookie) Reply(c *Conn) (x.Window, error) {
-	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
+func (cookie GetWindowCookie) Reply(c *x.Conn) (x.Window, error) {
+	reply, err := x.GetPropertyCookie(cookie).Reply(c)
 	if err != nil {
 		return 0, err
 	}
@@ -57,8 +57,8 @@ func getWindowsFromReply(r *x.GetPropertyReply) ([]x.Window, error) {
 
 type GetWindowsCookie x.GetPropertyCookie
 
-func (cookie GetWindowsCookie) Reply(c *Conn) ([]x.Window, error) {
-	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
+func (cookie GetWindowsCookie) Reply(c *x.Conn) ([]x.Window, error) {
+	reply, err := x.GetPropertyCookie(cookie).Reply(c)
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +83,8 @@ func getAtomsFromReply(r *x.GetPropertyReply) ([]x.Atom, error) {
 
 type GetAtomsCookie x.GetPropertyCookie
 
-func (cookie GetAtomsCookie) Reply(c *Conn) ([]x.Atom, error) {
-	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
+func (cookie GetAtomsCookie) Reply(c *x.Conn) ([]x.Atom, error) {
+	reply, err := x.GetPropertyCookie(cookie).Reply(c)
 	if err != nil {
 		return nil, err
 	}
@@ -95,44 +95,33 @@ func (cookie GetAtomsCookie) Reply(c *Conn) ([]x.Atom, error) {
 }
 
 /* WM_NAME */
-func (c *Conn) GetWMName(window x.Window) GetTextCookie {
-	return c.getTextProperty(window, x.AtomWMName)
-}
-
-func (c *Conn) GetWMNameUnchecked(window x.Window) GetTextCookie {
-	return c.getTextPropertyUnchecked(window, x.AtomWMName)
+func GetWMName(c *x.Conn, window x.Window) GetTextCookie {
+	return getTextProperty(c, window, x.AtomWMName)
 }
 
 /* WM_ICON_NAME */
-func (c *Conn) GetWMIconName(window x.Window) GetTextCookie {
-	return c.getTextProperty(window, x.AtomWMIconName)
-}
-
-func (c *Conn) GetWMIconNameUnchecked(window x.Window) GetTextCookie {
-	return c.getTextPropertyUnchecked(window, x.AtomWMIconName)
+func GetWMIconName(c *x.Conn, window x.Window) GetTextCookie {
+	return getTextProperty(c, window, x.AtomWMIconName)
 }
 
 /* WM_COLORMAP_WINDOWS */
-func (c *Conn) GetWMColormapWindows(window x.Window) GetWindowsCookie {
-	cookie := x.GetProperty(c.conn, false, window, c.GetAtom("WM_COLORMAP_WINDOWS"),
+func GetWMColormapWindows(c *x.Conn, window x.Window) GetWindowsCookie {
+	atomWMColormapWindows, _ := c.GetAtom("WM_COLORMAP_WINDOWS")
+	cookie := x.GetProperty(c, false, window, atomWMColormapWindows,
 		x.AtomWindow, 0, getPropertyMaxLength)
 	return GetWindowsCookie(cookie)
 }
 
 /* WM_CLIENT_MACHINE  */
-func (c *Conn) GetWMClientMachine(window x.Window) GetTextCookie {
-	return c.getTextProperty(window, x.AtomWMClientMachine)
-}
-
-func (c *Conn) GetWMClientMachineUnchecked(window x.Window) GetTextCookie {
-	return c.getTextPropertyUnchecked(window, x.AtomWMClientMachine)
+func GetWMClientMachine(c *x.Conn, window x.Window) GetTextCookie {
+	return getTextProperty(c, window, x.AtomWMClientMachine)
 }
 
 /* WM_CLASS */
 type GetWMClassCookie x.GetPropertyCookie
 
-func (cookie GetWMClassCookie) Reply(c *Conn) (WMClass, error) {
-	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
+func (cookie GetWMClassCookie) Reply(c *x.Conn) (WMClass, error) {
+	reply, err := x.GetPropertyCookie(cookie).Reply(c)
 	if err != nil {
 		return WMClass{}, err
 	}
@@ -180,14 +169,14 @@ type WMClass struct {
 	Class, Instance string
 }
 
-func (c *Conn) GetWMClass(window x.Window) GetWMClassCookie {
-	cookie := x.GetProperty(c.conn, false, window, x.AtomWMClass, x.AtomString, 0, 2048)
+func GetWMClass(c *x.Conn, window x.Window) GetWMClassCookie {
+	cookie := x.GetProperty(c, false, window, x.AtomWMClass, x.AtomString, 0, 2048)
 	return GetWMClassCookie(cookie)
 }
 
 /* WM_TRANSIENT_FOR */
-func (c *Conn) GetWMTransientFor(window x.Window) GetWindowCookie {
-	cookie := x.GetProperty(c.conn, false, window, x.AtomWMTransientFor, x.AtomWindow, 0, 1)
+func GetWMTransientFor(c *x.Conn, window x.Window) GetWindowCookie {
+	cookie := x.GetProperty(c, false, window, x.AtomWMTransientFor, x.AtomWindow, 0, 1)
 	return GetWindowCookie(cookie)
 }
 
@@ -250,8 +239,8 @@ func (flags SizeHintsFlags) String() string {
 
 type GetWMSizeHintsCookie x.GetPropertyCookie
 
-func (cookie GetWMSizeHintsCookie) Reply(c *Conn) (*WMSizeHints, error) {
-	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
+func (cookie GetWMSizeHintsCookie) Reply(c *x.Conn) (*WMSizeHints, error) {
+	reply, err := x.GetPropertyCookie(cookie).Reply(c)
 	if err != nil {
 		return nil, err
 	}
@@ -305,8 +294,8 @@ func getWMSizeHintsFromReply(reply *x.GetPropertyReply) (*WMSizeHints, error) {
 const wmSizeHintsElements = 18
 
 /* WM_NORMAL_HINTS */
-func (c *Conn) GetWMNormalHints(window x.Window) GetWMSizeHintsCookie {
-	cookie := x.GetProperty(c.conn, false, window, x.AtomWMNormalHints, x.AtomWMSizeHints, 0, wmSizeHintsElements)
+func GetWMNormalHints(c *x.Conn, window x.Window) GetWMSizeHintsCookie {
+	cookie := x.GetProperty(c, false, window, x.AtomWMNormalHints, x.AtomWMSizeHints, 0, wmSizeHintsElements)
 	return GetWMSizeHintsCookie(cookie)
 }
 
@@ -361,8 +350,8 @@ const wmHintsElements = 9
 
 type GetWMHintsCookie x.GetPropertyCookie
 
-func (cookie GetWMHintsCookie) Reply(c *Conn) (*WMHints, error) {
-	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
+func (cookie GetWMHintsCookie) Reply(c *x.Conn) (*WMHints, error) {
+	reply, err := x.GetPropertyCookie(cookie).Reply(c)
 	if err != nil {
 		return nil, err
 	}
@@ -396,15 +385,16 @@ func getWMHintsFromReply(reply *x.GetPropertyReply) (*WMHints, error) {
 	return &v, nil
 }
 
-func (c *Conn) GetWMHints(window x.Window) GetWMHintsCookie {
-	cookie := x.GetProperty(c.conn, false, window, x.AtomWMHints, x.AtomWMHints,
+func GetWMHints(c *x.Conn, window x.Window) GetWMHintsCookie {
+	cookie := x.GetProperty(c, false, window, x.AtomWMHints, x.AtomWMHints,
 		0, wmHintsElements)
 	return GetWMHintsCookie(cookie)
 }
 
 /* WM_PROTOCOLS */
-func (c *Conn) GetWMProtocols(window x.Window) GetAtomsCookie {
-	cookie := x.GetProperty(c.conn, false, window, c.GetAtom("WM_PROTOCOLS"), x.AtomAtom,
+func GetWMProtocols(c *x.Conn, window x.Window) GetAtomsCookie {
+	atomWMProtocols, _ := c.GetAtom("WM_PROTOCOLS")
+	cookie := x.GetProperty(c, false, window, atomWMProtocols, x.AtomAtom,
 		0, getPropertyMaxLength)
 	return GetAtomsCookie(cookie)
 }
@@ -425,8 +415,8 @@ const (
 
 type GetWMStateCookie x.GetPropertyCookie
 
-func (cookie GetWMStateCookie) Reply(c *Conn) (WMState, error) {
-	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
+func (cookie GetWMStateCookie) Reply(c *x.Conn) (WMState, error) {
+	reply, err := x.GetPropertyCookie(cookie).Reply(c)
 	if err != nil {
 		return WMState{}, err
 	}
@@ -449,14 +439,14 @@ func getWMStateFromReply(reply *x.GetPropertyReply) (WMState, error) {
 	return v, nil
 }
 
-func (c *Conn) GetWMState(window x.Window) GetWMStateCookie {
-	atomWMState := c.GetAtom("WM_STATE")
-	cookie := x.GetProperty(c.conn, false, window, atomWMState, atomWMState,
+func GetWMState(c *x.Conn, window x.Window) GetWMStateCookie {
+	atomWMState, _ := c.GetAtom("WM_STATE")
+	cookie := x.GetProperty(c, false, window, atomWMState, atomWMState,
 		0, wmStateElements)
 	return GetWMStateCookie(cookie)
 }
 
-func (c *Conn) sendClientMessage(win, dest x.Window, msgType x.Atom, pArray *[5]uint32) x.VoidCookie {
+func sendClientMessage(c *x.Conn, win, dest x.Window, msgType x.Atom, pArray *[5]uint32) x.VoidCookie {
 	var data x.ClientMessageData
 	data.SetData32(pArray)
 	event := x.ClientMessageEvent{
@@ -468,12 +458,14 @@ func (c *Conn) sendClientMessage(win, dest x.Window, msgType x.Atom, pArray *[5]
 	w := x.NewWriter()
 	x.WriteClientMessageEvent(w, &event)
 	const evMask = x.EventMaskSubstructureNotify | x.EventMaskSubstructureRedirect
-	return x.SendEventChecked(c.conn, false, dest, evMask, w.Bytes())
+	return x.SendEventChecked(c, false, dest, evMask, w.Bytes())
 }
 
-func (c *Conn) RequestChangeWMState(window x.Window, state uint32) x.VoidCookie {
+func RequestChangeWMState(c *x.Conn, window x.Window, state uint32) x.VoidCookie {
+	atomWMChangeState, _ := c.GetAtom("WM_CHANGE_STATE")
+	root := c.GetDefaultScreen().Root
 	array := [5]uint32{state}
-	return c.sendClientMessage(window, c.GetRootWin(), c.GetAtom("WM_CHANGE_STATE"), &array)
+	return sendClientMessage(c, window, root, atomWMChangeState, &array)
 }
 
 /* WM_ICON_SIZE */
@@ -487,8 +479,8 @@ const wmIconSizeElements = 6
 
 type GetWMIconSizeCookie x.GetPropertyCookie
 
-func (cookie GetWMIconSizeCookie) Reply(c *Conn) (*WMIconSize, error) {
-	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
+func (cookie GetWMIconSizeCookie) Reply(c *x.Conn) (*WMIconSize, error) {
+	reply, err := x.GetPropertyCookie(cookie).Reply(c)
 	if err != nil {
 		return nil, err
 	}
@@ -515,7 +507,8 @@ func getWMIconSizeFromReply(reply *x.GetPropertyReply) (*WMIconSize, error) {
 	return &v, nil
 }
 
-func (c *Conn) GetWMIconSize() GetWMIconSizeCookie {
-	cookie := x.GetProperty(c.conn, false, c.GetRootWin(), x.AtomWMIconSize, x.AtomCardinal, 0, wmIconSizeElements)
+func GetWMIconSize(c *x.Conn) GetWMIconSizeCookie {
+	root := c.GetDefaultScreen().Root
+	cookie := x.GetProperty(c, false, root, x.AtomWMIconSize, x.AtomCardinal, 0, wmIconSizeElements)
 	return GetWMIconSizeCookie(cookie)
 }

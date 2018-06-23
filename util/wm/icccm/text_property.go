@@ -31,18 +31,13 @@ func (tp *TextProperty) GetStr() (string, error) {
 	return convertLatin1ToUTF8(tp.Value)
 }
 
-func (c *Conn) getTextProperty(window x.Window, property x.Atom) GetTextCookie {
-	cookie := x.GetProperty(c.conn, false, window, property, x.AtomAny, 0, getPropertyMaxLength)
+func getTextProperty(c *x.Conn, window x.Window, property x.Atom) GetTextCookie {
+	cookie := x.GetProperty(c, false, window, property, x.AtomAny, 0, getPropertyMaxLength)
 	return GetTextCookie(cookie)
 }
 
-func (c *Conn) getTextPropertyUnchecked(window x.Window, property x.Atom) GetTextCookie {
-	cookie := x.GetProperty(c.conn, false, window, property, x.AtomAny, 0, getPropertyMaxLength)
-	return GetTextCookie(cookie)
-}
-
-func (cookie GetTextCookie) Reply(c *Conn) (TextProperty, error) {
-	reply, err := x.GetPropertyCookie(cookie).Reply(c.conn)
+func (cookie GetTextCookie) Reply(c *x.Conn) (TextProperty, error) {
+	reply, err := x.GetPropertyCookie(cookie).Reply(c)
 	if err != nil {
 		return TextProperty{}, err
 	}

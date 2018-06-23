@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	x "github.com/linuxdeepin/go-x11-client"
+	"github.com/linuxdeepin/go-x11-client"
 )
 
 const LENGTH_MAX = 0xFFFF
@@ -20,6 +20,11 @@ const (
 	// pagers and other clients that represent direct user actions
 	ClientSourceOther
 )
+
+func getAtom(c *x.Conn, name string) x.Atom {
+	atom, _ := c.GetAtom(name)
+	return atom
+}
 
 func getBooleanFromReply(r *x.GetPropertyReply) (bool, error) {
 	num, err := getCardinalFromReply(r)
@@ -106,7 +111,7 @@ func getIcons(p []byte) ([]WMIcon, error) {
 	return icons, nil
 }
 
-func (c *Conn) sendClientMessage(win, dest x.Window, msgType x.Atom, pArray *[5]uint32) x.VoidCookie {
+func sendClientMessage(c *x.Conn, win, dest x.Window, msgType x.Atom, pArray *[5]uint32) x.VoidCookie {
 	var data x.ClientMessageData
 	data.SetData32(pArray)
 	event := x.ClientMessageEvent{
@@ -118,90 +123,98 @@ func (c *Conn) sendClientMessage(win, dest x.Window, msgType x.Atom, pArray *[5]
 	w := x.NewWriter()
 	x.WriteClientMessageEvent(w, &event)
 	const evMask = x.EventMaskSubstructureNotify | x.EventMaskSubstructureRedirect
-	return x.SendEventChecked(c.conn, false, dest, evMask, w.Bytes())
+	return x.SendEventChecked(c, false, dest, evMask, w.Bytes())
 }
 
 /**
  *    _NET_DESKTOP_GEOMETRY
  */
 
-func (c *Conn) RequestChangeDesktopGeometry(geo DesktopGeometry) x.VoidCookie {
+func RequestChangeDesktopGeometry(c *x.Conn, geo DesktopGeometry) x.VoidCookie {
 	array := [5]uint32{
 		geo.Width,
 		geo.Height,
 	}
-	return c.sendClientMessage(c.GetRootWin(), c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_GEOMETRY"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetDesktopGeometry, _ := c.GetAtom("_NET_DESKTOP_GEOMETRY")
+	return sendClientMessage(c, root, root, atomNetDesktopGeometry, &array)
 }
 
 /**
  *    _NET_DESKTOP_VIEWPORT
  */
 
-func (c *Conn) RequestChangeDessktopViewport(corner ViewportLeftTopCorner) x.VoidCookie {
+func RequestChangeDesktopViewport(c *x.Conn, corner ViewportLeftTopCorner) x.VoidCookie {
 	array := [5]uint32{
 		corner.X,
 		corner.Y,
 	}
-	return c.sendClientMessage(c.GetRootWin(), c.GetRootWin(),
-		c.GetAtom("_NET_DESKTOP_VIEWPORT"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetDesktopViewport, _ := c.GetAtom("_NET_DESKTOP_VIEWPORT")
+	return sendClientMessage(c, root, root, atomNetDesktopViewport, &array)
 }
 
 /**
  *    _NET_CURRENT_DESKTOP
  */
 
-func (c *Conn) RequestChangeCurrentDestkop(desktop uint32, timestamp x.Timestamp) x.VoidCookie {
+func RequestChangeCurrentDesktop(c *x.Conn, desktop uint32, timestamp x.Timestamp) x.VoidCookie {
 	array := [5]uint32{
 		desktop,
 		uint32(timestamp),
 	}
-	return c.sendClientMessage(c.GetRootWin(), c.GetRootWin(),
-		c.GetAtom("_NET_CURRENT_DESKTOP"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetCurrentDesktop, _ := c.GetAtom("_NET_CURRENT_DESKTOP")
+	return sendClientMessage(c, root, root, atomNetCurrentDesktop, &array)
 }
 
 /**
  *    _NET_ACTIVE_WINDOW
  */
 
-func (c *Conn) RequestChangeActiveWindow(windowToActivate x.Window, source ClientSource, timestamp x.Timestamp,
+func RequestChangeActiveWindow(c *x.Conn, windowToActivate x.Window, source ClientSource, timestamp x.Timestamp,
 	currentActiveWindow x.Window) x.VoidCookie {
 	array := [5]uint32{
 		uint32(source),
 		uint32(timestamp),
 		uint32(currentActiveWindow),
 	}
-	return c.sendClientMessage(windowToActivate, c.GetRootWin(),
-		c.GetAtom("_NET_ACTIVE_WINDOW"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetActivewindow, _ := c.GetAtom("_NET_ACTIVE_WINDOW")
+	return sendClientMessage(c, windowToActivate, root, atomNetActivewindow, &array)
 }
 
 /**
  *    _NET_SHOWING_DESKTOP
  */
 
-func (c *Conn) SetShowingDesktopChecked(show bool) x.VoidCookie {
+func SetShowingDesktopChecked(c *x.Conn, show bool) x.VoidCookie {
 	val := uint32(0)
 	if show {
 		val = 1
 	}
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
-	return x.ChangePropertyChecked(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCardinal, 32, w.Bytes())
+	root := c.GetDefaultScreen().Root
+	atomNetShowingDesktop, _ := c.GetAtom("_NET_SHOWING_DESKTOP")
+	return x.ChangePropertyChecked(c, x.PropModeReplace, root, atomNetShowingDesktop,
+		x.AtomCardinal, 32, w.Bytes())
 }
 
-func (c *Conn) SetShowingDesktop(show bool) {
+func SetShowingDesktop(c *x.Conn, show bool) {
 	val := uint32(0)
 	if show {
 		val = 1
 	}
 	w := x.NewWriter()
 	w.Write4b(uint32(val))
-	x.ChangeProperty(c.conn, x.PropModeReplace, c.GetRootWin(),
-		c.GetAtom("_NET_SHOWING_DESKTOP"), x.AtomCardinal, 32, w.Bytes())
+	root := c.GetDefaultScreen().Root
+	atomNetShowingDesktop, _ := c.GetAtom("_NET_SHOWING_DESKTOP")
+	x.ChangeProperty(c, x.PropModeReplace, root, atomNetShowingDesktop, x.AtomCardinal,
+		32, w.Bytes())
 }
 
-func (c *Conn) RequestChangeShowingDesktop(show bool) x.VoidCookie {
+func RequestChangeShowingDesktop(c *x.Conn, show bool) x.VoidCookie {
 	val := uint32(0)
 	if show {
 		val = 1
@@ -209,21 +222,23 @@ func (c *Conn) RequestChangeShowingDesktop(show bool) x.VoidCookie {
 	array := [5]uint32{
 		val,
 	}
-	return c.sendClientMessage(c.GetRootWin(), c.GetRootWin(),
-		c.GetAtom("_NET_SHOWING_DESKTOP"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetShowingDesktop, _ := c.GetAtom("_NET_SHOWING_DESKTOP")
+	return sendClientMessage(c, root, root, atomNetShowingDesktop, &array)
 }
 
 /**
  *    _NET_CLOSE_WINDOW
  */
 
-func (c *Conn) RequestCloseWindow(window x.Window, timestamp x.Timestamp, source ClientSource) x.VoidCookie {
+func RequestCloseWindow(c *x.Conn, window x.Window, timestamp x.Timestamp, source ClientSource) x.VoidCookie {
 	array := [5]uint32{
 		uint32(timestamp),
 		uint32(source),
 	}
-	return c.sendClientMessage(window, c.GetRootWin(),
-		c.GetAtom("_NET_CLOSE_WINDOW"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetCloseWindow, _ := c.GetAtom("_NET_CLOSE_WINDOW")
+	return sendClientMessage(c, window, root, atomNetCloseWindow, &array)
 }
 
 /**
@@ -239,14 +254,15 @@ const (
 	MoveResizeWindowHeight
 )
 
-func (c *Conn) RequestMoveResizeWindow(window x.Window, gravity uint32, source ClientSource, flags MoveResizeWindowFlags,
+func RequestMoveResizeWindow(c *x.Conn, window x.Window, gravity uint32, source ClientSource, flags MoveResizeWindowFlags,
 	x, y, width, height uint32) x.VoidCookie {
 	array := [5]uint32{
 		gravity | uint32(flags) | (uint32(source) << 12),
 		x, y, width, height,
 	}
-	return c.sendClientMessage(window, c.GetRootWin(),
-		c.GetAtom("_NET_MOVERESIZE_WINDOW"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetMoveResizeWindow, _ := c.GetAtom("_NET_MOVERESIZE_WINDOW")
+	return sendClientMessage(c, window, root, atomNetMoveResizeWindow, &array)
 }
 
 /**
@@ -270,7 +286,7 @@ const (
 	MoveResizeCancel
 )
 
-func (c *Conn) RequestWMMoveResize(window x.Window, xRoot, yRoot uint32, direction MoveResizeDirection,
+func RequestWMMoveResize(c *x.Conn, window x.Window, xRoot, yRoot uint32, direction MoveResizeDirection,
 	button uint32, source ClientSource) x.VoidCookie {
 	array := [5]uint32{
 		xRoot, yRoot,
@@ -278,33 +294,37 @@ func (c *Conn) RequestWMMoveResize(window x.Window, xRoot, yRoot uint32, directi
 		button,
 		uint32(source),
 	}
-	return c.sendClientMessage(window, c.GetRootWin(),
-		c.GetAtom("_NET_WM_MOVERESIZE"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetWMMoveResize, _ := c.GetAtom("_NET_WM_MOVERESIZE")
+	return sendClientMessage(c, window, root, atomNetWMMoveResize, &array)
 }
 
 /**
  *    _NET_RESTACK_WINDOW
  */
 
-func (c *Conn) RequestRestackWindow(window, siblingWindow x.Window, stackMode uint32) x.VoidCookie {
+func RequestRestackWindow(c *x.Conn, window, siblingWindow x.Window, stackMode uint32) x.VoidCookie {
 	array := [5]uint32{
 		2,
 		uint32(siblingWindow),
 		stackMode,
 	}
-	return c.sendClientMessage(window, c.GetRootWin(),
-		c.GetAtom("_NET_RESTACK_WINDOW"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetRestackWindow, _ := c.GetAtom("_NET_RESTACK_WINDOW")
+	return sendClientMessage(c, window, root, atomNetRestackWindow, &array)
 }
 
 /**
  *    _NET_WM_DESKTOP
  */
-func (c *Conn) RequestChangeWMDesktop(window x.Window, desktop uint32, source ClientSource) x.VoidCookie {
+func RequestChangeWMDesktop(c *x.Conn, window x.Window, desktop uint32, source ClientSource) x.VoidCookie {
 	array := [5]uint32{
 		desktop,
 		uint32(source),
 	}
-	return c.sendClientMessage(window, c.GetRootWin(), c.GetAtom("_NET_WM_DESKTOP"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetWMDesktop, _ := c.GetAtom("_NET_WM_DESKTOP")
+	return sendClientMessage(c, window, root, atomNetWMDesktop, &array)
 }
 
 /**
@@ -319,7 +339,7 @@ const (
 	WMStateToggle
 )
 
-func (c *Conn) RequestChangeWMState(window x.Window, action WMStateAction, firstProperty, secondProperty x.Atom,
+func RequestChangeWMState(c *x.Conn, window x.Window, action WMStateAction, firstProperty, secondProperty x.Atom,
 	source ClientSource) x.VoidCookie {
 	array := [5]uint32{
 		uint32(action),
@@ -327,20 +347,24 @@ func (c *Conn) RequestChangeWMState(window x.Window, action WMStateAction, first
 		uint32(secondProperty),
 		uint32(source),
 	}
-	return c.sendClientMessage(window, c.GetRootWin(), c.GetAtom("_NET_WM_STATE"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetWMState, _ := c.GetAtom("_NET_WM_STATE")
+	return sendClientMessage(c, window, root, atomNetWMState, &array)
 }
 
 /*
  *    _NET_WM_PING
  */
 
-func (c *Conn) SendWMPing(window x.Window, timestamp x.Timestamp) x.VoidCookie {
+func SendWMPing(c *x.Conn, window x.Window, timestamp x.Timestamp) x.VoidCookie {
+	atomNetWMPing, _ := c.GetAtom("_NET_WM_PING")
 	array := [5]uint32{
-		uint32(c.GetAtom("_NET_WM_PING")),
+		uint32(atomNetWMPing),
 		uint32(timestamp),
 		uint32(window),
 	}
-	return c.sendClientMessage(window, window, c.GetAtom("WM_PROTOCOLS"), &array)
+	atomWMProtocols, _ := c.GetAtom("WM_PROTOCOLS")
+	return sendClientMessage(c, window, window, atomWMProtocols, &array)
 }
 
 /*
@@ -362,20 +386,22 @@ func NewWMSyncRequestCounter(val uint64) WMSyncRequestCounter {
 	}
 }
 
-func (c *Conn) SendWMSyncRequest(window x.Window, timestamp x.Timestamp, counter WMSyncRequestCounter) x.VoidCookie {
+func SendWMSyncRequest(c *x.Conn, window x.Window, timestamp x.Timestamp, counter WMSyncRequestCounter) x.VoidCookie {
+	atomNetWMSyncRequest, _ := c.GetAtom("_NET_WM_SYNC_REQUEST")
 	array := [5]uint32{
-		uint32(c.GetAtom("_NET_WM_SYNC_REQUEST")),
+		uint32(atomNetWMSyncRequest),
 		uint32(timestamp),
 		counter.Low,
 		counter.High,
 	}
-	return c.sendClientMessage(window, window, c.GetAtom("WM_PROTOCOLS"), &array)
+	atomWMProtocols, _ := c.GetAtom("WM_PROTOCOLS")
+	return sendClientMessage(c, window, window, atomWMProtocols, &array)
 }
 
 /*
  *    _NET_WM_FULLSCREEN_MONITORS
  */
-func (c *Conn) RequestChangeWMFullscreenMonitors(window x.Window, edges WMFullscreenMonitors,
+func RequestChangeWMFullscreenMonitors(c *x.Conn, window x.Window, edges WMFullscreenMonitors,
 	source ClientSource) x.VoidCookie {
 	array := [5]uint32{
 		edges.Top,
@@ -384,5 +410,7 @@ func (c *Conn) RequestChangeWMFullscreenMonitors(window x.Window, edges WMFullsc
 		edges.Right,
 		uint32(source),
 	}
-	return c.sendClientMessage(window, c.GetRootWin(), c.GetAtom("_NET_WM_FULLSCREEN_MONITORS"), &array)
+	root := c.GetDefaultScreen().Root
+	atomNetWMFullscreenMonitors, _ := c.GetAtom("_NET_WM_FULLSCREEN_MONITORS")
+	return sendClientMessage(c, window, root, atomNetWMFullscreenMonitors, &array)
 }
