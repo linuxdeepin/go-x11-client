@@ -25,7 +25,7 @@ func NewConnDisplay(display string) (*Conn, error) {
 	c.bufReader = bufio.NewReader(c.conn)
 	c.in = newIn()
 	c.out = newOut(c.conn)
-	c.xidGen = newXidGenerator(c.setup.ResourceIdBase, c.setup.ResourceIdMask)
+	c.ridAllocator.init(c.setup.ResourceIdBase, c.setup.ResourceIdMask)
 	go c.readLoop()
 	return c, nil
 }

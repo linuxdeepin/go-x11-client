@@ -36,7 +36,7 @@ func getConn(t *testing.T) *Conn {
 func TestCreateWindow(t *testing.T) {
 	c := getConn(t)
 
-	xid, err := c.GenerateID()
+	xid, err := c.AllocID()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func TestCreateWindow(t *testing.T) {
 func TestDestroySubwindows(t *testing.T) {
 	c := getConn(t)
 
-	xid, err := c.GenerateID()
+	xid, err := c.AllocID()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func TestDestroySubwindows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	xid2, err := c.GenerateID()
+	xid2, err := c.AllocID()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,7 +108,7 @@ func TestDestroySubwindows(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	xid3, err := c.GenerateID()
+	xid3, err := c.AllocID()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,7 +139,7 @@ func TestDestroySubwindows(t *testing.T) {
 func TestReparentWindow(t *testing.T) {
 	c := getConn(t)
 
-	xid, err := c.GenerateID()
+	xid, err := c.AllocID()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,7 +153,7 @@ func TestReparentWindow(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	xid2, err := c.GenerateID()
+	xid2, err := c.AllocID()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -264,7 +264,7 @@ func TestGetProperty(t *testing.T) {
 
 func TestChangeProperty(t *testing.T) {
 	c := getConn(t)
-	xid, err := c.GenerateID()
+	xid, err := c.AllocID()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -520,4 +520,46 @@ func TestSetScreenSaver(t *testing.T) {
 	assert.Equal(t, uint16(0), reply.Interval)
 	assert.Equal(t, uint8(BlankingNotPreferred), reply.PreferBlanking)
 	assert.Equal(t, uint8(ExposuresNotAllowed), reply.AllowExposures)
+}
+
+func TestConn_AllocID(t *testing.T) {
+	c := getConn(t)
+	const length = 10000
+	xidList := make([]uint32, length)
+	for i := 0; i < length; i++ {
+		xid, err := c.AllocID()
+		if err != nil {
+			t.Fatal(err)
+		}
+		xidList[i] = xid
+	}
+	for _, xid := range xidList {
+		err := c.FreeID(xid)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	err := c.FreeID(0)
+	assert.NotNil(t, err)
+
+	root := c.GetDefaultScreen().Root
+	err = c.FreeID(uint32(root))
+	assert.NotNil(t, err)
+
+	setup := c.GetSetup()
+	err = c.FreeID((setup.ResourceIdBase | setup.ResourceIdMask) + 1)
+	assert.NotNil(t, err)
+
+	xid, err := c.AllocID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = c.FreeID(xid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// free xid again
+	err = c.FreeID(xid)
+	assert.NotNil(t, err)
 }

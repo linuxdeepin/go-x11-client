@@ -43,10 +43,10 @@ type Conn struct {
 	in   *in
 	out  *out
 
-	ext         ext
-	xidGen      *xidGenerator
-	atomCache   *AtomCache
-	atomCacheMu sync.Mutex
+	ext          ext
+	ridAllocator resourceIdAllocator
+	atomCache    *AtomCache
+	atomCacheMu  sync.Mutex
 }
 
 func (c *Conn) GetSetup() *Setup {
