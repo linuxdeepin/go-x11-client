@@ -5,11 +5,14 @@ import (
 	"net"
 )
 
-func (c *Conn) Flush() {
-	// TODO: check error
+func (c *Conn) Flush() (err error) {
 	c.ioMu.Lock()
-	c.out.flushTo(c.out.request)
+	err = c.out.flushTo(c.out.request)
 	c.ioMu.Unlock()
+	if err != nil {
+		c.Close()
+	}
+	return
 }
 
 // getInputFocusRequest writes the raw bytes to a buffer.
@@ -59,6 +62,9 @@ func newOut(conn net.Conn) *out {
 }
 
 func (c *Conn) sendRequest(noReply bool, workaround uint, flags uint, data []byte) {
+	if c.isClosed() {
+		return
+	}
 	c.out.request++
 	if !noReply {
 		// has reply
@@ -72,6 +78,7 @@ func (c *Conn) sendRequest(noReply bool, workaround uint, flags uint, data []byt
 	_, err := c.out.write(c.out.request, data)
 	if err != nil {
 		logPrintln("write error:", err)
+		c.Close()
 	}
 }
 
@@ -83,6 +90,10 @@ type ProtocolRequest struct {
 
 // return sequence id
 func (c *Conn) SendRequest(flags uint, data []byte, req *ProtocolRequest) uint64 {
+	if c.isClosed() {
+		return 0
+	}
+
 	// process data auto field
 	// set the major opcode, and the minor opcode for extensions
 	if req.Ext != nil {
@@ -152,17 +163,21 @@ func (o *out) write(request uint64, p []byte) (nn int, err error) {
 	return nn, nil
 }
 
-func (o *out) flushTo(request uint64) {
+func (o *out) flushTo(request uint64) error {
 	if !(request <= o.request) {
 		panic("assert request < o.request failed")
 	}
 
 	if o.requestWritten >= request {
-		return
+		return nil
 	}
 
-	o.flush()
+	err := o.flush()
+	if err != nil {
+		return err
+	}
 	o.requestWritten = o.request
+	return nil
 }
 
 // flush writes any buffered data to the underlying io.Writer.

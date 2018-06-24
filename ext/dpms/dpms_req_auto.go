@@ -15,13 +15,13 @@ func GetVersion(conn *x.Conn, clientMajorVersion, clientMinorVersion uint16) Get
 }
 
 func (cookie GetVersionCookie) Reply(conn *x.Conn) (*GetVersionReply, error) {
-	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
-	if isErr {
-		return nil, conn.NewError(replyBuf)
+	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	if err != nil {
+		return nil, err
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply GetVersionReply
-	err := readGetVersionReply(r, &reply)
+	err = readGetVersionReply(r, &reply)
 	if err != nil {
 		return nil, err
 	}
@@ -41,13 +41,13 @@ func Capable(conn *x.Conn) CapableCookie {
 }
 
 func (cookie CapableCookie) Reply(conn *x.Conn) (*CapableReply, error) {
-	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
-	if isErr {
-		return nil, conn.NewError(replyBuf)
+	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	if err != nil {
+		return nil, err
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply CapableReply
-	err := readCapableReply(r, &reply)
+	err = readCapableReply(r, &reply)
 	if err != nil {
 		return nil, err
 	}
@@ -67,13 +67,13 @@ func GetTimeouts(conn *x.Conn) GetTimeoutsCookie {
 }
 
 func (cookie GetTimeoutsCookie) Reply(conn *x.Conn) (*GetTimeoutsReply, error) {
-	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
-	if isErr {
-		return nil, conn.NewError(replyBuf)
+	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	if err != nil {
+		return nil, err
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply GetTimeoutsReply
-	err := readGetTimeoutsReply(r, &reply)
+	err = readGetTimeoutsReply(r, &reply)
 	if err != nil {
 		return nil, err
 	}
@@ -193,13 +193,13 @@ func Info(conn *x.Conn) InfoCookie {
 }
 
 func (cookie InfoCookie) Reply(conn *x.Conn) (*InfoReply, error) {
-	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
-	if isErr {
-		return nil, conn.NewError(replyBuf)
+	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	if err != nil {
+		return nil, err
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply InfoReply
-	err := readInfoReply(r, &reply)
+	err = readInfoReply(r, &reply)
 	if err != nil {
 		return nil, err
 	}

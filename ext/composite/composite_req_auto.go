@@ -15,13 +15,13 @@ func QueryVersion(conn *x.Conn, majorVersion, minorVersion uint32) QueryVersionC
 }
 
 func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error) {
-	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
-	if isErr {
-		return nil, conn.NewError(replyBuf)
+	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	if err != nil {
+		return nil, err
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply QueryVersionReply
-	err := readQueryVersionReply(r, &reply)
+	err = readQueryVersionReply(r, &reply)
 	if err != nil {
 		return nil, err
 	}

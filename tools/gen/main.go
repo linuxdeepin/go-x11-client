@@ -163,13 +163,13 @@ func main() {
 			// cookie Reply method
 			g.p("\nfunc (cookie %sCookie) Reply(conn *%sConn) (*%sReply, error) {\n",
 				reqFunc.name, xPrefix, reqFunc.name)
-			g.p(`replyBuf, isErr := conn.WaitForReply(uint64(cookie))
-	if isErr {
-		return nil, conn.NewError(replyBuf)
+			g.p(`replyBuf, err := conn.WaitForReply(uint64(cookie))
+	if err != nil {
+		return nil, err
 	}
 	r := %sNewReaderFromData(replyBuf)
 	var reply %sReply
-	err := read%sReply(r, &reply)
+	err = read%sReply(r, &reply)
 	if err != nil {
 		return nil, err
 	}

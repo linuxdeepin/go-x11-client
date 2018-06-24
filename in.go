@@ -207,6 +207,14 @@ func (in *in) removeFinishedReaders() {
 	}
 }
 
+func (in *in) wakeUpAllReaders() {
+	l := in.readers
+	for e := l.Front(); e != nil; e = e.Next() {
+		reader := e.Value.(*ReplyReader)
+		reader.cond.Signal()
+	}
+}
+
 func (in *in) wakeUpNextReader() {
 	if in.readers.Front() != nil {
 		reader := in.readers.Front().Value.(*ReplyReader)

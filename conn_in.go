@@ -51,6 +51,7 @@ func (c *Conn) readLoop() {
 	for {
 		err := c.readPacket()
 		if err != nil {
+			c.Close()
 			return
 		}
 	}
@@ -169,6 +170,11 @@ func (c *Conn) readPacket() error {
 }
 
 func (c *Conn) pollForReply(request uint64) (replyBuf []byte, isErr, stop bool) {
+	if c.isClosed() {
+		stop = true
+		return
+	}
+
 	logPrintln("pollForReply", request)
 	var front *list.Element
 	if request == 0 {
@@ -221,12 +227,17 @@ func (c *Conn) pollForReply(request uint64) (replyBuf []byte, isErr, stop bool) 
 	return
 }
 
-func (c *Conn) waitForReply(request uint64) (replyBuf []byte, isErr bool) {
-	c.out.flushTo(request)
+func (c *Conn) waitForReply(request uint64) (replyBuf []byte, err error) {
+	err = c.out.flushTo(request)
+	if err != nil {
+		c.Close()
+		return nil, err
+	}
 
-	var stop bool
 	cond := sync.NewCond(&c.ioMu)
 	r := c.in.insertNewReader(request, cond)
+	var isErr bool
+	var stop bool
 	for {
 		replyBuf, isErr, stop = c.pollForReply(request)
 		if stop {
@@ -234,16 +245,27 @@ func (c *Conn) waitForReply(request uint64) (replyBuf []byte, isErr bool) {
 		}
 
 		logPrintf("waitForReply reader %d wait\n", request)
-		r.cond.Wait()
+		cond.Wait()
+	}
+	if c.isClosed() {
+		return nil, errConnClosed
 	}
 	c.in.removeReader(r)
 	c.in.wakeUpNextReader()
-	return
+
+	if isErr {
+		return nil, c.NewError(replyBuf)
+	}
+	return replyBuf, nil
 }
 
-func (c *Conn) WaitForReply(request uint64) (replyBuf []byte, isErr bool) {
+func (c *Conn) WaitForReply(request uint64) (replyBuf []byte, err error) {
+	if c.isClosed() {
+		return nil, errConnClosed
+	}
+
 	c.ioMu.Lock()
-	replyBuf, isErr = c.waitForReply(request)
+	replyBuf, err = c.waitForReply(request)
 	c.ioMu.Unlock()
 	return
 }
@@ -251,6 +273,10 @@ func (c *Conn) WaitForReply(request uint64) (replyBuf []byte, isErr bool) {
 type VoidCookie uint64
 
 func (cookie VoidCookie) Check(c *Conn) error {
+	if c.isClosed() {
+		return errConnClosed
+	}
+
 	return c.requestCheck(uint64(cookie))
 }
 
@@ -262,12 +288,11 @@ func (c *Conn) requestCheck(request uint64) error {
 		// send sync request
 		c.sendSync()
 	}
-	replyBuf, isErr := c.waitForReply(request)
+	replyBuf, err := c.waitForReply(request)
 	c.ioMu.Unlock()
 
-	if isErr {
-		return c.NewError(replyBuf)
-
+	if err != nil {
+		return err
 	} else {
 		// if not err, replyBuf must be nil
 		if replyBuf != nil {

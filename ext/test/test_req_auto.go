@@ -15,13 +15,13 @@ func GetVersion(conn *x.Conn, majorVersion uint8, minorVersion uint16) GetVersio
 }
 
 func (cookie GetVersionCookie) Reply(conn *x.Conn) (*GetVersionReply, error) {
-	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
-	if isErr {
-		return nil, conn.NewError(replyBuf)
+	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	if err != nil {
+		return nil, err
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply GetVersionReply
-	err := readGetVersionReply(r, &reply)
+	err = readGetVersionReply(r, &reply)
 	if err != nil {
 		return nil, err
 	}
@@ -41,13 +41,13 @@ func CompareCursor(conn *x.Conn, window x.Window, cursor x.Cursor) CompareCursor
 }
 
 func (cookie CompareCursorCookie) Reply(conn *x.Conn) (*CompareCursorReply, error) {
-	replyBuf, isErr := conn.WaitForReply(uint64(cookie))
-	if isErr {
-		return nil, conn.NewError(replyBuf)
+	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	if err != nil {
+		return nil, err
 	}
 	r := x.NewReaderFromData(replyBuf)
 	var reply CompareCursorReply
-	err := readCompareCursorReply(r, &reply)
+	err = readCompareCursorReply(r, &reply)
 	if err != nil {
 		return nil, err
 	}
