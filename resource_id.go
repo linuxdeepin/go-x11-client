@@ -14,6 +14,10 @@ func (c *Conn) FreeID(rid uint32) error {
 	return c.ridAllocator.free(rid)
 }
 
+func (c *Conn) IDUsedCount() int {
+	return c.ridAllocator.usedCount()
+}
+
 type resourceIdAllocator struct {
 	mu           sync.Mutex
 	base         uint32
@@ -70,4 +74,17 @@ func (ra *resourceIdAllocator) free(rid uint32) error {
 	ra.bitmap.SetBit(ra.bitmap, int(i), 0)
 	ra.allAllocated = false
 	return nil
+}
+
+func (ra *resourceIdAllocator) usedCount() int {
+	ra.mu.Lock()
+	count := 0
+	bitLen := ra.bitmap.BitLen()
+	for i := 0; i < bitLen; i++ {
+		if ra.bitmap.Bit(i) == 1 {
+			count++
+		}
+	}
+	ra.mu.Unlock()
+	return count
 }
