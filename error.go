@@ -65,18 +65,6 @@ func NewGenericError(data []byte) *GenericError {
 	return &v
 }
 
-func NewError(data []byte) Error {
-	genericErr := NewGenericError(data)
-	// TODO:
-	readErrFunc, ok := readErrorFuncMap[genericErr.ErrorCode]
-	if ok {
-		r := NewReaderFromData(data)
-		return readErrFunc(r)
-	} else {
-		return genericErr
-	}
-}
-
 func (c *Conn) NewError(data []byte) Error {
 	genericErr := NewGenericError(data)
 	errCode := genericErr.ErrorCode

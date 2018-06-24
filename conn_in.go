@@ -159,7 +159,7 @@ func (c *Conn) readPacket() error {
 	// not special event
 	if genReply.responseType == ResponseTypeError {
 		// is unchecked error
-		c.in.addError(NewError(buf))
+		c.in.addError(c.NewError(buf))
 	} else {
 		// is event
 		c.in.addEvent(GenericEvent(buf))
@@ -266,7 +266,7 @@ func (c *Conn) requestCheck(request uint64) error {
 	c.ioMu.Unlock()
 
 	if isErr {
-		return NewError(replyBuf)
+		return c.NewError(replyBuf)
 
 	} else {
 		// if not err, replyBuf must be nil
