@@ -185,7 +185,7 @@ type GetOutputInfoReply struct {
 	MmWidth       uint32
 	MmHeight      uint32
 	Connection    uint8
-	SubpixelOrder uint8
+	SubPixelOrder uint8
 	NumPreferred  uint16
 	Crtcs         []Crtc
 	Modes         []Mode
@@ -241,7 +241,7 @@ func readGetOutputInfoReply(r *x.Reader, v *GetOutputInfoReply) error {
 		return r.Err()
 	}
 
-	v.SubpixelOrder = r.Read1b()
+	v.SubPixelOrder = r.Read1b()
 	if r.Err() != nil {
 		return r.Err()
 	}
@@ -576,12 +576,12 @@ func readGetOutputPrimaryReply(r *x.Reader, v *GetOutputPrimaryReply) error {
 }
 
 // #WREQ
-func writeGetOutputProperty(w *x.Writer, output Output, property, type0 x.Atom,
+func writeGetOutputProperty(w *x.Writer, output Output, property, Type x.Atom,
 	longOffset, longLength uint32, delete, pending bool) {
 	w.WritePad(4)
 	w.Write4b(uint32(output))
 	w.Write4b(uint32(property))
-	w.Write4b(uint32(type0))
+	w.Write4b(uint32(Type))
 	w.Write4b(longOffset)
 	w.Write4b(longLength)
 	w.Write1b(x.BoolToUint8(delete))
