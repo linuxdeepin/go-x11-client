@@ -50,6 +50,7 @@ type Conn struct {
 	ridAllocator resourceIdAllocator
 	atomCache    *AtomCache
 	atomCacheMu  sync.Mutex
+	errorCb      func(err Error)
 }
 
 func (c *Conn) GetSetup() *Setup {
@@ -74,8 +75,8 @@ func (c *Conn) Close() {
 	}
 	c.markClosed()
 	c.conn.Close()
-	c.in.close()
 
+	c.in.eventsCond.Signal()
 	go func() {
 		c.ioMu.Lock()
 		c.in.wakeUpAllReaders()
@@ -86,23 +87,19 @@ func (c *Conn) Close() {
 var errConnClosed = errors.New("conn closed")
 
 func (c *Conn) AddEventChan(eventChan chan<- GenericEvent) {
-	if c.isClosed() {
+	if c.isClosed() || eventChan == nil {
 		return
 	}
 	c.in.addEventChan(eventChan)
 }
 
 func (c *Conn) RemoveEventChan(eventChan chan<- GenericEvent) {
+	if eventChan == nil {
+		return
+	}
 	c.in.removeEventChan(eventChan)
 }
 
-func (c *Conn) AddErrorChan(errorChan chan<- Error) {
-	if c.isClosed() {
-		return
-	}
-	c.in.addErrorChan(errorChan)
-}
-
-func (c *Conn) RemoveErrorChan(errorChan chan<- Error) {
-	c.in.removeErrorChan(errorChan)
+func (c *Conn) SetErrorCallback(fn func(err Error)) {
+	c.errorCb = fn
 }

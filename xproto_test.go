@@ -563,3 +563,26 @@ func TestConn_AllocID(t *testing.T) {
 	err = c.FreeID(xid)
 	assert.NotNil(t, err)
 }
+
+// AddEventChan + RemoveEventChan
+func TestConn_AddRemoveEventChan(t *testing.T) {
+	c := getConn(t)
+	// add one
+	ch := make(chan GenericEvent)
+	c.AddEventChan(ch)
+	assert.Len(t, c.in.eventChans, 1)
+
+	// add one
+	ch1 := make(chan GenericEvent)
+	c.AddEventChan(ch1)
+	assert.Len(t, c.in.eventChans, 2)
+
+	// remove one
+	c.RemoveEventChan(ch)
+	assert.Len(t, c.in.eventChans, 1)
+
+	// remove not added
+	ch2 := make(chan GenericEvent)
+	c.RemoveEventChan(ch2)
+	assert.Len(t, c.in.eventChans, 1)
+}

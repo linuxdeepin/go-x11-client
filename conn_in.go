@@ -160,7 +160,9 @@ func (c *Conn) readPacket() error {
 	// not special event
 	if genReply.responseType == ResponseTypeError {
 		// is unchecked error
-		c.in.addError(c.NewError(buf))
+		if c.errorCb != nil {
+			c.errorCb(c.NewError(buf))
+		}
 	} else {
 		// is event
 		c.in.addEvent(GenericEvent(buf))
@@ -300,4 +302,40 @@ func (c *Conn) requestCheck(request uint64) error {
 		}
 	}
 	return nil
+}
+
+func (c *Conn) pollForEvent() (ev GenericEvent) {
+	f := c.in.events.Front()
+	if f != nil {
+		ev = f.Value.(GenericEvent)
+		c.in.events.Remove(f)
+	}
+	return
+}
+
+func (c *Conn) waitForEvent() (ev GenericEvent) {
+	for {
+		if c.isClosed() {
+			return nil
+		}
+		ev = c.pollForEvent()
+		if ev != nil {
+			break
+		}
+		c.in.eventsCond.Wait()
+	}
+	return ev
+}
+
+func (c *Conn) eventSendLoop() {
+	for {
+		c.ioMu.Lock()
+		ev := c.waitForEvent()
+		c.ioMu.Unlock()
+		if ev == nil {
+			c.in.closeEventChans()
+			return
+		}
+		c.in.sendEvent(ev)
+	}
 }

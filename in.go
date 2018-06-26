@@ -2,6 +2,8 @@ package x
 
 import (
 	"container/list"
+	"fmt"
+	"os"
 	"sync"
 )
 
@@ -14,18 +16,21 @@ type in struct {
 	replies        map[uint64]*list.List
 	pendingReplies *list.List
 
-	readers *list.List
+	readers    *list.List
+	events     *list.List
+	eventsCond *sync.Cond
 
 	eventChans []chan<- GenericEvent
-	errorChans []chan<- Error
 	chansMu    sync.Mutex
 }
 
-func newIn() *in {
+func newIn(ioMu *sync.Mutex) *in {
 	in := &in{}
 	in.replies = make(map[uint64]*list.List)
 	in.pendingReplies = list.New()
 	in.readers = list.New()
+	in.events = list.New()
+	in.eventsCond = sync.NewCond(ioMu)
 	return in
 }
 
@@ -40,7 +45,11 @@ func (in *in) addEventChan(eventChan chan<- GenericEvent) {
 		}
 	}
 
-	in.eventChans = append(in.eventChans, eventChan)
+	// COW
+	newEventChans := make([]chan<- GenericEvent, len(in.eventChans)+1)
+	copy(newEventChans, in.eventChans)
+	newEventChans[len(newEventChans)-1] = eventChan
+	in.eventChans = newEventChans
 	in.chansMu.Unlock()
 }
 
@@ -48,99 +57,55 @@ func (in *in) removeEventChan(eventChan chan<- GenericEvent) {
 	in.chansMu.Lock()
 
 	chans := in.eventChans
-	idx := -1
-	for i, ch := range chans {
+	var found bool
+	for _, ch := range chans {
 		if ch == eventChan {
-			idx = i
+			found = true
 			break
 		}
 	}
 
-	if idx == -1 {
+	if !found {
 		// not found
 		in.chansMu.Unlock()
 		return
 	}
 
-	chans[idx] = chans[len(chans)-1]
-	chans[len(chans)-1] = nil
-	chans = chans[:len(chans)-1]
-
-	in.chansMu.Unlock()
-}
-
-func (in *in) addErrorChan(errorChan chan<- Error) {
-	in.chansMu.Lock()
-
-	for _, ch := range in.errorChans {
-		if ch == errorChan {
-			// exist
-			in.chansMu.Unlock()
-			return
+	// COW
+	newEventChans := make([]chan<- GenericEvent, 0, len(in.eventChans)-1)
+	for _, ch := range chans {
+		if ch != eventChan {
+			newEventChans = append(newEventChans, ch)
 		}
 	}
-
-	in.errorChans = append(in.errorChans, errorChan)
-	in.chansMu.Unlock()
-}
-
-func (in *in) removeErrorChan(errorChan chan<- Error) {
-	in.chansMu.Lock()
-
-	chans := in.errorChans
-	idx := -1
-	for i, ch := range chans {
-		if ch == errorChan {
-			idx = i
-			break
-		}
-	}
-
-	if idx == -1 {
-		// not found
-		in.chansMu.Unlock()
-		return
-	}
-
-	chans[idx] = chans[len(chans)-1]
-	chans[len(chans)-1] = nil
-	chans = chans[:len(chans)-1]
-
+	in.eventChans = newEventChans
 	in.chansMu.Unlock()
 }
 
 func (in *in) addEvent(e GenericEvent) {
 	logPrintln("add event", e)
-	in.chansMu.Lock()
+	if in.events.Len() > 0xfff {
+		fmt.Fprintf(os.Stderr, "<warning> too many events are not processed, len: %d\n",
+			in.events.Len())
+	}
+	in.events.PushBack(e)
+	in.eventsCond.Signal()
+}
 
-	for _, ch := range in.eventChans {
+func (in *in) sendEvent(e GenericEvent) {
+	in.chansMu.Lock()
+	eventChans := in.eventChans
+	in.chansMu.Unlock()
+
+	for _, ch := range eventChans {
 		ch <- e
 	}
-
-	in.chansMu.Unlock()
 }
 
-func (in *in) addError(e Error) {
-	in.chansMu.Lock()
-
-	for _, ch := range in.errorChans {
-		select {
-		case ch <- e:
-		default:
-		}
-	}
-
-	in.chansMu.Unlock()
-}
-
-func (in *in) close() {
+func (in *in) closeEventChans() {
 	in.chansMu.Lock()
 
 	for _, ch := range in.eventChans {
-		close(ch)
-	}
-
-	for _, ch := range in.errorChans {
 		close(ch)
 	}
 
