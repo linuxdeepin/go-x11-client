@@ -907,6 +907,11 @@ func readMapNotifyEvent(r *Reader, v *MapNotifyEvent) error {
 		return r.Err()
 	}
 
+	v.Window = Window(r.Read4b())
+	if r.Err() != nil {
+		return r.Err()
+	}
+
 	v.OverrideRedirect = Uint8ToBool(r.Read1b())
 	if r.Err() != nil {
 		return r.Err()
