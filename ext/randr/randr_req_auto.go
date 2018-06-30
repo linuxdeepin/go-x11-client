@@ -132,9 +132,9 @@ func (cookie GetOutputPrimaryCookie) Reply(conn *x.Conn) (*GetOutputPrimaryReply
 	return &reply, nil
 }
 
-func GetOutputProperty(conn *x.Conn, output Output, property, type0 x.Atom, longOffset, longLength uint32, delete, pending bool) GetOutputPropertyCookie {
+func GetOutputProperty(conn *x.Conn, output Output, property, Type x.Atom, longOffset, longLength uint32, delete, pending bool) GetOutputPropertyCookie {
 	w := x.NewWriter()
-	writeGetOutputProperty(w, output, property, type0, longOffset, longLength, delete, pending)
+	writeGetOutputProperty(w, output, property, Type, longOffset, longLength, delete, pending)
 	d := w.Bytes()
 	req := &x.ProtocolRequest{
 		Ext:    _ext,
