@@ -1762,10 +1762,10 @@ type GeGenericEvent struct {
 	Sequence  uint16
 	Length    uint32
 	EventType uint16
+	Data      []byte
 }
 
 func readGeGenericEvent(r *Reader, v *GeGenericEvent) error {
-	// TODO
 	// code
 	r.ReadPad(1)
 	if r.Err() != nil {
@@ -1789,6 +1789,11 @@ func readGeGenericEvent(r *Reader, v *GeGenericEvent) error {
 	}
 
 	v.EventType = r.Read2b()
+	if r.Err() != nil {
+		return r.Err()
+	}
+
+	v.Data = r.ReadBytes(22 + (int(v.Length) * 4))
 	if r.Err() != nil {
 		return r.Err()
 	}

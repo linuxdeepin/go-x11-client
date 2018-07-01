@@ -67,7 +67,8 @@ func (c *Conn) readPacket() error {
 	genReply := NewGenericReply(buf)
 	logPrintf("genReply: %#v\n", genReply)
 
-	if genReply.responseType == ResponseTypeReply && genReply.length > 0 {
+	if (genReply.responseType == ResponseTypeReply ||
+		genReply.responseType == GeGenericEventCode) && genReply.length > 0 {
 		length += int(genReply.length) * 4
 		// grow buf
 		biggerBuf := make([]byte, length)
