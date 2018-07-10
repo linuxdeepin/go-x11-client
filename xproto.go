@@ -2741,6 +2741,15 @@ type Str struct {
 	Value string
 }
 
+func ReadStr(r *Reader) (string, error) {
+	var v Str
+	_, err := readStr(r, &v)
+	if err != nil {
+		return "", err
+	}
+	return v.Value, nil
+}
+
 func readStr(r *Reader, v *Str) (int, error) {
 	nameLen := int(r.Read1b())
 	if r.Err() != nil {
