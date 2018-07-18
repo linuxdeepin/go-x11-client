@@ -74,7 +74,7 @@ func (c *Conn) sendRequest(noReply bool, workaround uint, flags uint, data []byt
 	if workaround != 0 || flags != 0 {
 		c.in.expectReply(c.out.request, workaround, flags)
 	}
-	logPrintln("sendRequest seq:", c.out.request)
+	logPrintf("sendRequest seq: %d, len(data): %d", c.out.request, len(data))
 	_, err := c.out.write(c.out.request, data)
 	if err != nil {
 		logPrintln("write error:", err)
