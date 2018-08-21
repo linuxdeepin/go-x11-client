@@ -2,9 +2,13 @@
 
 export DH_GOLANG_EXCLUDES := tools/gen util/tool/gen-keysymdef
 
+ifeq ($(DEB_BUILD_ARCH),sw_64)
+%:
+	dh $@
+else
 %:
 	dh $@ --buildsystem=golang --with=golang
-
+endif
 
 
 override_dh_auto_clean:
