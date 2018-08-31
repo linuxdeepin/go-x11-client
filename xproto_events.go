@@ -1600,6 +1600,18 @@ func readSelectionNotifyEvent(r *Reader, v *SelectionNotifyEvent) error {
 	return nil
 }
 
+func WriteSelectionNotifyEvent(w *Writer, v *SelectionNotifyEvent) {
+	w.Write1b(SelectionNotifyEventCode)
+	w.WritePad(1)
+	w.Write2b(v.Sequence)
+	w.Write4b(uint32(v.Time))
+	w.Write4b(uint32(v.Requestor))
+	w.Write4b(uint32(v.Selection))
+	w.Write4b(uint32(v.Target))
+	w.Write4b(uint32(v.Property))
+	w.WritePad(8)
+}
+
 type ColormapNotifyEvent struct {
 	Sequence uint16
 	Window   Window
