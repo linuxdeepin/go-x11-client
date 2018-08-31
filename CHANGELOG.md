@@ -1,3 +1,6 @@
+# [0.0.4.1] - 2018-08-31
+*   chore: add makefile for `sw_64`
+
 # [0.0.4] - 2018-07-19
 *   fix: requestCheck method
 *   feat: add ext shm
