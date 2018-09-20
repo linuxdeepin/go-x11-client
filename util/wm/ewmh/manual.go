@@ -3,12 +3,13 @@ package ewmh
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/linuxdeepin/go-x11-client"
 )
 
-const LENGTH_MAX = 0xFFFF
+const LENGTH_MAX = math.MaxUint32
 
 type ClientSource uint32
 
@@ -105,7 +106,7 @@ func getIcons(p []byte) ([]WMIcon, error) {
 				break
 			}
 		} else {
-			return nil, errors.New("bad icon data")
+			break
 		}
 	}
 	return icons, nil
