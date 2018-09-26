@@ -1,3 +1,6 @@
+# [0.0.4.2] - 2018-09-26
+*   fix(wm/ewmh): get icon failed
+
 # [0.0.4.1] - 2018-08-31
 *   chore: add makefile for `sw_64`
 
