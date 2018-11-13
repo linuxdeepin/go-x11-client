@@ -138,6 +138,11 @@ func readSetup(r *Reader, v *Setup) error {
 		return r.Err()
 	}
 
+	r.ReadPad(Pad(int(vendorLen)))
+	if r.Err() != nil {
+		return r.Err()
+	}
+
 	// formats
 	if formatsLen > 0 {
 		v.PixmapFormats = make([]Format, int(formatsLen))
