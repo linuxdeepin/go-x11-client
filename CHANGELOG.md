@@ -1,3 +1,6 @@
+# [0.2.0] - 2018-11-23
+*   fix: readSetup
+
 # [0.1.0] - 2018-10-25
 *   fix(wm/ewmh): get icon failed
 *   feat: add WriteSelectionNotifyEvent
