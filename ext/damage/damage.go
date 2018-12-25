@@ -107,10 +107,12 @@ func readBadDamageError(r *x.Reader) x.Error {
 }
 
 // #WREQ
-func writeQueryVersion(w *x.Writer, majorVersion, minorVersion uint32) {
-	w.WritePad(4)
-	w.Write4b(majorVersion)
-	w.Write4b(minorVersion)
+func encodeQueryVersion(majorVersion, minorVersion uint32) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(majorVersion).
+		Write4b(minorVersion).
+		End()
+	return
 }
 
 type QueryVersionReply struct {
@@ -156,18 +158,22 @@ func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
 }
 
 // #WREQ
-func writeCreate(w *x.Writer, damage Damage, drawable x.Drawable, level uint8) {
-	w.WritePad(4)
-	w.Write4b(uint32(damage))
-	w.Write4b(uint32(drawable))
-	w.Write1b(level)
-	w.WritePad(3)
+func encodeCreate(damage Damage, drawable x.Drawable, level uint8) (b x.RequestBody) {
+	b.AddBlock(3).
+		Write4b(uint32(damage)).
+		Write4b(uint32(drawable)).
+		Write1b(level).
+		WritePad(3).
+		End()
+	return
 }
 
 // #WREQ
-func writeDestroy(w *x.Writer, damage Damage) {
-	w.WritePad(4)
-	w.Write4b(uint32(damage))
+func encodeDestroy(damage Damage) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(damage)).
+		End()
+	return
 }
 
 // #WREQ

@@ -4,7 +4,7 @@ import x "github.com/linuxdeepin/go-x11-client"
 
 // _ns.ext_name: RandR
 const MajorVersion = 1
-const MinorVersion = 5
+const MinorVersion = 6
 
 var _ext *x.Extension
 
@@ -23,6 +23,9 @@ type Output uint32
 
 // simple ('xcb', 'RandR', 'PROVIDER')
 type Provider uint32
+
+// simple ('xcb', 'RandR', 'LEASE')
+type Lease uint32
 
 const BadOutputErrorCode = 0
 const BadCrtcErrorCode = 1
@@ -64,6 +67,7 @@ const (
 	NotifyMaskProviderChange   = 16
 	NotifyMaskProviderProperty = 32
 	NotifyMaskResourceChange   = 64
+	NotifyMaskLease            = 128
 )
 
 const SelectInputOpcode = 4
@@ -232,8 +236,20 @@ const (
 	NotifyProviderChange   = 3
 	NotifyProviderProperty = 4
 	NotifyResourceChange   = 5
+	NotifyLease            = 6
 )
 
+const GetMonitorsOpcode = 42
+
+type GetMonitorsCookie uint64
+
+const SetMonitorOpcode = 43
+const DeleteMonitorOpcode = 44
+const CreateLeaseOpcode = 45
+
+type CreateLeaseCookie uint64
+
+const FreeLeaseOpcode = 46
 const NotifyEventCode = 1
 
 func NewNotifyEvent(data []byte) (*NotifyEvent, error) {
@@ -245,13 +261,6 @@ func NewNotifyEvent(data []byte) (*NotifyEvent, error) {
 	}
 	return &ev, nil
 }
-
-const GetMonitorsOpcode = 42
-
-type GetMonitorsCookie uint64
-
-const SetMonitorOpcode = 43
-const DeleteMonitorOpcode = 44
 
 var readErrorFuncMap = make(map[uint8]x.ReadErrorFunc, 4)
 

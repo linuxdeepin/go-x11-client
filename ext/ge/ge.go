@@ -3,10 +3,12 @@ package ge
 import "github.com/linuxdeepin/go-x11-client"
 
 // #WREQ
-func writeQueryVersion(w *x.Writer, majorVersion, minorVersion uint16) {
-	w.WritePad(4)
-	w.Write2b(majorVersion)
-	w.Write2b(minorVersion)
+func encodeQueryVersion(majorVersion, minorVersion uint16) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write2b(majorVersion).
+		Write2b(minorVersion).
+		End()
+	return
 }
 
 type QueryVersionReply struct {

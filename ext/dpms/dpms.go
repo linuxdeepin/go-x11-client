@@ -3,10 +3,12 @@ package dpms
 import "github.com/linuxdeepin/go-x11-client"
 
 // #WREQ
-func writeGetVersion(w *x.Writer, clientMajorVersion, clientMinorVersion uint16) {
-	w.WritePad(4)
-	w.Write2b(clientMajorVersion)
-	w.Write2b(clientMinorVersion)
+func encodeGetVersion(clientMajorVersion, clientMinorVersion uint16) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write2b(clientMajorVersion).
+		Write2b(clientMinorVersion).
+		End()
+	return
 }
 
 type GetVersionReply struct {
@@ -51,8 +53,8 @@ func readGetVersionReply(r *x.Reader, v *GetVersionReply) error {
 }
 
 // #WREQ
-func writeCapable(w *x.Writer) {
-	w.WritePad(4)
+func encodeCapable() (b x.RequestBody) {
+	return
 }
 
 type CapableReply struct {
@@ -96,8 +98,8 @@ func readCapableReply(r *x.Reader, v *CapableReply) error {
 }
 
 // #WREQ
-func writeGetTimeouts(w *x.Writer) {
-	w.WritePad(4)
+func encodeGetTimeouts() (b x.RequestBody) {
+	return
 }
 
 type GetTimeoutsReply struct {
@@ -153,34 +155,38 @@ func readGetTimeoutsReply(r *x.Reader, v *GetTimeoutsReply) error {
 }
 
 // #WREQ
-func writeSetTimeouts(w *x.Writer, standbyTimeout, suspendTimeout, offTimeout uint16) {
-	w.WritePad(4)
-	w.Write2b(standbyTimeout)
-	w.Write2b(suspendTimeout)
-	w.Write2b(offTimeout)
-	w.WritePad(2)
+func encodeSetTimeouts(standbyTimeout, suspendTimeout, offTimeout uint16) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write2b(standbyTimeout).
+		Write2b(suspendTimeout).
+		Write2b(offTimeout).
+		WritePad(2).
+		End()
+	return
 }
 
 // #WREQ
-func writeEnable(w *x.Writer) {
-	w.WritePad(4)
+func encodeEnable() (b x.RequestBody) {
+	return
 }
 
 // #WREQ
-func writeDisable(w *x.Writer) {
-	w.WritePad(4)
+func encodeDisable() (b x.RequestBody) {
+	return
 }
 
 // #WREQ
-func writeForceLevel(w *x.Writer, powerLevel uint16) {
-	w.WritePad(4)
-	w.Write2b(powerLevel)
-	w.WritePad(2)
+func encodeForceLevel(powerLevel uint16) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write2b(powerLevel).
+		WritePad(2).
+		End()
+	return
 }
 
 // #WREQ
-func writeInfo(w *x.Writer) {
-	w.WritePad(4)
+func encodeInfo() (b x.RequestBody) {
+	return
 }
 
 type InfoReply struct {

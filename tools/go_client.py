@@ -151,6 +151,9 @@ def go_error(self, name):
     if code > max_error_code:
         max_error_code = code
 
+def go_eventstruct(self, name):
+    pass
+
 output = {
     'open': go_open,
     'close': go_close,
@@ -161,6 +164,7 @@ output = {
     'request': go_request,
     'event': go_event,
     'error': go_error,
+    'eventstruct': go_eventstruct,
 }
 # Import the module class
 from xcbgen.state import Module

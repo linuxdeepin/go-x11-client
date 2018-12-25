@@ -24,14 +24,12 @@ type in struct {
 	chansMu    sync.Mutex
 }
 
-func newIn(ioMu *sync.Mutex) *in {
-	in := &in{}
+func (in *in) init(ioMu *sync.Mutex) {
 	in.replies = make(map[uint64]*list.List)
 	in.pendingReplies = list.New()
 	in.readers = list.New()
 	in.events = list.New()
 	in.eventsCond = sync.NewCond(ioMu)
-	return in
 }
 
 func (in *in) addEventChan(eventChan chan<- GenericEvent) {
@@ -85,7 +83,7 @@ func (in *in) removeEventChan(eventChan chan<- GenericEvent) {
 func (in *in) addEvent(e GenericEvent) {
 	logPrintln("add event", e)
 	if in.events.Len() > 0xfff {
-		fmt.Fprintf(os.Stderr, "<warning> too many events are not processed, len: %d\n",
+		_, _ = fmt.Fprintf(os.Stderr, "<warning> too many events are not processed, len: %d\n",
 			in.events.Len())
 	}
 	in.events.PushBack(e)

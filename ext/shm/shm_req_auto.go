@@ -3,14 +3,15 @@ package shm
 import x "github.com/linuxdeepin/go-x11-client"
 
 func QueryVersion(conn *x.Conn) QueryVersionCookie {
-	w := x.NewWriter()
-	writeQueryVersion(w)
-	d := w.Bytes()
+	body := encodeQueryVersion()
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: QueryVersionOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: QueryVersionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return QueryVersionCookie(seq)
 }
 
@@ -29,89 +30,96 @@ func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error)
 }
 
 func Attach(conn *x.Conn, shmSeg Seg, shmId uint32, readOnly bool) {
-	w := x.NewWriter()
-	writeAttach(w, shmSeg, shmId, readOnly)
-	d := w.Bytes()
+	body := encodeAttach(shmSeg, shmId, readOnly)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  AttachOpcode,
+		Header: x.RequestHeader{
+			Data: AttachOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func AttachChecked(conn *x.Conn, shmSeg Seg, shmId uint32, readOnly bool) x.VoidCookie {
-	w := x.NewWriter()
-	writeAttach(w, shmSeg, shmId, readOnly)
-	d := w.Bytes()
+	body := encodeAttach(shmSeg, shmId, readOnly)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  AttachOpcode,
+		Header: x.RequestHeader{
+			Data: AttachOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func Detach(conn *x.Conn, shmSeg Seg) {
-	w := x.NewWriter()
-	writeDetach(w, shmSeg)
-	d := w.Bytes()
+	body := encodeDetach(shmSeg)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DetachOpcode,
+		Header: x.RequestHeader{
+			Data: DetachOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func DetachChecked(conn *x.Conn, shmSeg Seg) x.VoidCookie {
-	w := x.NewWriter()
-	writeDetach(w, shmSeg)
-	d := w.Bytes()
+	body := encodeDetach(shmSeg)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DetachOpcode,
+		Header: x.RequestHeader{
+			Data: DetachOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func PutImage(conn *x.Conn, drawable x.Drawable, gc x.GContext, totalWidth, totalHeight, srcX, srcY, srcWidth, srcHeight uint16, dstX, dstY int16, depth, format uint8, sendEvent bool, shmSeg Seg, offset uint32) {
-	w := x.NewWriter()
-	writePutImage(w, drawable, gc, totalWidth, totalHeight, srcX, srcY, srcWidth, srcHeight, dstX, dstY, depth, format, sendEvent, shmSeg, offset)
-	d := w.Bytes()
+	body := encodePutImage(drawable, gc, totalWidth, totalHeight, srcX, srcY, srcWidth, srcHeight, dstX, dstY, depth, format, sendEvent, shmSeg, offset)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  PutImageOpcode,
+		Header: x.RequestHeader{
+			Data: PutImageOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func PutImageChecked(conn *x.Conn, drawable x.Drawable, gc x.GContext, totalWidth, totalHeight, srcX, srcY, srcWidth, srcHeight uint16, dstX, dstY int16, depth, format uint8, sendEvent bool, shmSeg Seg, offset uint32) x.VoidCookie {
-	w := x.NewWriter()
-	writePutImage(w, drawable, gc, totalWidth, totalHeight, srcX, srcY, srcWidth, srcHeight, dstX, dstY, depth, format, sendEvent, shmSeg, offset)
-	d := w.Bytes()
+	body := encodePutImage(drawable, gc, totalWidth, totalHeight, srcX, srcY, srcWidth, srcHeight, dstX, dstY, depth, format, sendEvent, shmSeg, offset)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  PutImageOpcode,
+		Header: x.RequestHeader{
+			Data: PutImageOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func GetImage(conn *x.Conn, drawable x.Drawable, X, y int16, width, height uint16, planeMask uint32, format uint8, shmSeg Seg, offset uint32) GetImageCookie {
-	w := x.NewWriter()
-	writeGetImage(w, drawable, X, y, width, height, planeMask, format, shmSeg, offset)
-	d := w.Bytes()
+	body := encodeGetImage(drawable, X, y, width, height, planeMask, format, shmSeg, offset)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetImageOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetImageOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetImageCookie(seq)
 }
 
@@ -130,26 +138,28 @@ func (cookie GetImageCookie) Reply(conn *x.Conn) (*GetImageReply, error) {
 }
 
 func CreatePixmap(conn *x.Conn, pid x.Pixmap, drawable x.Drawable, width, height uint16, depth uint8, shmSeg Seg, offset uint32) {
-	w := x.NewWriter()
-	writeCreatePixmap(w, pid, drawable, width, height, depth, shmSeg, offset)
-	d := w.Bytes()
+	body := encodeCreatePixmap(pid, drawable, width, height, depth, shmSeg, offset)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreatePixmapOpcode,
+		Header: x.RequestHeader{
+			Data: CreatePixmapOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func CreatePixmapChecked(conn *x.Conn, pid x.Pixmap, drawable x.Drawable, width, height uint16, depth uint8, shmSeg Seg, offset uint32) x.VoidCookie {
-	w := x.NewWriter()
-	writeCreatePixmap(w, pid, drawable, width, height, depth, shmSeg, offset)
-	d := w.Bytes()
+	body := encodeCreatePixmap(pid, drawable, width, height, depth, shmSeg, offset)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreatePixmapOpcode,
+		Header: x.RequestHeader{
+			Data: CreatePixmapOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }

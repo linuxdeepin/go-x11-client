@@ -3,6 +3,7 @@ package x
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -22,12 +23,12 @@ func init() {
 
 func logPrintln(v ...interface{}) {
 	if debugEnabled {
-		Logger.Println(v...)
+		_ = Logger.Output(2, fmt.Sprintln(v...))
 	}
 }
 func logPrintf(format string, v ...interface{}) {
 	if debugEnabled {
-		Logger.Printf(format, v...)
+		_ = Logger.Output(2, fmt.Sprintf(format, v...))
 	}
 }
 
@@ -43,8 +44,8 @@ type Conn struct {
 	setup         *Setup
 
 	ioMu sync.Mutex
-	in   *in
-	out  *out
+	in   in
+	out  out
 
 	ext          ext
 	ridAllocator resourceIdAllocator

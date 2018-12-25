@@ -58,6 +58,9 @@ const ListInputDevicesOpcode = 2
 
 type ListInputDevicesCookie uint64
 
+// simple ('xcb', 'Input', 'EventTypeBase')
+type EventTypeBase uint8
+
 const OpenDeviceOpcode = 3
 
 type OpenDeviceCookie uint64
@@ -191,7 +194,6 @@ const QueryDeviceStateOpcode = 30
 
 type QueryDeviceStateCookie uint64
 
-const SendExtensionEventOpcode = 31
 const DeviceBellOpcode = 32
 const SetDeviceValuatorsOpcode = 33
 
@@ -1031,6 +1033,7 @@ func NewBarrierLeaveEvent(data []byte) (*BarrierLeaveEvent, error) {
 	return &ev, nil
 }
 
+const SendExtensionEventOpcode = 31
 const DeviceErrorCode = 0
 const EventErrorCode = 1
 const ModeErrorCode = 2

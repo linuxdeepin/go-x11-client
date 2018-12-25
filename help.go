@@ -56,6 +56,10 @@ func PopCount(mask0 int) int {
 	return n
 }
 
+func SizeIn4bWithPad(length int) int {
+	return (length + Pad(length)) / 4
+}
+
 // Put16 takes a 16 bit integer and copies it into a byte slice.
 func Put16(buf []byte, v uint16) {
 	buf[0] = byte(v)
@@ -123,4 +127,11 @@ func Uint8ToBool(v uint8) bool {
 		return false
 	}
 	return true
+}
+
+func TruncateStr(s string, n int) string {
+	if len(s) > n {
+		return s[:n]
+	}
+	return s
 }

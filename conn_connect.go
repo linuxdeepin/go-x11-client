@@ -23,8 +23,8 @@ func NewConnDisplay(display string) (*Conn, error) {
 	}
 
 	c.bufReader = bufio.NewReader(c.conn)
-	c.in = newIn(&c.ioMu)
-	c.out = newOut(c.conn)
+	c.in.init(&c.ioMu)
+	c.out.bw = bufio.NewWriter(c.conn)
 	c.ridAllocator.init(c.setup.ResourceIdBase, c.setup.ResourceIdMask)
 	go c.readLoop()
 	go c.eventSendLoop()

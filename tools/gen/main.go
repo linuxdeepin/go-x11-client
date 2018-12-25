@@ -24,9 +24,9 @@ func init() {
 
 var xPrefix string
 
-func astNodeToStr(fset *token.FileSet, node interface{}) (string, error) {
+func astNodeToStr(fileSet *token.FileSet, node interface{}) (string, error) {
 	var buf bytes.Buffer
-	err := printer.Fprint(&buf, fset, node)
+	err := printer.Fprint(&buf, fileSet, node)
 	if err != nil {
 		return "", err
 	}
@@ -37,8 +37,11 @@ type Generator struct {
 	buf bytes.Buffer
 }
 
-func (g *Generator) p(format string, args ...interface{}) (int, error) {
-	return fmt.Fprintf(&g.buf, format, args...)
+func (g *Generator) p(format string, args ...interface{}) {
+	_, err := fmt.Fprintf(&g.buf, format, args...)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (g *Generator) format() []byte {
@@ -51,11 +54,11 @@ func (g *Generator) format() []byte {
 }
 
 type requestFunc struct {
-	name          string
-	writeFuncName string
-	writeFuncArgs string
-	args          string
-	noReply       bool
+	name           string
+	encodeFuncName string
+	writeFuncArgs  string
+	args           string
+	noReply        bool
 }
 
 func main() {
@@ -90,7 +93,7 @@ func main() {
 		}
 
 		funcName := funcDel.Name.Name
-		if strings.HasPrefix(funcName, "write") {
+		if strings.HasPrefix(funcName, "encode") {
 
 			if !strings.Contains(funcDel.Doc.Text(), "#WREQ") {
 				return false
@@ -98,13 +101,8 @@ func main() {
 
 			params := funcDel.Type.Params.List
 			var args []string
-			var writeFuncArgs = []string{"w"}
-			for idx, param := range params {
-				if idx == 0 {
-					// skip first param
-					continue
-				}
-
+			var writeFuncArgs []string
+			for _, param := range params {
 				log.Println(param.Names)
 
 				var paramNames []string
@@ -123,10 +121,10 @@ func main() {
 			}
 
 			requestFuncs = append(requestFuncs, &requestFunc{
-				writeFuncName: funcName,
-				writeFuncArgs: strings.Join(writeFuncArgs, ","),
-				name:          strings.TrimPrefix(funcName, "write"),
-				args:          strings.Join(args, ","),
+				encodeFuncName: funcName,
+				writeFuncArgs:  strings.Join(writeFuncArgs, ","),
+				name:           strings.TrimPrefix(funcName, "encode"),
+				args:           strings.Join(args, ","),
 			})
 		} else if strings.HasPrefix(funcName, "read") &&
 			strings.HasSuffix(funcName, "Reply") {
@@ -180,7 +178,10 @@ func main() {
 
 	}
 
-	os.Stdout.Write(g.format())
+	_, err = os.Stdout.Write(g.format())
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (g *Generator) pRequestFunc(reqFunc *requestFunc, check bool) {
@@ -205,9 +206,11 @@ func (g *Generator) pRequestFunc(reqFunc *requestFunc, check bool) {
 	g.p("\nfunc %s(conn *%sConn, %s) %s {\n", funcName, xPrefix, reqFunc.args,
 		returnType)
 
-	g.p("w := %sNewWriter()\n", xPrefix)
-	g.p("%s(%s)\n", reqFunc.writeFuncName, reqFunc.writeFuncArgs)
-	g.p("d := w.Bytes()\n")
+	if optIsExt {
+		g.p("body := %s(%s)\n", reqFunc.encodeFuncName, reqFunc.writeFuncArgs)
+	} else {
+		g.p("headerData, body := %s(%s)\n", reqFunc.encodeFuncName, reqFunc.writeFuncArgs)
+	}
 	g.p("req := &%sProtocolRequest{\n", xPrefix)
 
 	if optIsExt {
@@ -218,13 +221,23 @@ func (g *Generator) pRequestFunc(reqFunc *requestFunc, check bool) {
 		g.p("NoReply: true,\n")
 	}
 
-	g.p("Opcode: %sOpcode,\n", reqFunc.name)
+	g.p("Header: %sRequestHeader{\n", xPrefix)
+
+	if optIsExt {
+		g.p("    Data: %sOpcode,\n", reqFunc.name)
+	} else {
+		g.p("    Opcode: %sOpcode,\n", reqFunc.name)
+		g.p("    Data: headerData,\n")
+	}
+
+	g.p("},\n")
+	g.p("Body: body,\n")
 	g.p("}\n")
 
 	if returnType == "" {
-		g.p("conn.SendRequest(%s, d, req)\n", sendReqFlag)
+		g.p("conn.SendRequest(%s, req)\n", sendReqFlag)
 	} else {
-		g.p("seq := conn.SendRequest(%s, d, req)\n", sendReqFlag)
+		g.p("seq := conn.SendRequest(%s, req)\n", sendReqFlag)
 		g.p("return %s(seq)", returnType)
 	}
 

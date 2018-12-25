@@ -3,14 +3,15 @@ package damage
 import x "github.com/linuxdeepin/go-x11-client"
 
 func QueryVersion(conn *x.Conn, majorVersion, minorVersion uint32) QueryVersionCookie {
-	w := x.NewWriter()
-	writeQueryVersion(w, majorVersion, minorVersion)
-	d := w.Bytes()
+	body := encodeQueryVersion(majorVersion, minorVersion)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: QueryVersionOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: QueryVersionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return QueryVersionCookie(seq)
 }
 
@@ -29,51 +30,55 @@ func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error)
 }
 
 func Create(conn *x.Conn, damage Damage, drawable x.Drawable, level uint8) {
-	w := x.NewWriter()
-	writeCreate(w, damage, drawable, level)
-	d := w.Bytes()
+	body := encodeCreate(damage, drawable, level)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreateOpcode,
+		Header: x.RequestHeader{
+			Data: CreateOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func CreateChecked(conn *x.Conn, damage Damage, drawable x.Drawable, level uint8) x.VoidCookie {
-	w := x.NewWriter()
-	writeCreate(w, damage, drawable, level)
-	d := w.Bytes()
+	body := encodeCreate(damage, drawable, level)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreateOpcode,
+		Header: x.RequestHeader{
+			Data: CreateOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func Destroy(conn *x.Conn, damage Damage) {
-	w := x.NewWriter()
-	writeDestroy(w, damage)
-	d := w.Bytes()
+	body := encodeDestroy(damage)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DestroyOpcode,
+		Header: x.RequestHeader{
+			Data: DestroyOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func DestroyChecked(conn *x.Conn, damage Damage) x.VoidCookie {
-	w := x.NewWriter()
-	writeDestroy(w, damage)
-	d := w.Bytes()
+	body := encodeDestroy(damage)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DestroyOpcode,
+		Header: x.RequestHeader{
+			Data: DestroyOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }

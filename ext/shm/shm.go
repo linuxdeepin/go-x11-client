@@ -22,8 +22,8 @@ func readCompletionEvent(r *x.Reader, v *CompletionEvent) error {
 }
 
 // #WREQ
-func writeQueryVersion(w *x.Writer) {
-	w.WritePad(4)
+func encodeQueryVersion() (b x.RequestBody) {
+	return
 }
 
 type QueryVersionReply struct {
@@ -92,60 +92,66 @@ func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
 }
 
 // #WREQ
-func writeAttach(w *x.Writer, shmSeg Seg, shmId uint32, readOnly bool) {
-	w.WritePad(4)
-	w.Write4b(uint32(shmSeg))
-	w.Write4b(shmId)
-	w.Write1b(x.BoolToUint8(readOnly))
-	w.WritePad(3)
+func encodeAttach(shmSeg Seg, shmId uint32, readOnly bool) (b x.RequestBody) {
+	b.AddBlock(3).
+		Write4b(uint32(shmSeg)).
+		Write4b(shmId).
+		Write1b(x.BoolToUint8(readOnly)).
+		WritePad(3).
+		End()
+	return
 }
 
 // #WREQ
-func writeDetach(w *x.Writer, shmSeg Seg) {
-	w.WritePad(4)
-	w.Write4b(uint32(shmSeg))
+func encodeDetach(shmSeg Seg) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(shmSeg)).
+		End()
+	return
 }
 
 // #WREQ
-func writePutImage(w *x.Writer, drawable x.Drawable, gc x.GContext, totalWidth,
+func encodePutImage(drawable x.Drawable, gc x.GContext, totalWidth,
 	totalHeight, srcX, srcY, srcWidth, srcHeight uint16, dstX, dstY int16,
-	depth, format uint8, sendEvent bool, shmSeg Seg, offset uint32) {
+	depth, format uint8, sendEvent bool, shmSeg Seg, offset uint32) (b x.RequestBody) {
 
-	w.WritePad(4)
-	w.Write4b(uint32(drawable))
-	w.Write4b(uint32(gc))
-	w.Write2b(totalWidth)
-	w.Write2b(totalHeight)
-	w.Write2b(srcX)
-	w.Write2b(srcY)
-	w.Write2b(srcWidth)
-	w.Write2b(srcHeight)
-	w.Write2b(uint16(dstX))
-	w.Write2b(uint16(dstY))
-
-	w.Write1b(depth)
-	w.Write1b(format)
-	w.Write1b(x.BoolToUint8(sendEvent))
-	w.WritePad(1)
-
-	w.Write4b(uint32(shmSeg))
-	w.Write4b(offset)
+	b.AddBlock(9).
+		Write4b(uint32(drawable)).
+		Write4b(uint32(gc)).
+		Write2b(totalWidth).
+		Write2b(totalHeight).
+		Write2b(srcX).
+		Write2b(srcY).
+		Write2b(srcWidth).
+		Write2b(srcHeight).
+		Write2b(uint16(dstX)).
+		Write2b(uint16(dstY)).
+		Write1b(depth).
+		Write1b(format).
+		Write1b(x.BoolToUint8(sendEvent)).
+		WritePad(1).
+		Write4b(uint32(shmSeg)).
+		Write4b(offset).
+		End()
+	return
 }
 
 // #WREQ
-func writeGetImage(w *x.Writer, drawable x.Drawable, X, y int16, width, height uint16,
-	planeMask uint32, format uint8, shmSeg Seg, offset uint32) {
-	w.WritePad(4)
-	w.Write4b(uint32(drawable))
-	w.Write2b(uint16(X))
-	w.Write2b(uint16(y))
-	w.Write2b(width)
-	w.Write2b(height)
-	w.Write4b(planeMask)
-	w.Write1b(format)
-	w.WritePad(3)
-	w.Write4b(uint32(shmSeg))
-	w.Write4b(offset)
+func encodeGetImage(drawable x.Drawable, X, y int16, width, height uint16,
+	planeMask uint32, format uint8, shmSeg Seg, offset uint32) (b x.RequestBody) {
+	b.AddBlock(7).
+		Write4b(uint32(drawable)).
+		Write2b(uint16(X)).
+		Write2b(uint16(y)).
+		Write2b(width).
+		Write2b(height).
+		Write4b(planeMask).
+		Write1b(format).
+		WritePad(3).
+		Write4b(uint32(shmSeg)).
+		Write4b(offset).
+		End()
+	return
 }
 
 type GetImageReply struct {
@@ -191,17 +197,17 @@ func readGetImageReply(r *x.Reader, v *GetImageReply) error {
 }
 
 // #WREQ
-func writeCreatePixmap(w *x.Writer, pid x.Pixmap, drawable x.Drawable,
-	width, height uint16, depth uint8, shmSeg Seg, offset uint32) {
-	w.WritePad(4)
-	w.Write4b(uint32(pid))
-	w.Write4b(uint32(drawable))
-	w.Write2b(width)
-	w.Write2b(height)
-
-	w.Write1b(depth)
-	w.WritePad(3)
-
-	w.Write4b(uint32(shmSeg))
-	w.Write4b(offset)
+func encodeCreatePixmap(pid x.Pixmap, drawable x.Drawable,
+	width, height uint16, depth uint8, shmSeg Seg, offset uint32) (b x.RequestBody) {
+	b.AddBlock(6).
+		Write4b(uint32(pid)).
+		Write4b(uint32(drawable)).
+		Write2b(width).
+		Write2b(height).
+		Write1b(depth).
+		WritePad(3).
+		Write4b(uint32(shmSeg)).
+		Write4b(offset).
+		End()
+	return
 }

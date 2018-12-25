@@ -3,14 +3,15 @@ package dpms
 import x "github.com/linuxdeepin/go-x11-client"
 
 func GetVersion(conn *x.Conn, clientMajorVersion, clientMinorVersion uint16) GetVersionCookie {
-	w := x.NewWriter()
-	writeGetVersion(w, clientMajorVersion, clientMinorVersion)
-	d := w.Bytes()
+	body := encodeGetVersion(clientMajorVersion, clientMinorVersion)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetVersionOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetVersionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetVersionCookie(seq)
 }
 
@@ -29,14 +30,15 @@ func (cookie GetVersionCookie) Reply(conn *x.Conn) (*GetVersionReply, error) {
 }
 
 func Capable(conn *x.Conn) CapableCookie {
-	w := x.NewWriter()
-	writeCapable(w)
-	d := w.Bytes()
+	body := encodeCapable()
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: CapableOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: CapableOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return CapableCookie(seq)
 }
 
@@ -55,14 +57,15 @@ func (cookie CapableCookie) Reply(conn *x.Conn) (*CapableReply, error) {
 }
 
 func GetTimeouts(conn *x.Conn) GetTimeoutsCookie {
-	w := x.NewWriter()
-	writeGetTimeouts(w)
-	d := w.Bytes()
+	body := encodeGetTimeouts()
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetTimeoutsOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetTimeoutsOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetTimeoutsCookie(seq)
 }
 
@@ -81,114 +84,123 @@ func (cookie GetTimeoutsCookie) Reply(conn *x.Conn) (*GetTimeoutsReply, error) {
 }
 
 func SetTimeouts(conn *x.Conn, standbyTimeout, suspendTimeout, offTimeout uint16) {
-	w := x.NewWriter()
-	writeSetTimeouts(w, standbyTimeout, suspendTimeout, offTimeout)
-	d := w.Bytes()
+	body := encodeSetTimeouts(standbyTimeout, suspendTimeout, offTimeout)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetTimeoutsOpcode,
+		Header: x.RequestHeader{
+			Data: SetTimeoutsOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SetTimeoutsChecked(conn *x.Conn, standbyTimeout, suspendTimeout, offTimeout uint16) x.VoidCookie {
-	w := x.NewWriter()
-	writeSetTimeouts(w, standbyTimeout, suspendTimeout, offTimeout)
-	d := w.Bytes()
+	body := encodeSetTimeouts(standbyTimeout, suspendTimeout, offTimeout)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetTimeoutsOpcode,
+		Header: x.RequestHeader{
+			Data: SetTimeoutsOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func Enable(conn *x.Conn) {
-	w := x.NewWriter()
-	writeEnable(w)
-	d := w.Bytes()
+	body := encodeEnable()
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  EnableOpcode,
+		Header: x.RequestHeader{
+			Data: EnableOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func EnableChecked(conn *x.Conn) x.VoidCookie {
-	w := x.NewWriter()
-	writeEnable(w)
-	d := w.Bytes()
+	body := encodeEnable()
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  EnableOpcode,
+		Header: x.RequestHeader{
+			Data: EnableOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func Disable(conn *x.Conn) {
-	w := x.NewWriter()
-	writeDisable(w)
-	d := w.Bytes()
+	body := encodeDisable()
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DisableOpcode,
+		Header: x.RequestHeader{
+			Data: DisableOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func DisableChecked(conn *x.Conn) x.VoidCookie {
-	w := x.NewWriter()
-	writeDisable(w)
-	d := w.Bytes()
+	body := encodeDisable()
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DisableOpcode,
+		Header: x.RequestHeader{
+			Data: DisableOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func ForceLevel(conn *x.Conn, powerLevel uint16) {
-	w := x.NewWriter()
-	writeForceLevel(w, powerLevel)
-	d := w.Bytes()
+	body := encodeForceLevel(powerLevel)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ForceLevelOpcode,
+		Header: x.RequestHeader{
+			Data: ForceLevelOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func ForceLevelChecked(conn *x.Conn, powerLevel uint16) x.VoidCookie {
-	w := x.NewWriter()
-	writeForceLevel(w, powerLevel)
-	d := w.Bytes()
+	body := encodeForceLevel(powerLevel)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ForceLevelOpcode,
+		Header: x.RequestHeader{
+			Data: ForceLevelOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func Info(conn *x.Conn) InfoCookie {
-	w := x.NewWriter()
-	writeInfo(w)
-	d := w.Bytes()
+	body := encodeInfo()
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: InfoOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: InfoOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return InfoCookie(seq)
 }
 

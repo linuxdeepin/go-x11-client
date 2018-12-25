@@ -3,14 +3,15 @@ package record
 import x "github.com/linuxdeepin/go-x11-client"
 
 func QueryVersion(conn *x.Conn, majorVersion, minorVersion uint16) QueryVersionCookie {
-	w := x.NewWriter()
-	writeQueryVersion(w, majorVersion, minorVersion)
-	d := w.Bytes()
+	body := encodeQueryVersion(majorVersion, minorVersion)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: QueryVersionOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: QueryVersionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return QueryVersionCookie(seq)
 }
 
@@ -29,89 +30,96 @@ func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error)
 }
 
 func CreateContext(conn *x.Conn, context Context, elementHeader ElementHeader, clientSpecs []ClientSpec, ranges []Range) {
-	w := x.NewWriter()
-	writeCreateContext(w, context, elementHeader, clientSpecs, ranges)
-	d := w.Bytes()
+	body := encodeCreateContext(context, elementHeader, clientSpecs, ranges)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreateContextOpcode,
+		Header: x.RequestHeader{
+			Data: CreateContextOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func CreateContextChecked(conn *x.Conn, context Context, elementHeader ElementHeader, clientSpecs []ClientSpec, ranges []Range) x.VoidCookie {
-	w := x.NewWriter()
-	writeCreateContext(w, context, elementHeader, clientSpecs, ranges)
-	d := w.Bytes()
+	body := encodeCreateContext(context, elementHeader, clientSpecs, ranges)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreateContextOpcode,
+		Header: x.RequestHeader{
+			Data: CreateContextOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func RegisterClients(conn *x.Conn, context Context, elementHeader ElementHeader, clientSpecs []ClientSpec, ranges []Range) {
-	w := x.NewWriter()
-	writeRegisterClients(w, context, elementHeader, clientSpecs, ranges)
-	d := w.Bytes()
+	body := encodeRegisterClients(context, elementHeader, clientSpecs, ranges)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  RegisterClientsOpcode,
+		Header: x.RequestHeader{
+			Data: RegisterClientsOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func RegisterClientsChecked(conn *x.Conn, context Context, elementHeader ElementHeader, clientSpecs []ClientSpec, ranges []Range) x.VoidCookie {
-	w := x.NewWriter()
-	writeRegisterClients(w, context, elementHeader, clientSpecs, ranges)
-	d := w.Bytes()
+	body := encodeRegisterClients(context, elementHeader, clientSpecs, ranges)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  RegisterClientsOpcode,
+		Header: x.RequestHeader{
+			Data: RegisterClientsOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func UnregisterClients(conn *x.Conn, context Context, clientSpecs []ClientSpec) {
-	w := x.NewWriter()
-	writeUnregisterClients(w, context, clientSpecs)
-	d := w.Bytes()
+	body := encodeUnregisterClients(context, clientSpecs)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  UnregisterClientsOpcode,
+		Header: x.RequestHeader{
+			Data: UnregisterClientsOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func UnregisterClientsChecked(conn *x.Conn, context Context, clientSpecs []ClientSpec) x.VoidCookie {
-	w := x.NewWriter()
-	writeUnregisterClients(w, context, clientSpecs)
-	d := w.Bytes()
+	body := encodeUnregisterClients(context, clientSpecs)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  UnregisterClientsOpcode,
+		Header: x.RequestHeader{
+			Data: UnregisterClientsOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func GetContext(conn *x.Conn, context Context) GetContextCookie {
-	w := x.NewWriter()
-	writeGetContext(w, context)
-	d := w.Bytes()
+	body := encodeGetContext(context)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetContextOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetContextOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetContextCookie(seq)
 }
 
@@ -130,14 +138,15 @@ func (cookie GetContextCookie) Reply(conn *x.Conn) (*GetContextReply, error) {
 }
 
 func EnableContext(conn *x.Conn, context Context) EnableContextCookie {
-	w := x.NewWriter()
-	writeEnableContext(w, context)
-	d := w.Bytes()
+	body := encodeEnableContext(context)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: EnableContextOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: EnableContextOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return EnableContextCookie(seq)
 }
 
@@ -156,51 +165,55 @@ func (cookie EnableContextCookie) Reply(conn *x.Conn) (*EnableContextReply, erro
 }
 
 func DisableContext(conn *x.Conn, context Context) {
-	w := x.NewWriter()
-	writeDisableContext(w, context)
-	d := w.Bytes()
+	body := encodeDisableContext(context)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DisableContextOpcode,
+		Header: x.RequestHeader{
+			Data: DisableContextOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func DisableContextChecked(conn *x.Conn, context Context) x.VoidCookie {
-	w := x.NewWriter()
-	writeDisableContext(w, context)
-	d := w.Bytes()
+	body := encodeDisableContext(context)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DisableContextOpcode,
+		Header: x.RequestHeader{
+			Data: DisableContextOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func FreeContext(conn *x.Conn, context Context) {
-	w := x.NewWriter()
-	writeFreeContext(w, context)
-	d := w.Bytes()
+	body := encodeFreeContext(context)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  FreeContextOpcode,
+		Header: x.RequestHeader{
+			Data: FreeContextOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func FreeContextChecked(conn *x.Conn, context Context) x.VoidCookie {
-	w := x.NewWriter()
-	writeFreeContext(w, context)
-	d := w.Bytes()
+	body := encodeFreeContext(context)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  FreeContextOpcode,
+		Header: x.RequestHeader{
+			Data: FreeContextOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }

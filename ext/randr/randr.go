@@ -7,10 +7,12 @@ import (
 )
 
 // #WREQ
-func writeQueryVersion(w *x.Writer, clientMajorVersion, clientMinorVersion uint32) {
-	w.WritePad(4)
-	w.Write4b(clientMajorVersion)
-	w.Write4b(clientMinorVersion)
+func encodeQueryVersion(clientMajorVersion, clientMinorVersion uint32) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(clientMajorVersion).
+		Write4b(clientMinorVersion).
+		End()
+	return
 }
 
 type QueryVersionReply struct {
@@ -55,10 +57,12 @@ func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
 }
 
 // #WREQ
-func writeGetCrtcInfo(w *x.Writer, crtc Crtc, configTimestamp x.Timestamp) {
-	w.WritePad(4)
-	w.Write4b(uint32(crtc))
-	w.Write4b(uint32(configTimestamp))
+func encodeGetCrtcInfo(crtc Crtc, configTimestamp x.Timestamp) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(crtc)).
+		Write4b(uint32(configTimestamp)).
+		End()
+	return
 }
 
 type GetCrtcInfoReply struct {
@@ -172,10 +176,12 @@ func readGetCrtcInfoReply(r *x.Reader, v *GetCrtcInfoReply) error {
 }
 
 // #WREQ
-func writeGetOutputInfo(w *x.Writer, output Output, configTimestamp x.Timestamp) {
-	w.WritePad(4)
-	w.Write4b(uint32(output))
-	w.Write4b(uint32(configTimestamp))
+func encodeGetOutputInfo(output Output, configTimestamp x.Timestamp) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(output)).
+		Write4b(uint32(configTimestamp)).
+		End()
+	return
 }
 
 type GetOutputInfoReply struct {
@@ -318,9 +324,11 @@ func (r *GetOutputInfoReply) GetPreferredMode() Mode {
 }
 
 // #WREQ
-func writeGetScreenResources(w *x.Writer, window x.Window) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
+func encodeGetScreenResources(window x.Window) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(window)).
+		End()
+	return
 }
 
 type GetScreenResourcesReply struct {
@@ -530,9 +538,11 @@ func readGetScreenResourcesReply(r *x.Reader, v *GetScreenResourcesReply) error 
 }
 
 // #WREQ
-func writeGetOutputPrimary(w *x.Writer, window x.Window) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
+func encodeGetOutputPrimary(window x.Window) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(window)).
+		End()
+	return
 }
 
 type GetOutputPrimaryReply struct {
@@ -576,17 +586,19 @@ func readGetOutputPrimaryReply(r *x.Reader, v *GetOutputPrimaryReply) error {
 }
 
 // #WREQ
-func writeGetOutputProperty(w *x.Writer, output Output, property, Type x.Atom,
-	longOffset, longLength uint32, delete, pending bool) {
-	w.WritePad(4)
-	w.Write4b(uint32(output))
-	w.Write4b(uint32(property))
-	w.Write4b(uint32(Type))
-	w.Write4b(longOffset)
-	w.Write4b(longLength)
-	w.Write1b(x.BoolToUint8(delete))
-	w.Write1b(x.BoolToUint8(pending))
-	w.WritePad(2)
+func encodeGetOutputProperty(output Output, property, Type x.Atom,
+	longOffset, longLength uint32, delete, pending bool) (b x.RequestBody) {
+	b.AddBlock(6).
+		Write4b(uint32(output)).
+		Write4b(uint32(property)).
+		Write4b(uint32(Type)).
+		Write4b(longOffset).
+		Write4b(longLength).
+		Write1b(x.BoolToUint8(delete)).
+		Write1b(x.BoolToUint8(pending)).
+		WritePad(2).
+		End()
+	return
 }
 
 type GetOutputPropertyReply struct {
@@ -657,20 +669,23 @@ func readGetOutputPropertyReply(r *x.Reader, v *GetOutputPropertyReply) error {
 }
 
 // #WREQ
-func writeSetCrtcConfig(w *x.Writer, crtc Crtc, timestamp, configTimestamp x.Timestamp,
-	X, y int16, mode Mode, rotation uint16, outputs []Output) {
-	w.WritePad(4)
-	w.Write4b(uint32(crtc))
-	w.Write4b(uint32(timestamp))
-	w.Write4b(uint32(configTimestamp))
-	w.Write2b(uint16(X))
-	w.Write2b(uint16(y))
-	w.Write4b(uint32(mode))
-	w.Write2b(rotation)
-	w.WritePad(2)
+func encodeSetCrtcConfig(crtc Crtc, timestamp, configTimestamp x.Timestamp,
+	X, y int16, mode Mode, rotation uint16, outputs []Output) (b x.RequestBody) {
+	b0 := b.AddBlock(6 + len(outputs)).
+		Write4b(uint32(crtc)).
+		Write4b(uint32(timestamp)).
+		Write4b(uint32(configTimestamp)).
+		Write2b(uint16(X)).
+		Write2b(uint16(y)).
+		Write4b(uint32(mode)).
+		Write2b(rotation).
+		WritePad(2)
+
 	for _, output := range outputs {
-		w.Write4b(uint32(output))
+		b0.Write4b(uint32(output))
 	}
+	b0.End()
+	return
 }
 
 type SetCrtcConfigReply struct {
@@ -715,17 +730,21 @@ func readSetCrtcConfigReply(r *x.Reader, v *SetCrtcConfigReply) error {
 }
 
 // #WREQ
-func writeSelectInput(w *x.Writer, window x.Window, enable uint16) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-	w.Write2b(enable)
-	w.WritePad(2)
+func encodeSelectInput(window x.Window, enable uint16) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(window)).
+		Write2b(enable).
+		WritePad(2).
+		End()
+	return
 }
 
 // #WREQ
-func writeGetCrtcGammaSize(w *x.Writer, crtc Crtc) {
-	w.WritePad(4)
-	w.Write4b(uint32(crtc))
+func encodeGetCrtcGammaSize(crtc Crtc) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(crtc)).
+		End()
+	return
 }
 
 type GetCrtcGammaSizeReply struct {
@@ -769,7 +788,7 @@ func readGetCrtcGammaSizeReply(r *x.Reader, v *GetCrtcGammaSizeReply) error {
 }
 
 // #WREQ
-func writeSetCrtcGamma(w *x.Writer, crtc Crtc, red, green, blue []uint16) {
+func encodeSetCrtcGamma(crtc Crtc, red, green, blue []uint16) (b x.RequestBody) {
 	size := len(red)
 	if len(green) != size {
 		panic("assert len(green) != size failed")
@@ -778,22 +797,22 @@ func writeSetCrtcGamma(w *x.Writer, crtc Crtc, red, green, blue []uint16) {
 		panic("assert len(blue) != size failed")
 	}
 
-	w.WritePad(4)
-	w.Write4b(uint32(crtc))
-
-	w.Write2b(uint16(size))
-	w.WritePad(2)
+	b0 := b.AddBlock(2 + x.SizeIn4bWithPad(6*size)).
+		Write4b(uint32(crtc)).
+		Write2b(uint16(size)).
+		WritePad(2)
 
 	for _, value := range red {
-		w.Write2b(value)
+		b0.Write2b(value)
 	}
 
 	for _, value := range green {
-		w.Write2b(value)
+		b0.Write2b(value)
 	}
 
 	for _, value := range blue {
-		w.Write2b(value)
+		b0.Write2b(value)
 	}
-	w.WritePad(x.Pad(6 * size))
+	b0.WritePad(x.Pad(6 * size))
+	return
 }

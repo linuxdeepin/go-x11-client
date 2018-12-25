@@ -290,7 +290,10 @@ func (c *Conn) requestCheck(request uint64) error {
 
 		// send sync request
 		c.sendSync()
-		c.out.flushTo(c.out.request)
+		err := c.out.flushTo(c.out.request)
+		if err != nil {
+			return err
+		}
 	}
 	replyBuf, err := c.waitForReply(request)
 	c.ioMu.Unlock()

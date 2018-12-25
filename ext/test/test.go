@@ -5,11 +5,13 @@ import (
 )
 
 // #WREQ
-func writeGetVersion(w *x.Writer, majorVersion uint8, minorVersion uint16) {
-	w.WritePad(4)
-	w.Write1b(majorVersion)
-	w.WritePad(1)
-	w.Write2b(minorVersion)
+func encodeGetVersion(majorVersion uint8, minorVersion uint16) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write1b(majorVersion).
+		WritePad(1).
+		Write2b(minorVersion).
+		End()
+	return
 }
 
 type GetVersionReply struct {
@@ -49,10 +51,12 @@ func readGetVersionReply(r *x.Reader, v *GetVersionReply) error {
 }
 
 // #WREQ
-func writeCompareCursor(w *x.Writer, window x.Window, cursor x.Cursor) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-	w.Write4b(uint32(cursor))
+func encodeCompareCursor(window x.Window, cursor x.Cursor) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(window)).
+		Write4b(uint32(cursor)).
+		End()
+	return
 }
 
 type CompareCursorReply struct {
@@ -85,29 +89,29 @@ func readCompareCursorReply(r *x.Reader, v *CompareCursorReply) error {
 }
 
 // #WREQ
-func writeFakeInput(w *x.Writer, evType uint8, detail uint8, time x.Timestamp, root x.Window,
-	rootX, rootY int16, deviceId uint8) {
-	w.WritePad(4)
+func encodeFakeInput(evType uint8, detail uint8, time x.Timestamp, root x.Window,
+	rootX, rootY int16, deviceId uint8) (b x.RequestBody) {
 
-	w.Write1b(evType)
-	w.Write1b(detail)
-	w.WritePad(2)
-
-	w.Write4b(uint32(time))
-	w.Write4b(uint32(root))
-	w.WritePad(8)
-
-	w.Write2b(uint16(rootX))
-	w.Write2b(uint16(rootY))
-
-	w.WritePad(7)
-	w.Write1b(deviceId)
+	b.AddBlock(8).
+		Write1b(evType).
+		Write1b(detail).
+		WritePad(2).
+		Write4b(uint32(time)).
+		Write4b(uint32(root)).
+		WritePad(8).
+		Write2b(uint16(rootX)).
+		Write2b(uint16(rootY)).
+		WritePad(7).
+		Write1b(deviceId).
+		End()
+	return
 }
 
 // #WREQ
-func writeGrabControl(w *x.Writer, impervious bool) {
-	w.WritePad(4)
-
-	w.Write1b(x.BoolToUint8(impervious))
-	w.WritePad(3)
+func encodeGrabControl(impervious bool) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write1b(x.BoolToUint8(impervious)).
+		WritePad(3).
+		End()
+	return
 }

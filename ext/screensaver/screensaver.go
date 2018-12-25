@@ -64,11 +64,13 @@ func readNotifyEvent(r *x.Reader, v *NotifyEvent) error {
 }
 
 // #WREQ
-func writeQueryVersion(w *x.Writer, clientMajorVersion, clientMinorVersion uint8) {
-	w.WritePad(4)
-	w.Write1b(clientMajorVersion)
-	w.Write1b(clientMinorVersion)
-	w.WritePad(2)
+func encodeQueryVersion(clientMajorVersion, clientMinorVersion uint8) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write1b(clientMajorVersion).
+		Write1b(clientMinorVersion).
+		WritePad(2).
+		End()
+	return
 }
 
 type QueryVersionReply struct {
@@ -118,9 +120,11 @@ func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
 }
 
 // #WREQ
-func writeQueryInfo(w *x.Writer, drawable x.Drawable) {
-	w.WritePad(4)
-	w.Write4b(uint32(drawable))
+func encodeQueryInfo(drawable x.Drawable) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(drawable)).
+		End()
+	return
 }
 
 type QueryInfoReply struct {
@@ -190,45 +194,51 @@ func readQueryInfoReply(r *x.Reader, v *QueryInfoReply) error {
 }
 
 // #WREQ
-func writeSelectInput(w *x.Writer, drawable x.Drawable, eventMask uint32) {
-	w.WritePad(4)
-	w.Write4b(uint32(drawable))
-	w.Write4b(eventMask)
+func encodeSelectInput(drawable x.Drawable, eventMask uint32) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(drawable)).
+		Write4b(eventMask).
+		End()
+	return
 }
 
 // #WREQ
-func writeSetAttributes(w *x.Writer, drawable x.Drawable, X, y int16, width, height,
-	boardWidth uint16, class, depth uint8, visual x.VisualID, valueMask uint32, valueList []uint32) {
-	w.WritePad(4)
-	w.Write4b(uint32(drawable))
+func encodeSetAttributes(drawable x.Drawable, X, y int16, width, height,
+	boardWidth uint16, class, depth uint8, visual x.VisualID, valueMask uint32,
+	valueList []uint32) (b x.RequestBody) {
 
-	w.Write2b(uint16(X))
-	w.Write2b(uint16(y))
-
-	w.Write2b(width)
-	w.Write2b(height)
-
-	w.Write2b(boardWidth)
-	w.Write1b(class)
-	w.Write1b(depth)
-
-	w.Write4b(uint32(visual))
-	w.Write4b(valueMask)
+	b0 := b.AddBlock(6 + len(valueList)).
+		Write4b(uint32(drawable)).
+		Write2b(uint16(X)).
+		Write2b(uint16(y)).
+		Write2b(width).
+		Write2b(height).
+		Write2b(boardWidth).
+		Write1b(class).
+		Write1b(depth).
+		Write4b(uint32(visual)).
+		Write4b(valueMask)
 
 	for _, value := range valueList {
-		w.Write4b(value)
+		b0.Write4b(value)
 	}
+	b0.End()
+	return
 }
 
 // #WREQ
-func writeUnsetAttributes(w *x.Writer, drawable x.Drawable) {
-	w.WritePad(4)
-	w.Write4b(uint32(drawable))
+func encodeUnsetAttributes(drawable x.Drawable) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(drawable)).
+		End()
+	return
 }
 
 // #WREQ
-func writeSuspend(w *x.Writer, suspend bool) {
-	w.WritePad(4)
-	w.Write1b(x.BoolToUint8(suspend))
-	w.WritePad(3)
+func encodeSuspend(suspend bool) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write1b(x.BoolToUint8(suspend)).
+		WritePad(3).
+		End()
+	return
 }

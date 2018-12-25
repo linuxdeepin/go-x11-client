@@ -5,10 +5,12 @@ import (
 )
 
 // #WREQ
-func writeOpenDevice(w *x.Writer, deviceId uint8) {
-	w.WritePad(4)
-	w.Write1b(deviceId)
-	w.WritePad(3)
+func encodeOpenDevice(deviceId uint8) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write1b(deviceId).
+		WritePad(3).
+		End()
+	return
 }
 
 type OpenDeviceReply struct {
@@ -95,21 +97,24 @@ func readClassInfo(r *x.Reader) (ClassInfo, error) {
 }
 
 // #WREQ
-func writeCloseDevice(w *x.Writer, deviceId uint8) {
-	w.WritePad(4)
-	w.Write1b(deviceId)
-	w.WritePad(3)
+func encodeCloseDevice(deviceId uint8) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write1b(deviceId).
+		WritePad(3).
+		End()
+	return
 }
 
 // #WREQ
-func writeSelectExtensionEvent(w *x.Writer, window x.Window, classes []EventClass) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-
-	w.Write2b(uint16(len(classes)))
-	w.WritePad(2)
+func encodeSelectExtensionEvent(window x.Window, classes []EventClass) (b x.RequestBody) {
+	b0 := b.AddBlock(2 + len(classes)).
+		Write4b(uint32(window)).
+		Write2b(uint16(len(classes))).
+		WritePad(2)
 
 	for _, class := range classes {
-		w.Write4b(uint32(class))
+		b0.Write4b(uint32(class))
 	}
+	b0.End()
+	return
 }

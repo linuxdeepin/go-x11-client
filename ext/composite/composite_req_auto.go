@@ -3,14 +3,15 @@ package composite
 import x "github.com/linuxdeepin/go-x11-client"
 
 func QueryVersion(conn *x.Conn, majorVersion, minorVersion uint32) QueryVersionCookie {
-	w := x.NewWriter()
-	writeQueryVersion(w, majorVersion, minorVersion)
-	d := w.Bytes()
+	body := encodeQueryVersion(majorVersion, minorVersion)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: QueryVersionOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: QueryVersionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return QueryVersionCookie(seq)
 }
 
@@ -29,126 +30,136 @@ func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error)
 }
 
 func RedirectWindow(conn *x.Conn, window x.Window, update uint8) {
-	w := x.NewWriter()
-	writeRedirectWindow(w, window, update)
-	d := w.Bytes()
+	body := encodeRedirectWindow(window, update)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  RedirectWindowOpcode,
+		Header: x.RequestHeader{
+			Data: RedirectWindowOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func RedirectWindowChecked(conn *x.Conn, window x.Window, update uint8) x.VoidCookie {
-	w := x.NewWriter()
-	writeRedirectWindow(w, window, update)
-	d := w.Bytes()
+	body := encodeRedirectWindow(window, update)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  RedirectWindowOpcode,
+		Header: x.RequestHeader{
+			Data: RedirectWindowOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func RedirectSubwindows(conn *x.Conn, window x.Window, update uint8) {
-	w := x.NewWriter()
-	writeRedirectSubwindows(w, window, update)
-	d := w.Bytes()
+	body := encodeRedirectSubwindows(window, update)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  RedirectSubwindowsOpcode,
+		Header: x.RequestHeader{
+			Data: RedirectSubwindowsOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func RedirectSubwindowsChecked(conn *x.Conn, window x.Window, update uint8) x.VoidCookie {
-	w := x.NewWriter()
-	writeRedirectSubwindows(w, window, update)
-	d := w.Bytes()
+	body := encodeRedirectSubwindows(window, update)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  RedirectSubwindowsOpcode,
+		Header: x.RequestHeader{
+			Data: RedirectSubwindowsOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func UnredirectWindow(conn *x.Conn, window x.Window) {
-	w := x.NewWriter()
-	writeUnredirectWindow(w, window)
-	d := w.Bytes()
+	body := encodeUnredirectWindow(window)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  UnredirectWindowOpcode,
+		Header: x.RequestHeader{
+			Data: UnredirectWindowOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func UnredirectWindowChecked(conn *x.Conn, window x.Window) x.VoidCookie {
-	w := x.NewWriter()
-	writeUnredirectWindow(w, window)
-	d := w.Bytes()
+	body := encodeUnredirectWindow(window)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  UnredirectWindowOpcode,
+		Header: x.RequestHeader{
+			Data: UnredirectWindowOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func UnredirectSubwindows(conn *x.Conn, window x.Window) {
-	w := x.NewWriter()
-	writeUnredirectSubwindows(w, window)
-	d := w.Bytes()
+	body := encodeUnredirectSubwindows(window)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  UnredirectSubwindowsOpcode,
+		Header: x.RequestHeader{
+			Data: UnredirectSubwindowsOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func UnredirectSubwindowsChecked(conn *x.Conn, window x.Window) x.VoidCookie {
-	w := x.NewWriter()
-	writeUnredirectSubwindows(w, window)
-	d := w.Bytes()
+	body := encodeUnredirectSubwindows(window)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  UnredirectSubwindowsOpcode,
+		Header: x.RequestHeader{
+			Data: UnredirectSubwindowsOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func NameWindowPixmap(conn *x.Conn, window x.Window, pixmap x.Pixmap) {
-	w := x.NewWriter()
-	writeNameWindowPixmap(w, window, pixmap)
-	d := w.Bytes()
+	body := encodeNameWindowPixmap(window, pixmap)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  NameWindowPixmapOpcode,
+		Header: x.RequestHeader{
+			Data: NameWindowPixmapOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func NameWindowPixmapChecked(conn *x.Conn, window x.Window, pixmap x.Pixmap) x.VoidCookie {
-	w := x.NewWriter()
-	writeNameWindowPixmap(w, window, pixmap)
-	d := w.Bytes()
+	body := encodeNameWindowPixmap(window, pixmap)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  NameWindowPixmapOpcode,
+		Header: x.RequestHeader{
+			Data: NameWindowPixmapOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }

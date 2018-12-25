@@ -3,14 +3,15 @@ package xfixes
 import x "github.com/linuxdeepin/go-x11-client"
 
 func QueryVersion(conn *x.Conn, majorVersion, minorVersion uint32) QueryVersionCookie {
-	w := x.NewWriter()
-	writeQueryVersion(w, majorVersion, minorVersion)
-	d := w.Bytes()
+	body := encodeQueryVersion(majorVersion, minorVersion)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: QueryVersionOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: QueryVersionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return QueryVersionCookie(seq)
 }
 
@@ -29,89 +30,96 @@ func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error)
 }
 
 func ChangeSaveSet(conn *x.Conn, mode, target, map0 uint8, window x.Window) {
-	w := x.NewWriter()
-	writeChangeSaveSet(w, mode, target, map0, window)
-	d := w.Bytes()
+	body := encodeChangeSaveSet(mode, target, map0, window)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ChangeSaveSetOpcode,
+		Header: x.RequestHeader{
+			Data: ChangeSaveSetOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func ChangeSaveSetChecked(conn *x.Conn, mode, target, map0 uint8, window x.Window) x.VoidCookie {
-	w := x.NewWriter()
-	writeChangeSaveSet(w, mode, target, map0, window)
-	d := w.Bytes()
+	body := encodeChangeSaveSet(mode, target, map0, window)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ChangeSaveSetOpcode,
+		Header: x.RequestHeader{
+			Data: ChangeSaveSetOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func SelectSelectionInput(conn *x.Conn, window x.Window, selection x.Atom, eventMask uint32) {
-	w := x.NewWriter()
-	writeSelectSelectionInput(w, window, selection, eventMask)
-	d := w.Bytes()
+	body := encodeSelectSelectionInput(window, selection, eventMask)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SelectSelectionInputOpcode,
+		Header: x.RequestHeader{
+			Data: SelectSelectionInputOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SelectSelectionInputChecked(conn *x.Conn, window x.Window, selection x.Atom, eventMask uint32) x.VoidCookie {
-	w := x.NewWriter()
-	writeSelectSelectionInput(w, window, selection, eventMask)
-	d := w.Bytes()
+	body := encodeSelectSelectionInput(window, selection, eventMask)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SelectSelectionInputOpcode,
+		Header: x.RequestHeader{
+			Data: SelectSelectionInputOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func SelectCursorInput(conn *x.Conn, window x.Window, eventMask uint32) {
-	w := x.NewWriter()
-	writeSelectCursorInput(w, window, eventMask)
-	d := w.Bytes()
+	body := encodeSelectCursorInput(window, eventMask)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SelectCursorInputOpcode,
+		Header: x.RequestHeader{
+			Data: SelectCursorInputOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SelectCursorInputChecked(conn *x.Conn, window x.Window, eventMask uint32) x.VoidCookie {
-	w := x.NewWriter()
-	writeSelectCursorInput(w, window, eventMask)
-	d := w.Bytes()
+	body := encodeSelectCursorInput(window, eventMask)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SelectCursorInputOpcode,
+		Header: x.RequestHeader{
+			Data: SelectCursorInputOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func GetCursorImage(conn *x.Conn) GetCursorImageCookie {
-	w := x.NewWriter()
-	writeGetCursorImage(w)
-	d := w.Bytes()
+	body := encodeGetCursorImage()
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetCursorImageOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetCursorImageOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetCursorImageCookie(seq)
 }
 
@@ -130,314 +138,339 @@ func (cookie GetCursorImageCookie) Reply(conn *x.Conn) (*GetCursorImageReply, er
 }
 
 func CreateRegion(conn *x.Conn, region Region, rects []x.Rectangle) {
-	w := x.NewWriter()
-	writeCreateRegion(w, region, rects)
-	d := w.Bytes()
+	body := encodeCreateRegion(region, rects)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreateRegionOpcode,
+		Header: x.RequestHeader{
+			Data: CreateRegionOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func CreateRegionChecked(conn *x.Conn, region Region, rects []x.Rectangle) x.VoidCookie {
-	w := x.NewWriter()
-	writeCreateRegion(w, region, rects)
-	d := w.Bytes()
+	body := encodeCreateRegion(region, rects)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreateRegionOpcode,
+		Header: x.RequestHeader{
+			Data: CreateRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func CreateRegionFromBitmap(conn *x.Conn, region Region, bitmap x.Pixmap) {
-	w := x.NewWriter()
-	writeCreateRegionFromBitmap(w, region, bitmap)
-	d := w.Bytes()
+	body := encodeCreateRegionFromBitmap(region, bitmap)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreateRegionFromBitmapOpcode,
+		Header: x.RequestHeader{
+			Data: CreateRegionFromBitmapOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func CreateRegionFromBitmapChecked(conn *x.Conn, region Region, bitmap x.Pixmap) x.VoidCookie {
-	w := x.NewWriter()
-	writeCreateRegionFromBitmap(w, region, bitmap)
-	d := w.Bytes()
+	body := encodeCreateRegionFromBitmap(region, bitmap)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreateRegionFromBitmapOpcode,
+		Header: x.RequestHeader{
+			Data: CreateRegionFromBitmapOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func CreateRegionFromGC(conn *x.Conn, region Region, gc x.GContext) {
-	w := x.NewWriter()
-	writeCreateRegionFromGC(w, region, gc)
-	d := w.Bytes()
+	body := encodeCreateRegionFromGC(region, gc)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreateRegionFromGCOpcode,
+		Header: x.RequestHeader{
+			Data: CreateRegionFromGCOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func CreateRegionFromGCChecked(conn *x.Conn, region Region, gc x.GContext) x.VoidCookie {
-	w := x.NewWriter()
-	writeCreateRegionFromGC(w, region, gc)
-	d := w.Bytes()
+	body := encodeCreateRegionFromGC(region, gc)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreateRegionFromGCOpcode,
+		Header: x.RequestHeader{
+			Data: CreateRegionFromGCOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func DestroyRegion(conn *x.Conn, region Region) {
-	w := x.NewWriter()
-	writeDestroyRegion(w, region)
-	d := w.Bytes()
+	body := encodeDestroyRegion(region)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DestroyRegionOpcode,
+		Header: x.RequestHeader{
+			Data: DestroyRegionOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func DestroyRegionChecked(conn *x.Conn, region Region) x.VoidCookie {
-	w := x.NewWriter()
-	writeDestroyRegion(w, region)
-	d := w.Bytes()
+	body := encodeDestroyRegion(region)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DestroyRegionOpcode,
+		Header: x.RequestHeader{
+			Data: DestroyRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func SetRegion(conn *x.Conn, region Region, rects []x.Rectangle) {
-	w := x.NewWriter()
-	writeSetRegion(w, region, rects)
-	d := w.Bytes()
+	body := encodeSetRegion(region, rects)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetRegionOpcode,
+		Header: x.RequestHeader{
+			Data: SetRegionOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SetRegionChecked(conn *x.Conn, region Region, rects []x.Rectangle) x.VoidCookie {
-	w := x.NewWriter()
-	writeSetRegion(w, region, rects)
-	d := w.Bytes()
+	body := encodeSetRegion(region, rects)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetRegionOpcode,
+		Header: x.RequestHeader{
+			Data: SetRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func CopyRegion(conn *x.Conn, source, destination Region) {
-	w := x.NewWriter()
-	writeCopyRegion(w, source, destination)
-	d := w.Bytes()
+	body := encodeCopyRegion(source, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CopyRegionOpcode,
+		Header: x.RequestHeader{
+			Data: CopyRegionOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func CopyRegionChecked(conn *x.Conn, source, destination Region) x.VoidCookie {
-	w := x.NewWriter()
-	writeCopyRegion(w, source, destination)
-	d := w.Bytes()
+	body := encodeCopyRegion(source, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CopyRegionOpcode,
+		Header: x.RequestHeader{
+			Data: CopyRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func UnionRegion(conn *x.Conn, source1, source2, destination Region) {
-	w := x.NewWriter()
-	writeUnionRegion(w, source1, source2, destination)
-	d := w.Bytes()
+	body := encodeUnionRegion(source1, source2, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  UnionRegionOpcode,
+		Header: x.RequestHeader{
+			Data: UnionRegionOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func UnionRegionChecked(conn *x.Conn, source1, source2, destination Region) x.VoidCookie {
-	w := x.NewWriter()
-	writeUnionRegion(w, source1, source2, destination)
-	d := w.Bytes()
+	body := encodeUnionRegion(source1, source2, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  UnionRegionOpcode,
+		Header: x.RequestHeader{
+			Data: UnionRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func IntersectRegion(conn *x.Conn, source1, source2, destination Region) {
-	w := x.NewWriter()
-	writeIntersectRegion(w, source1, source2, destination)
-	d := w.Bytes()
+	body := encodeIntersectRegion(source1, source2, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  IntersectRegionOpcode,
+		Header: x.RequestHeader{
+			Data: IntersectRegionOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func IntersectRegionChecked(conn *x.Conn, source1, source2, destination Region) x.VoidCookie {
-	w := x.NewWriter()
-	writeIntersectRegion(w, source1, source2, destination)
-	d := w.Bytes()
+	body := encodeIntersectRegion(source1, source2, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  IntersectRegionOpcode,
+		Header: x.RequestHeader{
+			Data: IntersectRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func SubtractRegion(conn *x.Conn, source1, source2, destination Region) {
-	w := x.NewWriter()
-	writeSubtractRegion(w, source1, source2, destination)
-	d := w.Bytes()
+	body := encodeSubtractRegion(source1, source2, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SubtractRegionOpcode,
+		Header: x.RequestHeader{
+			Data: SubtractRegionOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SubtractRegionChecked(conn *x.Conn, source1, source2, destination Region) x.VoidCookie {
-	w := x.NewWriter()
-	writeSubtractRegion(w, source1, source2, destination)
-	d := w.Bytes()
+	body := encodeSubtractRegion(source1, source2, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SubtractRegionOpcode,
+		Header: x.RequestHeader{
+			Data: SubtractRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func InvertRegion(conn *x.Conn, source Region, bounds x.Rectangle, destination Region) {
-	w := x.NewWriter()
-	writeInvertRegion(w, source, bounds, destination)
-	d := w.Bytes()
+	body := encodeInvertRegion(source, bounds, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  InvertRegionOpcode,
+		Header: x.RequestHeader{
+			Data: InvertRegionOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func InvertRegionChecked(conn *x.Conn, source Region, bounds x.Rectangle, destination Region) x.VoidCookie {
-	w := x.NewWriter()
-	writeInvertRegion(w, source, bounds, destination)
-	d := w.Bytes()
+	body := encodeInvertRegion(source, bounds, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  InvertRegionOpcode,
+		Header: x.RequestHeader{
+			Data: InvertRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func TranslateRegion(conn *x.Conn, region Region, dx, dy int16) {
-	w := x.NewWriter()
-	writeTranslateRegion(w, region, dx, dy)
-	d := w.Bytes()
+	body := encodeTranslateRegion(region, dx, dy)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  TranslateRegionOpcode,
+		Header: x.RequestHeader{
+			Data: TranslateRegionOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func TranslateRegionChecked(conn *x.Conn, region Region, dx, dy int16) x.VoidCookie {
-	w := x.NewWriter()
-	writeTranslateRegion(w, region, dx, dy)
-	d := w.Bytes()
+	body := encodeTranslateRegion(region, dx, dy)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  TranslateRegionOpcode,
+		Header: x.RequestHeader{
+			Data: TranslateRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func RegionExtents(conn *x.Conn, source, destination Region) {
-	w := x.NewWriter()
-	writeRegionExtents(w, source, destination)
-	d := w.Bytes()
+	body := encodeRegionExtents(source, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  RegionExtentsOpcode,
+		Header: x.RequestHeader{
+			Data: RegionExtentsOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func RegionExtentsChecked(conn *x.Conn, source, destination Region) x.VoidCookie {
-	w := x.NewWriter()
-	writeRegionExtents(w, source, destination)
-	d := w.Bytes()
+	body := encodeRegionExtents(source, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  RegionExtentsOpcode,
+		Header: x.RequestHeader{
+			Data: RegionExtentsOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func FetchRegion(conn *x.Conn, region Region) FetchRegionCookie {
-	w := x.NewWriter()
-	writeFetchRegion(w, region)
-	d := w.Bytes()
+	body := encodeFetchRegion(region)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: FetchRegionOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: FetchRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return FetchRegionCookie(seq)
 }
 
@@ -456,64 +489,69 @@ func (cookie FetchRegionCookie) Reply(conn *x.Conn) (*FetchRegionReply, error) {
 }
 
 func SetGCClipRegion(conn *x.Conn, gc x.GContext, clipXOrigin, clipYOrigin int16, region Region) {
-	w := x.NewWriter()
-	writeSetGCClipRegion(w, gc, clipXOrigin, clipYOrigin, region)
-	d := w.Bytes()
+	body := encodeSetGCClipRegion(gc, clipXOrigin, clipYOrigin, region)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetGCClipRegionOpcode,
+		Header: x.RequestHeader{
+			Data: SetGCClipRegionOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SetGCClipRegionChecked(conn *x.Conn, gc x.GContext, clipXOrigin, clipYOrigin int16, region Region) x.VoidCookie {
-	w := x.NewWriter()
-	writeSetGCClipRegion(w, gc, clipXOrigin, clipYOrigin, region)
-	d := w.Bytes()
+	body := encodeSetGCClipRegion(gc, clipXOrigin, clipYOrigin, region)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetGCClipRegionOpcode,
+		Header: x.RequestHeader{
+			Data: SetGCClipRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func SetCursorName(conn *x.Conn, cursor x.Cursor, name string) {
-	w := x.NewWriter()
-	writeSetCursorName(w, cursor, name)
-	d := w.Bytes()
+	body := encodeSetCursorName(cursor, name)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetCursorNameOpcode,
+		Header: x.RequestHeader{
+			Data: SetCursorNameOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SetCursorNameChecked(conn *x.Conn, cursor x.Cursor, name string) x.VoidCookie {
-	w := x.NewWriter()
-	writeSetCursorName(w, cursor, name)
-	d := w.Bytes()
+	body := encodeSetCursorName(cursor, name)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetCursorNameOpcode,
+		Header: x.RequestHeader{
+			Data: SetCursorNameOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func GetCursorImageAndName(conn *x.Conn) GetCursorImageAndNameCookie {
-	w := x.NewWriter()
-	writeGetCursorImageAndName(w)
-	d := w.Bytes()
+	body := encodeGetCursorImageAndName()
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetCursorImageAndNameOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetCursorImageAndNameOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetCursorImageAndNameCookie(seq)
 }
 
@@ -532,176 +570,190 @@ func (cookie GetCursorImageAndNameCookie) Reply(conn *x.Conn) (*GetCursorImageAn
 }
 
 func ChangeCursor(conn *x.Conn, source, destination x.Cursor) {
-	w := x.NewWriter()
-	writeChangeCursor(w, source, destination)
-	d := w.Bytes()
+	body := encodeChangeCursor(source, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ChangeCursorOpcode,
+		Header: x.RequestHeader{
+			Data: ChangeCursorOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func ChangeCursorChecked(conn *x.Conn, source, destination x.Cursor) x.VoidCookie {
-	w := x.NewWriter()
-	writeChangeCursor(w, source, destination)
-	d := w.Bytes()
+	body := encodeChangeCursor(source, destination)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ChangeCursorOpcode,
+		Header: x.RequestHeader{
+			Data: ChangeCursorOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func ChangeCursorByName(conn *x.Conn, src x.Cursor, name string) {
-	w := x.NewWriter()
-	writeChangeCursorByName(w, src, name)
-	d := w.Bytes()
+	body := encodeChangeCursorByName(src, name)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ChangeCursorByNameOpcode,
+		Header: x.RequestHeader{
+			Data: ChangeCursorByNameOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func ChangeCursorByNameChecked(conn *x.Conn, src x.Cursor, name string) x.VoidCookie {
-	w := x.NewWriter()
-	writeChangeCursorByName(w, src, name)
-	d := w.Bytes()
+	body := encodeChangeCursorByName(src, name)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ChangeCursorByNameOpcode,
+		Header: x.RequestHeader{
+			Data: ChangeCursorByNameOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func ExpandRegion(conn *x.Conn, source, destination Region, left, right, top, bottom uint16) {
-	w := x.NewWriter()
-	writeExpandRegion(w, source, destination, left, right, top, bottom)
-	d := w.Bytes()
+	body := encodeExpandRegion(source, destination, left, right, top, bottom)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ExpandRegionOpcode,
+		Header: x.RequestHeader{
+			Data: ExpandRegionOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func ExpandRegionChecked(conn *x.Conn, source, destination Region, left, right, top, bottom uint16) x.VoidCookie {
-	w := x.NewWriter()
-	writeExpandRegion(w, source, destination, left, right, top, bottom)
-	d := w.Bytes()
+	body := encodeExpandRegion(source, destination, left, right, top, bottom)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ExpandRegionOpcode,
+		Header: x.RequestHeader{
+			Data: ExpandRegionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func HideCursor(conn *x.Conn, window x.Window) {
-	w := x.NewWriter()
-	writeHideCursor(w, window)
-	d := w.Bytes()
+	body := encodeHideCursor(window)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  HideCursorOpcode,
+		Header: x.RequestHeader{
+			Data: HideCursorOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func HideCursorChecked(conn *x.Conn, window x.Window) x.VoidCookie {
-	w := x.NewWriter()
-	writeHideCursor(w, window)
-	d := w.Bytes()
+	body := encodeHideCursor(window)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  HideCursorOpcode,
+		Header: x.RequestHeader{
+			Data: HideCursorOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func ShowCursor(conn *x.Conn, window x.Window) {
-	w := x.NewWriter()
-	writeShowCursor(w, window)
-	d := w.Bytes()
+	body := encodeShowCursor(window)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ShowCursorOpcode,
+		Header: x.RequestHeader{
+			Data: ShowCursorOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func ShowCursorChecked(conn *x.Conn, window x.Window) x.VoidCookie {
-	w := x.NewWriter()
-	writeShowCursor(w, window)
-	d := w.Bytes()
+	body := encodeShowCursor(window)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  ShowCursorOpcode,
+		Header: x.RequestHeader{
+			Data: ShowCursorOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func CreatePointerBarrier(conn *x.Conn, barrier Barrier, drawable x.Drawable, x1, y1, x2, y2 int16, directions uint32, devices []uint16) {
-	w := x.NewWriter()
-	writeCreatePointerBarrier(w, barrier, drawable, x1, y1, x2, y2, directions, devices)
-	d := w.Bytes()
+	body := encodeCreatePointerBarrier(barrier, drawable, x1, y1, x2, y2, directions, devices)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreatePointerBarrierOpcode,
+		Header: x.RequestHeader{
+			Data: CreatePointerBarrierOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func CreatePointerBarrierChecked(conn *x.Conn, barrier Barrier, drawable x.Drawable, x1, y1, x2, y2 int16, directions uint32, devices []uint16) x.VoidCookie {
-	w := x.NewWriter()
-	writeCreatePointerBarrier(w, barrier, drawable, x1, y1, x2, y2, directions, devices)
-	d := w.Bytes()
+	body := encodeCreatePointerBarrier(barrier, drawable, x1, y1, x2, y2, directions, devices)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CreatePointerBarrierOpcode,
+		Header: x.RequestHeader{
+			Data: CreatePointerBarrierOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func DeletePointerBarrier(conn *x.Conn, barrier Barrier) {
-	w := x.NewWriter()
-	writeDeletePointerBarrier(w, barrier)
-	d := w.Bytes()
+	body := encodeDeletePointerBarrier(barrier)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DeletePointerBarrierOpcode,
+		Header: x.RequestHeader{
+			Data: DeletePointerBarrierOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func DeletePointerBarrierChecked(conn *x.Conn, barrier Barrier) x.VoidCookie {
-	w := x.NewWriter()
-	writeDeletePointerBarrier(w, barrier)
-	d := w.Bytes()
+	body := encodeDeletePointerBarrier(barrier)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  DeletePointerBarrierOpcode,
+		Header: x.RequestHeader{
+			Data: DeletePointerBarrierOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }

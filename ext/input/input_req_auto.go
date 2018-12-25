@@ -3,14 +3,15 @@ package input
 import x "github.com/linuxdeepin/go-x11-client"
 
 func XIQueryVersion(conn *x.Conn, majorVersion, minorVersion uint16) XIQueryVersionCookie {
-	w := x.NewWriter()
-	writeXIQueryVersion(w, majorVersion, minorVersion)
-	d := w.Bytes()
+	body := encodeXIQueryVersion(majorVersion, minorVersion)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: XIQueryVersionOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: XIQueryVersionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return XIQueryVersionCookie(seq)
 }
 
@@ -29,14 +30,15 @@ func (cookie XIQueryVersionCookie) Reply(conn *x.Conn) (*XIQueryVersionReply, er
 }
 
 func XIQueryDevice(conn *x.Conn, deviceId DeviceId) XIQueryDeviceCookie {
-	w := x.NewWriter()
-	writeXIQueryDevice(w, deviceId)
-	d := w.Bytes()
+	body := encodeXIQueryDevice(deviceId)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: XIQueryDeviceOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: XIQueryDeviceOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return XIQueryDeviceCookie(seq)
 }
 
@@ -55,39 +57,42 @@ func (cookie XIQueryDeviceCookie) Reply(conn *x.Conn) (*XIQueryDeviceReply, erro
 }
 
 func XISelectEvents(conn *x.Conn, window x.Window, masks []EventMask) {
-	w := x.NewWriter()
-	writeXISelectEvents(w, window, masks)
-	d := w.Bytes()
+	body := encodeXISelectEvents(window, masks)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XISelectEventsOpcode,
+		Header: x.RequestHeader{
+			Data: XISelectEventsOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func XISelectEventsChecked(conn *x.Conn, window x.Window, masks []EventMask) x.VoidCookie {
-	w := x.NewWriter()
-	writeXISelectEvents(w, window, masks)
-	d := w.Bytes()
+	body := encodeXISelectEvents(window, masks)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XISelectEventsOpcode,
+		Header: x.RequestHeader{
+			Data: XISelectEventsOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func XIGetSelectedEvents(conn *x.Conn, window x.Window) XIGetSelectedEventsCookie {
-	w := x.NewWriter()
-	writeXIGetSelectedEvents(w, window)
-	d := w.Bytes()
+	body := encodeXIGetSelectedEvents(window)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: XIGetSelectedEventsOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: XIGetSelectedEventsOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return XIGetSelectedEventsCookie(seq)
 }
 
@@ -106,14 +111,15 @@ func (cookie XIGetSelectedEventsCookie) Reply(conn *x.Conn) (*XIGetSelectedEvent
 }
 
 func XIQueryPointer(conn *x.Conn, window x.Window, deviceId DeviceId) XIQueryPointerCookie {
-	w := x.NewWriter()
-	writeXIQueryPointer(w, window, deviceId)
-	d := w.Bytes()
+	body := encodeXIQueryPointer(window, deviceId)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: XIQueryPointerOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: XIQueryPointerOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return XIQueryPointerCookie(seq)
 }
 
@@ -132,114 +138,123 @@ func (cookie XIQueryPointerCookie) Reply(conn *x.Conn) (*XIQueryPointerReply, er
 }
 
 func XIWarpPointer(conn *x.Conn, srcWin, dstWin x.Window, srcX, srcY float32, srcWidth, srcHeight uint16, dstX, dstY float32, deviceId DeviceId) {
-	w := x.NewWriter()
-	writeXIWarpPointer(w, srcWin, dstWin, srcX, srcY, srcWidth, srcHeight, dstX, dstY, deviceId)
-	d := w.Bytes()
+	body := encodeXIWarpPointer(srcWin, dstWin, srcX, srcY, srcWidth, srcHeight, dstX, dstY, deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIWarpPointerOpcode,
+		Header: x.RequestHeader{
+			Data: XIWarpPointerOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func XIWarpPointerChecked(conn *x.Conn, srcWin, dstWin x.Window, srcX, srcY float32, srcWidth, srcHeight uint16, dstX, dstY float32, deviceId DeviceId) x.VoidCookie {
-	w := x.NewWriter()
-	writeXIWarpPointer(w, srcWin, dstWin, srcX, srcY, srcWidth, srcHeight, dstX, dstY, deviceId)
-	d := w.Bytes()
+	body := encodeXIWarpPointer(srcWin, dstWin, srcX, srcY, srcWidth, srcHeight, dstX, dstY, deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIWarpPointerOpcode,
+		Header: x.RequestHeader{
+			Data: XIWarpPointerOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func XIChangeCursor(conn *x.Conn, window x.Window, cursor x.Cursor, deviceId DeviceId) {
-	w := x.NewWriter()
-	writeXIChangeCursor(w, window, cursor, deviceId)
-	d := w.Bytes()
+	body := encodeXIChangeCursor(window, cursor, deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIChangeCursorOpcode,
+		Header: x.RequestHeader{
+			Data: XIChangeCursorOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func XIChangeCursorChecked(conn *x.Conn, window x.Window, cursor x.Cursor, deviceId DeviceId) x.VoidCookie {
-	w := x.NewWriter()
-	writeXIChangeCursor(w, window, cursor, deviceId)
-	d := w.Bytes()
+	body := encodeXIChangeCursor(window, cursor, deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIChangeCursorOpcode,
+		Header: x.RequestHeader{
+			Data: XIChangeCursorOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func XIChangeHierarchy(conn *x.Conn, changes []HierarchyChange) {
-	w := x.NewWriter()
-	writeXIChangeHierarchy(w, changes)
-	d := w.Bytes()
+	body := encodeXIChangeHierarchy(changes)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIChangeHierarchyOpcode,
+		Header: x.RequestHeader{
+			Data: XIChangeHierarchyOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func XIChangeHierarchyChecked(conn *x.Conn, changes []HierarchyChange) x.VoidCookie {
-	w := x.NewWriter()
-	writeXIChangeHierarchy(w, changes)
-	d := w.Bytes()
+	body := encodeXIChangeHierarchy(changes)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIChangeHierarchyOpcode,
+		Header: x.RequestHeader{
+			Data: XIChangeHierarchyOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func XISetClientPointer(conn *x.Conn, window x.Window, deviceId DeviceId) {
-	w := x.NewWriter()
-	writeXISetClientPointer(w, window, deviceId)
-	d := w.Bytes()
+	body := encodeXISetClientPointer(window, deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XISetClientPointerOpcode,
+		Header: x.RequestHeader{
+			Data: XISetClientPointerOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func XISetClientPointerChecked(conn *x.Conn, window x.Window, deviceId DeviceId) x.VoidCookie {
-	w := x.NewWriter()
-	writeXISetClientPointer(w, window, deviceId)
-	d := w.Bytes()
+	body := encodeXISetClientPointer(window, deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XISetClientPointerOpcode,
+		Header: x.RequestHeader{
+			Data: XISetClientPointerOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func XIGetClientPointer(conn *x.Conn, window x.Window) XIGetClientPointerCookie {
-	w := x.NewWriter()
-	writeXIGetClientPointer(w, window)
-	d := w.Bytes()
+	body := encodeXIGetClientPointer(window)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: XIGetClientPointerOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: XIGetClientPointerOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return XIGetClientPointerCookie(seq)
 }
 
@@ -258,39 +273,42 @@ func (cookie XIGetClientPointerCookie) Reply(conn *x.Conn) (*XIGetClientPointerR
 }
 
 func XISetFocus(conn *x.Conn, focus x.Window, time x.Timestamp, deviceId DeviceId) {
-	w := x.NewWriter()
-	writeXISetFocus(w, focus, time, deviceId)
-	d := w.Bytes()
+	body := encodeXISetFocus(focus, time, deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XISetFocusOpcode,
+		Header: x.RequestHeader{
+			Data: XISetFocusOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func XISetFocusChecked(conn *x.Conn, focus x.Window, time x.Timestamp, deviceId DeviceId) x.VoidCookie {
-	w := x.NewWriter()
-	writeXISetFocus(w, focus, time, deviceId)
-	d := w.Bytes()
+	body := encodeXISetFocus(focus, time, deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XISetFocusOpcode,
+		Header: x.RequestHeader{
+			Data: XISetFocusOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func XIGetFocus(conn *x.Conn, deviceId DeviceId) XIGetFocusCookie {
-	w := x.NewWriter()
-	writeXIGetFocus(w, deviceId)
-	d := w.Bytes()
+	body := encodeXIGetFocus(deviceId)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: XIGetFocusOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: XIGetFocusOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return XIGetFocusCookie(seq)
 }
 
@@ -309,14 +327,15 @@ func (cookie XIGetFocusCookie) Reply(conn *x.Conn) (*XIGetFocusReply, error) {
 }
 
 func XIGrabDevice(conn *x.Conn, window x.Window, time x.Timestamp, cursor x.Cursor, deviceId DeviceId, mode, pairedDeviceMode uint8, ownerEvents bool, masks []EventMask) XIGrabDeviceCookie {
-	w := x.NewWriter()
-	writeXIGrabDevice(w, window, time, cursor, deviceId, mode, pairedDeviceMode, ownerEvents, masks)
-	d := w.Bytes()
+	body := encodeXIGrabDevice(window, time, cursor, deviceId, mode, pairedDeviceMode, ownerEvents, masks)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: XIGrabDeviceOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: XIGrabDeviceOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return XIGrabDeviceCookie(seq)
 }
 
@@ -335,64 +354,69 @@ func (cookie XIGrabDeviceCookie) Reply(conn *x.Conn) (*XIGrabDeviceReply, error)
 }
 
 func XIUngrabDevice(conn *x.Conn, time x.Timestamp, deviceId DeviceId) {
-	w := x.NewWriter()
-	writeXIUngrabDevice(w, time, deviceId)
-	d := w.Bytes()
+	body := encodeXIUngrabDevice(time, deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIUngrabDeviceOpcode,
+		Header: x.RequestHeader{
+			Data: XIUngrabDeviceOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func XIUngrabDeviceChecked(conn *x.Conn, time x.Timestamp, deviceId DeviceId) x.VoidCookie {
-	w := x.NewWriter()
-	writeXIUngrabDevice(w, time, deviceId)
-	d := w.Bytes()
+	body := encodeXIUngrabDevice(time, deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIUngrabDeviceOpcode,
+		Header: x.RequestHeader{
+			Data: XIUngrabDeviceOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func XIAllowEvents(conn *x.Conn, time x.Timestamp, deviceId DeviceId, eventMode uint8, touchId uint32, grabWindow x.Window) {
-	w := x.NewWriter()
-	writeXIAllowEvents(w, time, deviceId, eventMode, touchId, grabWindow)
-	d := w.Bytes()
+	body := encodeXIAllowEvents(time, deviceId, eventMode, touchId, grabWindow)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIAllowEventsOpcode,
+		Header: x.RequestHeader{
+			Data: XIAllowEventsOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func XIAllowEventsChecked(conn *x.Conn, time x.Timestamp, deviceId DeviceId, eventMode uint8, touchId uint32, grabWindow x.Window) x.VoidCookie {
-	w := x.NewWriter()
-	writeXIAllowEvents(w, time, deviceId, eventMode, touchId, grabWindow)
-	d := w.Bytes()
+	body := encodeXIAllowEvents(time, deviceId, eventMode, touchId, grabWindow)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIAllowEventsOpcode,
+		Header: x.RequestHeader{
+			Data: XIAllowEventsOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func XIPassiveGrabDevice(conn *x.Conn, grabWindow x.Window, cursor x.Cursor, detail uint32, deviceId DeviceId, grabType, grabMode, pairedDeviceMode uint8, ownerEvents bool, masks []uint32, modifiers []uint32) XIPassiveGrabDeviceCookie {
-	w := x.NewWriter()
-	writeXIPassiveGrabDevice(w, grabWindow, cursor, detail, deviceId, grabType, grabMode, pairedDeviceMode, ownerEvents, masks, modifiers)
-	d := w.Bytes()
+	body := encodeXIPassiveGrabDevice(grabWindow, cursor, detail, deviceId, grabType, grabMode, pairedDeviceMode, ownerEvents, masks, modifiers)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: XIPassiveGrabDeviceOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: XIPassiveGrabDeviceOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return XIPassiveGrabDeviceCookie(seq)
 }
 
@@ -411,39 +435,42 @@ func (cookie XIPassiveGrabDeviceCookie) Reply(conn *x.Conn) (*XIPassiveGrabDevic
 }
 
 func XIPassiveUngrabDevice(conn *x.Conn, grabWindow x.Window, detail uint32, deviceId DeviceId, grabType uint8, modifiers []uint32) {
-	w := x.NewWriter()
-	writeXIPassiveUngrabDevice(w, grabWindow, detail, deviceId, grabType, modifiers)
-	d := w.Bytes()
+	body := encodeXIPassiveUngrabDevice(grabWindow, detail, deviceId, grabType, modifiers)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIPassiveUngrabDeviceOpcode,
+		Header: x.RequestHeader{
+			Data: XIPassiveUngrabDeviceOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func XIPassiveUngrabDeviceChecked(conn *x.Conn, grabWindow x.Window, detail uint32, deviceId DeviceId, grabType uint8, modifiers []uint32) x.VoidCookie {
-	w := x.NewWriter()
-	writeXIPassiveUngrabDevice(w, grabWindow, detail, deviceId, grabType, modifiers)
-	d := w.Bytes()
+	body := encodeXIPassiveUngrabDevice(grabWindow, detail, deviceId, grabType, modifiers)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIPassiveUngrabDeviceOpcode,
+		Header: x.RequestHeader{
+			Data: XIPassiveUngrabDeviceOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func XIListProperties(conn *x.Conn, deviceId DeviceId) XIListPropertiesCookie {
-	w := x.NewWriter()
-	writeXIListProperties(w, deviceId)
-	d := w.Bytes()
+	body := encodeXIListProperties(deviceId)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: XIListPropertiesOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: XIListPropertiesOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return XIListPropertiesCookie(seq)
 }
 
@@ -462,64 +489,69 @@ func (cookie XIListPropertiesCookie) Reply(conn *x.Conn) (*XIListPropertiesReply
 }
 
 func XIChangeProperty(conn *x.Conn, deviceId DeviceId, mode uint8, format uint8, property x.Atom, Type x.Atom, data []byte) {
-	w := x.NewWriter()
-	writeXIChangeProperty(w, deviceId, mode, format, property, Type, data)
-	d := w.Bytes()
+	body := encodeXIChangeProperty(deviceId, mode, format, property, Type, data)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIChangePropertyOpcode,
+		Header: x.RequestHeader{
+			Data: XIChangePropertyOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func XIChangePropertyChecked(conn *x.Conn, deviceId DeviceId, mode uint8, format uint8, property x.Atom, Type x.Atom, data []byte) x.VoidCookie {
-	w := x.NewWriter()
-	writeXIChangeProperty(w, deviceId, mode, format, property, Type, data)
-	d := w.Bytes()
+	body := encodeXIChangeProperty(deviceId, mode, format, property, Type, data)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIChangePropertyOpcode,
+		Header: x.RequestHeader{
+			Data: XIChangePropertyOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func XIDeleteProperty(conn *x.Conn, deviceId DeviceId, property x.Atom) {
-	w := x.NewWriter()
-	writeXIDeleteProperty(w, deviceId, property)
-	d := w.Bytes()
+	body := encodeXIDeleteProperty(deviceId, property)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIDeletePropertyOpcode,
+		Header: x.RequestHeader{
+			Data: XIDeletePropertyOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func XIDeletePropertyChecked(conn *x.Conn, deviceId DeviceId, property x.Atom) x.VoidCookie {
-	w := x.NewWriter()
-	writeXIDeleteProperty(w, deviceId, property)
-	d := w.Bytes()
+	body := encodeXIDeleteProperty(deviceId, property)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  XIDeletePropertyOpcode,
+		Header: x.RequestHeader{
+			Data: XIDeletePropertyOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func XIGetProperty(conn *x.Conn, deviceId DeviceId, delete bool, property x.Atom, Type x.Atom, offset, len uint32) XIGetPropertyCookie {
-	w := x.NewWriter()
-	writeXIGetProperty(w, deviceId, delete, property, Type, offset, len)
-	d := w.Bytes()
+	body := encodeXIGetProperty(deviceId, delete, property, Type, offset, len)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: XIGetPropertyOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: XIGetPropertyOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return XIGetPropertyCookie(seq)
 }
 

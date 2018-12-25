@@ -3,14 +3,15 @@ package input
 import x "github.com/linuxdeepin/go-x11-client"
 
 func OpenDevice(conn *x.Conn, deviceId uint8) OpenDeviceCookie {
-	w := x.NewWriter()
-	writeOpenDevice(w, deviceId)
-	d := w.Bytes()
+	body := encodeOpenDevice(deviceId)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: OpenDeviceOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: OpenDeviceOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return OpenDeviceCookie(seq)
 }
 
@@ -29,51 +30,55 @@ func (cookie OpenDeviceCookie) Reply(conn *x.Conn) (*OpenDeviceReply, error) {
 }
 
 func CloseDevice(conn *x.Conn, deviceId uint8) {
-	w := x.NewWriter()
-	writeCloseDevice(w, deviceId)
-	d := w.Bytes()
+	body := encodeCloseDevice(deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CloseDeviceOpcode,
+		Header: x.RequestHeader{
+			Data: CloseDeviceOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func CloseDeviceChecked(conn *x.Conn, deviceId uint8) x.VoidCookie {
-	w := x.NewWriter()
-	writeCloseDevice(w, deviceId)
-	d := w.Bytes()
+	body := encodeCloseDevice(deviceId)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  CloseDeviceOpcode,
+		Header: x.RequestHeader{
+			Data: CloseDeviceOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func SelectExtensionEvent(conn *x.Conn, window x.Window, classes []EventClass) {
-	w := x.NewWriter()
-	writeSelectExtensionEvent(w, window, classes)
-	d := w.Bytes()
+	body := encodeSelectExtensionEvent(window, classes)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SelectExtensionEventOpcode,
+		Header: x.RequestHeader{
+			Data: SelectExtensionEventOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SelectExtensionEventChecked(conn *x.Conn, window x.Window, classes []EventClass) x.VoidCookie {
-	w := x.NewWriter()
-	writeSelectExtensionEvent(w, window, classes)
-	d := w.Bytes()
+	body := encodeSelectExtensionEvent(window, classes)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SelectExtensionEventOpcode,
+		Header: x.RequestHeader{
+			Data: SelectExtensionEventOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }

@@ -3,10 +3,12 @@ package composite
 import "github.com/linuxdeepin/go-x11-client"
 
 // #WREQ
-func writeQueryVersion(w *x.Writer, majorVersion, minorVersion uint32) {
-	w.WritePad(4)
-	w.Write4b(majorVersion)
-	w.Write4b(minorVersion)
+func encodeQueryVersion(majorVersion, minorVersion uint32) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(majorVersion).
+		Write4b(minorVersion).
+		End()
+	return
 }
 
 type QueryVersionReply struct {
@@ -52,36 +54,46 @@ func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
 }
 
 // #WREQ
-func writeRedirectWindow(w *x.Writer, window x.Window, update uint8) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-	w.Write1b(update)
-	w.WritePad(3)
+func encodeRedirectWindow(window x.Window, update uint8) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(window)).
+		Write1b(update).
+		WritePad(3).
+		End()
+	return
 }
 
 // #WREQ
-func writeRedirectSubwindows(w *x.Writer, window x.Window, update uint8) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-	w.Write1b(update)
-	w.WritePad(3)
+func encodeRedirectSubwindows(window x.Window, update uint8) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(window)).
+		Write1b(update).
+		WritePad(3).
+		End()
+	return
 }
 
 // #WREQ
-func writeUnredirectWindow(w *x.Writer, window x.Window) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
+func encodeUnredirectWindow(window x.Window) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(window)).
+		End()
+	return
 }
 
 // #WREQ
-func writeUnredirectSubwindows(w *x.Writer, window x.Window) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
+func encodeUnredirectSubwindows(window x.Window) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(window)).
+		End()
+	return
 }
 
 // #WREQ
-func writeNameWindowPixmap(w *x.Writer, window x.Window, pixmap x.Pixmap) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-	w.Write4b(uint32(pixmap))
+func encodeNameWindowPixmap(window x.Window, pixmap x.Pixmap) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(window)).
+		Write4b(uint32(pixmap)).
+		End()
+	return
 }

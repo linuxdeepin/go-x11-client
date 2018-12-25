@@ -3,14 +3,15 @@ package screensaver
 import x "github.com/linuxdeepin/go-x11-client"
 
 func QueryVersion(conn *x.Conn, clientMajorVersion, clientMinorVersion uint8) QueryVersionCookie {
-	w := x.NewWriter()
-	writeQueryVersion(w, clientMajorVersion, clientMinorVersion)
-	d := w.Bytes()
+	body := encodeQueryVersion(clientMajorVersion, clientMinorVersion)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: QueryVersionOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: QueryVersionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return QueryVersionCookie(seq)
 }
 
@@ -29,14 +30,15 @@ func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error)
 }
 
 func QueryInfo(conn *x.Conn, drawable x.Drawable) QueryInfoCookie {
-	w := x.NewWriter()
-	writeQueryInfo(w, drawable)
-	d := w.Bytes()
+	body := encodeQueryInfo(drawable)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: QueryInfoOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: QueryInfoOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return QueryInfoCookie(seq)
 }
 
@@ -55,101 +57,109 @@ func (cookie QueryInfoCookie) Reply(conn *x.Conn) (*QueryInfoReply, error) {
 }
 
 func SelectInput(conn *x.Conn, drawable x.Drawable, eventMask uint32) {
-	w := x.NewWriter()
-	writeSelectInput(w, drawable, eventMask)
-	d := w.Bytes()
+	body := encodeSelectInput(drawable, eventMask)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SelectInputOpcode,
+		Header: x.RequestHeader{
+			Data: SelectInputOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SelectInputChecked(conn *x.Conn, drawable x.Drawable, eventMask uint32) x.VoidCookie {
-	w := x.NewWriter()
-	writeSelectInput(w, drawable, eventMask)
-	d := w.Bytes()
+	body := encodeSelectInput(drawable, eventMask)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SelectInputOpcode,
+		Header: x.RequestHeader{
+			Data: SelectInputOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func SetAttributes(conn *x.Conn, drawable x.Drawable, X, y int16, width, height, boardWidth uint16, class, depth uint8, visual x.VisualID, valueMask uint32, valueList []uint32) {
-	w := x.NewWriter()
-	writeSetAttributes(w, drawable, X, y, width, height, boardWidth, class, depth, visual, valueMask, valueList)
-	d := w.Bytes()
+	body := encodeSetAttributes(drawable, X, y, width, height, boardWidth, class, depth, visual, valueMask, valueList)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetAttributesOpcode,
+		Header: x.RequestHeader{
+			Data: SetAttributesOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SetAttributesChecked(conn *x.Conn, drawable x.Drawable, X, y int16, width, height, boardWidth uint16, class, depth uint8, visual x.VisualID, valueMask uint32, valueList []uint32) x.VoidCookie {
-	w := x.NewWriter()
-	writeSetAttributes(w, drawable, X, y, width, height, boardWidth, class, depth, visual, valueMask, valueList)
-	d := w.Bytes()
+	body := encodeSetAttributes(drawable, X, y, width, height, boardWidth, class, depth, visual, valueMask, valueList)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetAttributesOpcode,
+		Header: x.RequestHeader{
+			Data: SetAttributesOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func UnsetAttributes(conn *x.Conn, drawable x.Drawable) {
-	w := x.NewWriter()
-	writeUnsetAttributes(w, drawable)
-	d := w.Bytes()
+	body := encodeUnsetAttributes(drawable)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  UnsetAttributesOpcode,
+		Header: x.RequestHeader{
+			Data: UnsetAttributesOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func UnsetAttributesChecked(conn *x.Conn, drawable x.Drawable) x.VoidCookie {
-	w := x.NewWriter()
-	writeUnsetAttributes(w, drawable)
-	d := w.Bytes()
+	body := encodeUnsetAttributes(drawable)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  UnsetAttributesOpcode,
+		Header: x.RequestHeader{
+			Data: UnsetAttributesOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func Suspend(conn *x.Conn, suspend bool) {
-	w := x.NewWriter()
-	writeSuspend(w, suspend)
-	d := w.Bytes()
+	body := encodeSuspend(suspend)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SuspendOpcode,
+		Header: x.RequestHeader{
+			Data: SuspendOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SuspendChecked(conn *x.Conn, suspend bool) x.VoidCookie {
-	w := x.NewWriter()
-	writeSuspend(w, suspend)
-	d := w.Bytes()
+	body := encodeSuspend(suspend)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SuspendOpcode,
+		Header: x.RequestHeader{
+			Data: SuspendOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }

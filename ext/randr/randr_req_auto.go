@@ -3,14 +3,15 @@ package randr
 import x "github.com/linuxdeepin/go-x11-client"
 
 func QueryVersion(conn *x.Conn, clientMajorVersion, clientMinorVersion uint32) QueryVersionCookie {
-	w := x.NewWriter()
-	writeQueryVersion(w, clientMajorVersion, clientMinorVersion)
-	d := w.Bytes()
+	body := encodeQueryVersion(clientMajorVersion, clientMinorVersion)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: QueryVersionOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: QueryVersionOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return QueryVersionCookie(seq)
 }
 
@@ -29,14 +30,15 @@ func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error)
 }
 
 func GetCrtcInfo(conn *x.Conn, crtc Crtc, configTimestamp x.Timestamp) GetCrtcInfoCookie {
-	w := x.NewWriter()
-	writeGetCrtcInfo(w, crtc, configTimestamp)
-	d := w.Bytes()
+	body := encodeGetCrtcInfo(crtc, configTimestamp)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetCrtcInfoOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetCrtcInfoOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetCrtcInfoCookie(seq)
 }
 
@@ -55,14 +57,15 @@ func (cookie GetCrtcInfoCookie) Reply(conn *x.Conn) (*GetCrtcInfoReply, error) {
 }
 
 func GetOutputInfo(conn *x.Conn, output Output, configTimestamp x.Timestamp) GetOutputInfoCookie {
-	w := x.NewWriter()
-	writeGetOutputInfo(w, output, configTimestamp)
-	d := w.Bytes()
+	body := encodeGetOutputInfo(output, configTimestamp)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetOutputInfoOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetOutputInfoOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetOutputInfoCookie(seq)
 }
 
@@ -81,14 +84,15 @@ func (cookie GetOutputInfoCookie) Reply(conn *x.Conn) (*GetOutputInfoReply, erro
 }
 
 func GetScreenResources(conn *x.Conn, window x.Window) GetScreenResourcesCookie {
-	w := x.NewWriter()
-	writeGetScreenResources(w, window)
-	d := w.Bytes()
+	body := encodeGetScreenResources(window)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetScreenResourcesOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetScreenResourcesOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetScreenResourcesCookie(seq)
 }
 
@@ -107,14 +111,15 @@ func (cookie GetScreenResourcesCookie) Reply(conn *x.Conn) (*GetScreenResourcesR
 }
 
 func GetOutputPrimary(conn *x.Conn, window x.Window) GetOutputPrimaryCookie {
-	w := x.NewWriter()
-	writeGetOutputPrimary(w, window)
-	d := w.Bytes()
+	body := encodeGetOutputPrimary(window)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetOutputPrimaryOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetOutputPrimaryOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetOutputPrimaryCookie(seq)
 }
 
@@ -133,14 +138,15 @@ func (cookie GetOutputPrimaryCookie) Reply(conn *x.Conn) (*GetOutputPrimaryReply
 }
 
 func GetOutputProperty(conn *x.Conn, output Output, property, Type x.Atom, longOffset, longLength uint32, delete, pending bool) GetOutputPropertyCookie {
-	w := x.NewWriter()
-	writeGetOutputProperty(w, output, property, Type, longOffset, longLength, delete, pending)
-	d := w.Bytes()
+	body := encodeGetOutputProperty(output, property, Type, longOffset, longLength, delete, pending)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetOutputPropertyOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetOutputPropertyOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetOutputPropertyCookie(seq)
 }
 
@@ -159,14 +165,15 @@ func (cookie GetOutputPropertyCookie) Reply(conn *x.Conn) (*GetOutputPropertyRep
 }
 
 func SetCrtcConfig(conn *x.Conn, crtc Crtc, timestamp, configTimestamp x.Timestamp, X, y int16, mode Mode, rotation uint16, outputs []Output) SetCrtcConfigCookie {
-	w := x.NewWriter()
-	writeSetCrtcConfig(w, crtc, timestamp, configTimestamp, X, y, mode, rotation, outputs)
-	d := w.Bytes()
+	body := encodeSetCrtcConfig(crtc, timestamp, configTimestamp, X, y, mode, rotation, outputs)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: SetCrtcConfigOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: SetCrtcConfigOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return SetCrtcConfigCookie(seq)
 }
 
@@ -185,39 +192,42 @@ func (cookie SetCrtcConfigCookie) Reply(conn *x.Conn) (*SetCrtcConfigReply, erro
 }
 
 func SelectInput(conn *x.Conn, window x.Window, enable uint16) {
-	w := x.NewWriter()
-	writeSelectInput(w, window, enable)
-	d := w.Bytes()
+	body := encodeSelectInput(window, enable)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SelectInputOpcode,
+		Header: x.RequestHeader{
+			Data: SelectInputOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SelectInputChecked(conn *x.Conn, window x.Window, enable uint16) x.VoidCookie {
-	w := x.NewWriter()
-	writeSelectInput(w, window, enable)
-	d := w.Bytes()
+	body := encodeSelectInput(window, enable)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SelectInputOpcode,
+		Header: x.RequestHeader{
+			Data: SelectInputOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }
 
 func GetCrtcGammaSize(conn *x.Conn, crtc Crtc) GetCrtcGammaSizeCookie {
-	w := x.NewWriter()
-	writeGetCrtcGammaSize(w, crtc)
-	d := w.Bytes()
+	body := encodeGetCrtcGammaSize(crtc)
 	req := &x.ProtocolRequest{
-		Ext:    _ext,
-		Opcode: GetCrtcGammaSizeOpcode,
+		Ext: _ext,
+		Header: x.RequestHeader{
+			Data: GetCrtcGammaSizeOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return GetCrtcGammaSizeCookie(seq)
 }
 
@@ -236,26 +246,28 @@ func (cookie GetCrtcGammaSizeCookie) Reply(conn *x.Conn) (*GetCrtcGammaSizeReply
 }
 
 func SetCrtcGamma(conn *x.Conn, crtc Crtc, red, green, blue []uint16) {
-	w := x.NewWriter()
-	writeSetCrtcGamma(w, crtc, red, green, blue)
-	d := w.Bytes()
+	body := encodeSetCrtcGamma(crtc, red, green, blue)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetCrtcGammaOpcode,
+		Header: x.RequestHeader{
+			Data: SetCrtcGammaOpcode,
+		},
+		Body: body,
 	}
-	conn.SendRequest(0, d, req)
+	conn.SendRequest(0, req)
 }
 
 func SetCrtcGammaChecked(conn *x.Conn, crtc Crtc, red, green, blue []uint16) x.VoidCookie {
-	w := x.NewWriter()
-	writeSetCrtcGamma(w, crtc, red, green, blue)
-	d := w.Bytes()
+	body := encodeSetCrtcGamma(crtc, red, green, blue)
 	req := &x.ProtocolRequest{
 		Ext:     _ext,
 		NoReply: true,
-		Opcode:  SetCrtcGammaOpcode,
+		Header: x.RequestHeader{
+			Data: SetCrtcGammaOpcode,
+		},
+		Body: body,
 	}
-	seq := conn.SendRequest(x.RequestChecked, d, req)
+	seq := conn.SendRequest(x.RequestChecked, req)
 	return x.VoidCookie(seq)
 }

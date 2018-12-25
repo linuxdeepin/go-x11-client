@@ -1,28 +1,28 @@
-package ge
+package bigrequests
 
 import x "github.com/linuxdeepin/go-x11-client"
 
-func QueryVersion(conn *x.Conn, majorVersion, minorVersion uint16) QueryVersionCookie {
-	body := encodeQueryVersion(majorVersion, minorVersion)
+func Enable(conn *x.Conn) EnableCookie {
+	body := encodeEnable()
 	req := &x.ProtocolRequest{
 		Ext: _ext,
 		Header: x.RequestHeader{
-			Data: QueryVersionOpcode,
+			Data: EnableOpcode,
 		},
 		Body: body,
 	}
 	seq := conn.SendRequest(x.RequestChecked, req)
-	return QueryVersionCookie(seq)
+	return EnableCookie(seq)
 }
 
-func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error) {
+func (cookie EnableCookie) Reply(conn *x.Conn) (*EnableReply, error) {
 	replyBuf, err := conn.WaitForReply(uint64(cookie))
 	if err != nil {
 		return nil, err
 	}
 	r := x.NewReaderFromData(replyBuf)
-	var reply QueryVersionReply
-	err = readQueryVersionReply(r, &reply)
+	var reply EnableReply
+	err = readEnableReply(r, &reply)
 	if err != nil {
 		return nil, err
 	}

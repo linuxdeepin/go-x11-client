@@ -6,14 +6,15 @@ import (
 	"github.com/linuxdeepin/go-x11-client"
 )
 
+// size: 2b
 type Range8 struct {
 	First uint8
 	Last  uint8
 }
 
-func writeRange8(w *x.Writer, v Range8) {
-	w.Write1b(v.First)
-	w.Write1b(v.Last)
+func writeRange8(b *x.FixedSizeBuf, v Range8) {
+	b.Write1b(v.First)
+	b.Write1b(v.Last)
 }
 
 func readRange8(r *x.Reader) (Range8, error) {
@@ -30,6 +31,7 @@ func readRange8(r *x.Reader) (Range8, error) {
 	return v, nil
 }
 
+// size: 4b
 type Range16 struct {
 	First uint16
 	Last  uint16
@@ -49,11 +51,12 @@ func readRange16(r *x.Reader) (Range16, error) {
 	return v, nil
 }
 
-func writeRange16(w *x.Writer, v Range16) {
-	w.Write2b(v.First)
-	w.Write2b(v.Last)
+func writeRange16(b *x.FixedSizeBuf, v Range16) {
+	b.Write2b(v.First)
+	b.Write2b(v.Last)
 }
 
+// size: 6b
 type ExtRange struct {
 	Major Range8
 	Minor Range16
@@ -73,11 +76,12 @@ func readExtRange(r *x.Reader) (v ExtRange, err error) {
 	return v, nil
 }
 
-func writeExtRange(w *x.Writer, v ExtRange) {
-	writeRange8(w, v.Major)
-	writeRange16(w, v.Minor)
+func writeExtRange(b *x.FixedSizeBuf, v ExtRange) {
+	writeRange8(b, v.Major)
+	writeRange16(b, v.Minor)
 }
 
+// size: 6 * 4b
 type Range struct {
 	CoreRequests    Range8
 	CoreReplies     Range8
@@ -90,17 +94,17 @@ type Range struct {
 	ClientDied      bool
 }
 
-func writeRange(w *x.Writer, v *Range) {
-	writeRange8(w, v.CoreRequests)
-	writeRange8(w, v.CoreReplies)
-	writeExtRange(w, v.ExtRequests)
-	writeExtRange(w, v.ExtReplies)
-	writeRange8(w, v.DeliveredEvents)
-	writeRange8(w, v.DeviceEvents)
-	writeRange8(w, v.Errors)
+func writeRange(b *x.FixedSizeBuf, v *Range) {
+	writeRange8(b, v.CoreRequests)
+	writeRange8(b, v.CoreReplies)
+	writeExtRange(b, v.ExtRequests)
+	writeExtRange(b, v.ExtReplies)
+	writeRange8(b, v.DeliveredEvents)
+	writeRange8(b, v.DeviceEvents)
+	writeRange8(b, v.Errors)
 
-	w.Write1b(x.BoolToUint8(v.ClientStarted))
-	w.Write1b(x.BoolToUint8(v.ClientDied))
+	b.Write1b(x.BoolToUint8(v.ClientStarted))
+	b.Write1b(x.BoolToUint8(v.ClientDied))
 }
 
 func readRange(r *x.Reader, v *Range) error {
@@ -222,10 +226,12 @@ func readBadContextError(r *x.Reader) x.Error {
 }
 
 // #WREQ
-func writeQueryVersion(w *x.Writer, majorVersion, minorVersion uint16) {
-	w.WritePad(4)
-	w.Write2b(majorVersion)
-	w.Write2b(minorVersion)
+func encodeQueryVersion(majorVersion, minorVersion uint16) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write2b(majorVersion).
+		Write2b(minorVersion).
+		End()
+	return
 }
 
 type QueryVersionReply struct {
@@ -271,68 +277,74 @@ func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
 }
 
 // #WREQ
-func writeCreateContext(w *x.Writer, context Context, elementHeader ElementHeader,
-	clientSpecs []ClientSpec, ranges []Range) {
-	w.WritePad(4)
-	w.Write4b(uint32(context))
-
-	w.Write1b(uint8(elementHeader))
-	w.WritePad(3)
+func encodeCreateContext(context Context, elementHeader ElementHeader,
+	clientSpecs []ClientSpec, ranges []Range) (b x.RequestBody) {
 
 	clientSpecsLen := len(clientSpecs)
-	w.Write4b(uint32(clientSpecsLen))
-
 	rangesLen := len(ranges)
-	w.Write4b(uint32(rangesLen))
+	b0 := b.AddBlock(4 + clientSpecsLen + rangesLen*6).
+		Write4b(uint32(context)).
+		Write1b(uint8(elementHeader)).
+		WritePad(3).
+		Write4b(uint32(clientSpecsLen)).
+		Write4b(uint32(rangesLen))
 
 	for _, clientSpec := range clientSpecs {
-		w.Write4b(uint32(clientSpec))
+		b0.Write4b(uint32(clientSpec))
 	}
 
 	for i := 0; i < rangesLen; i++ {
-		writeRange(w, &ranges[i])
+		writeRange(b0, &ranges[i])
 	}
+	b0.End()
+	return
 }
 
 // #WREQ
-func writeRegisterClients(w *x.Writer, context Context, elementHeader ElementHeader,
-	clientSpecs []ClientSpec, ranges []Range) {
-	w.WritePad(4)
-	w.Write4b(uint32(context))
-
-	w.Write1b(uint8(elementHeader))
-	w.WritePad(3)
+func encodeRegisterClients(context Context, elementHeader ElementHeader,
+	clientSpecs []ClientSpec, ranges []Range) (b x.RequestBody) {
 
 	clientSpecsLen := len(clientSpecs)
-	w.Write4b(uint32(clientSpecsLen))
-
 	rangesLen := len(ranges)
-	w.Write4b(uint32(rangesLen))
+
+	b0 := b.AddBlock(4 + clientSpecsLen + rangesLen*6).
+		Write4b(uint32(context)).
+		Write1b(uint8(elementHeader)).
+		WritePad(3).
+		Write4b(uint32(clientSpecsLen)).
+		Write4b(uint32(rangesLen))
 
 	for _, clientSpec := range clientSpecs {
-		w.Write4b(uint32(clientSpec))
+		b0.Write4b(uint32(clientSpec))
 	}
 
 	for i := 0; i < rangesLen; i++ {
-		writeRange(w, &ranges[i])
+		writeRange(b0, &ranges[i])
 	}
+	b0.End()
+	return
 }
 
 // #WREQ
-func writeUnregisterClients(w *x.Writer, context Context, clientSpecs []ClientSpec) {
-	w.WritePad(4)
-	w.Write4b(uint32(context))
+func encodeUnregisterClients(context Context, clientSpecs []ClientSpec) (b x.RequestBody) {
 	clientSpecsLen := len(clientSpecs)
-	w.Write4b(uint32(clientSpecsLen))
+	b0 := b.AddBlock(2 + clientSpecsLen).
+		Write4b(uint32(context)).
+		Write4b(uint32(clientSpecsLen))
+
 	for _, clientSpec := range clientSpecs {
-		w.Write4b(uint32(clientSpec))
+		b0.Write4b(uint32(clientSpec))
 	}
+	b0.End()
+	return
 }
 
 // #WREQ
-func writeGetContext(w *x.Writer, context Context) {
-	w.WritePad(4)
-	w.Write4b(uint32(context))
+func encodeGetContext(context Context) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(context)).
+		End()
+	return
 }
 
 type GetContextReply struct {
@@ -393,9 +405,11 @@ func readGetContextReply(r *x.Reader, v *GetContextReply) error {
 }
 
 // #WREQ
-func writeEnableContext(w *x.Writer, context Context) {
-	w.WritePad(4)
-	w.Write4b(uint32(context))
+func encodeEnableContext(context Context) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(context)).
+		End()
+	return
 }
 
 type EnableContextReply struct {
@@ -475,13 +489,17 @@ func readEnableContextReply(r *x.Reader, v *EnableContextReply) error {
 }
 
 // #WREQ
-func writeDisableContext(w *x.Writer, context Context) {
-	w.WritePad(4)
-	w.Write4b(uint32(context))
+func encodeDisableContext(context Context) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(context)).
+		End()
+	return
 }
 
 // #WREQ
-func writeFreeContext(w *x.Writer, context Context) {
-	w.WritePad(4)
-	w.Write4b(uint32(context))
+func encodeFreeContext(context Context) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(context)).
+		End()
+	return
 }

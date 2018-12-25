@@ -10,8 +10,8 @@ func readFP1616(r *x.Reader) (float32, error) {
 	return ret, nil
 }
 
-func writeFP1616(w *x.Writer, value float32) {
-	w.Write4b(uint32(int32(value * float32(1<<16))))
+func writeFP1616(b *x.FixedSizeBuf, value float32) {
+	b.Write4b(uint32(int32(value * float32(1<<16))))
 }
 
 func readFP3232(r *x.Reader) (float64, error) {
@@ -28,10 +28,12 @@ func readFP3232(r *x.Reader) (float64, error) {
 }
 
 // #WREQ
-func writeXIQueryVersion(w *x.Writer, majorVersion, minorVersion uint16) {
-	w.WritePad(4)
-	w.Write2b(majorVersion)
-	w.Write2b(minorVersion)
+func encodeXIQueryVersion(majorVersion, minorVersion uint16) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write2b(majorVersion).
+		Write2b(minorVersion).
+		End()
+	return
 }
 
 type XIQueryVersionReply struct {
@@ -81,10 +83,12 @@ func readXIQueryVersionReply(r *x.Reader, v *XIQueryVersionReply) error {
 }
 
 // #WREQ
-func writeXIQueryDevice(w *x.Writer, deviceId DeviceId) {
-	w.WritePad(4)
-	w.Write2b(uint16(deviceId))
-	w.WritePad(2)
+func encodeXIQueryDevice(deviceId DeviceId) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write2b(uint16(deviceId)).
+		WritePad(2).
+		End()
+	return
 }
 
 type XIQueryDeviceReply struct {
@@ -521,16 +525,21 @@ func readTouchClass(r *x.Reader, v *TouchClass) error {
 }
 
 // #WREQ
-func writeXISelectEvents(w *x.Writer, window x.Window, masks []EventMask) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-
-	w.Write2b(uint16(len(masks)))
-	w.WritePad(2)
+func encodeXISelectEvents(window x.Window, masks []EventMask) (b x.RequestBody) {
+	var masksSize int
+	for _, mask := range masks {
+		masksSize += mask.getSizeIn4b()
+	}
+	b0 := b.AddBlock(2 + masksSize).
+		Write4b(uint32(window)).
+		Write2b(uint16(len(masks))).
+		WritePad(2)
 
 	for _, mask := range masks {
-		writeEventMask(w, mask)
+		writeEventMask(b0, mask)
 	}
+	b0.End()
+	return
 }
 
 type EventMask struct {
@@ -538,12 +547,16 @@ type EventMask struct {
 	Mask     []uint32
 }
 
-func writeEventMask(w *x.Writer, v EventMask) {
-	w.Write2b(uint16(v.DeviceId))
+func (ev *EventMask) getSizeIn4b() int {
+	return 1 + len(ev.Mask)
+}
+
+func writeEventMask(b *x.FixedSizeBuf, v EventMask) {
 	maskLen := len(v.Mask)
-	w.Write2b(uint16(maskLen))
+	b.Write2b(uint16(v.DeviceId)).
+		Write2b(uint16(maskLen))
 	for _, mask := range v.Mask {
-		w.Write4b(mask)
+		b.Write4b(mask)
 	}
 }
 
@@ -571,9 +584,11 @@ func readEventMask(r *x.Reader, v *EventMask) error {
 }
 
 // #WREQ
-func writeXIGetSelectedEvents(w *x.Writer, window x.Window) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
+func encodeXIGetSelectedEvents(window x.Window) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(window)).
+		End()
+	return
 }
 
 type XIGetSelectedEventsReply struct {
@@ -627,11 +642,13 @@ func readXIGetSelectedEventsReply(r *x.Reader, v *XIGetSelectedEventsReply) erro
 }
 
 // #WREQ
-func writeXIQueryPointer(w *x.Writer, window x.Window, deviceId DeviceId) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-	w.Write2b(uint16(deviceId))
-	w.WritePad(2)
+func encodeXIQueryPointer(window x.Window, deviceId DeviceId) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(window)).
+		Write2b(uint16(deviceId)).
+		WritePad(2).
+		End()
+	return
 }
 
 type XIQueryPointerReply struct {
@@ -804,49 +821,60 @@ func readGroupInfo(r *x.Reader, v *GroupInfo) error {
 }
 
 // #WREQ
-func writeXIWarpPointer(w *x.Writer, srcWin, dstWin x.Window, srcX, srcY float32,
-	srcWidth, srcHeight uint16, dstX, dstY float32, deviceId DeviceId) {
+func encodeXIWarpPointer(srcWin, dstWin x.Window, srcX, srcY float32, srcWidth,
+	srcHeight uint16, dstX, dstY float32, deviceId DeviceId) (b x.RequestBody) {
 
-	w.WritePad(4)
-	w.Write4b(uint32(srcWin))
-	w.Write4b(uint32(dstWin))
-	writeFP1616(w, srcX)
-	writeFP1616(w, srcY)
-	w.Write2b(srcWidth)
-	w.Write2b(srcHeight)
-	writeFP1616(w, dstX)
-	writeFP1616(w, dstY)
-	w.Write2b(uint16(deviceId))
-	w.WritePad(2)
+	b0 := b.AddBlock(8).
+		Write4b(uint32(srcWin)).
+		Write4b(uint32(dstWin))
+	writeFP1616(b0, srcX)
+	writeFP1616(b0, srcY)
+	b0.Write2b(srcWidth).
+		Write2b(srcHeight)
+	writeFP1616(b0, dstX)
+	writeFP1616(b0, dstY)
+	b0.Write2b(uint16(deviceId)).
+		WritePad(2).
+		End()
+	return
 }
 
 // #WREQ
-func writeXIChangeCursor(w *x.Writer, window x.Window, cursor x.Cursor, deviceId DeviceId) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-	w.Write4b(uint32(cursor))
-	w.Write2b(uint16(deviceId))
-	w.WritePad(2)
+func encodeXIChangeCursor(window x.Window, cursor x.Cursor, deviceId DeviceId) (b x.RequestBody) {
+	b.AddBlock(3).
+		Write4b(uint32(window)).
+		Write4b(uint32(cursor)).
+		Write2b(uint16(deviceId)).
+		WritePad(2).
+		End()
+	return
 }
 
 // #WREQ
-func writeXIChangeHierarchy(w *x.Writer, changes []HierarchyChange) {
-	w.WritePad(4)
-	w.Write1b(uint8(len(changes)))
-	w.WritePad(3)
+func encodeXIChangeHierarchy(changes []HierarchyChange) (b x.RequestBody) {
+	var changesSize int
 	for _, change := range changes {
-		writeHierarchyChange(w, change)
+		changesSize += int(change.getLen())
 	}
+	b0 := b.AddBlock(1 + changesSize).
+		Write1b(uint8(len(changes))).
+		WritePad(3)
+
+	for _, change := range changes {
+		writeHierarchyChange(b0, change)
+	}
+	b0.End()
+	return
 }
 
-func writeHierarchyChange(w *x.Writer, v HierarchyChange) {
-	w.Write2b(v.getHierarchyType())
-	w.Write2b(v.getLen() + 1)
-	v.writeTo(w)
+func writeHierarchyChange(b *x.FixedSizeBuf, v HierarchyChange) {
+	b.Write2b(v.getHierarchyType())
+	b.Write2b(v.getLen() + 1)
+	v.writeTo(b)
 }
 
 type HierarchyChange interface {
-	writeTo(w *x.Writer)
+	writeTo(b *x.FixedSizeBuf)
 	getHierarchyType() uint16
 	getLen() uint16 // Length in 4 byte units.
 }
@@ -858,14 +886,14 @@ type AddMaster struct {
 	Name     string
 }
 
-func (am *AddMaster) writeTo(w *x.Writer) {
+func (am *AddMaster) writeTo(b *x.FixedSizeBuf) {
 	nameLen := len(am.Name)
-	w.Write2b(uint16(nameLen))
-	w.Write1b(x.BoolToUint8(am.SendCore))
-	w.Write1b(x.BoolToUint8(am.Enable))
+	b.Write2b(uint16(nameLen))
+	b.Write1b(x.BoolToUint8(am.SendCore))
+	b.Write1b(x.BoolToUint8(am.Enable))
 
-	w.WriteString(am.Name)
-	w.WritePad(x.Pad(nameLen))
+	b.WriteString(am.Name)
+	b.WritePad(x.Pad(nameLen))
 }
 
 func (*AddMaster) getHierarchyType() uint16 {
@@ -885,13 +913,13 @@ type RemoveMaster struct {
 	ReturnKeyboard DeviceId
 }
 
-func (rm *RemoveMaster) writeTo(w *x.Writer) {
-	w.Write2b(uint16(rm.DeviceId))
-	w.Write1b(rm.ReturnMode)
-	w.WritePad(1)
+func (rm *RemoveMaster) writeTo(b *x.FixedSizeBuf) {
+	b.Write2b(uint16(rm.DeviceId))
+	b.Write1b(rm.ReturnMode)
+	b.WritePad(1)
 
-	w.Write2b(uint16(rm.ReturnPointer))
-	w.Write2b(uint16(rm.ReturnKeyboard))
+	b.Write2b(uint16(rm.ReturnPointer))
+	b.Write2b(uint16(rm.ReturnKeyboard))
 }
 
 func (*RemoveMaster) getHierarchyType() uint16 {
@@ -908,9 +936,9 @@ type AttachSlave struct {
 	Master   DeviceId
 }
 
-func (as *AttachSlave) writeTo(w *x.Writer) {
-	w.Write2b(uint16(as.DeviceId))
-	w.Write2b(uint16(as.Master))
+func (as *AttachSlave) writeTo(b *x.FixedSizeBuf) {
+	b.Write2b(uint16(as.DeviceId))
+	b.Write2b(uint16(as.Master))
 }
 
 func (*AttachSlave) getHierarchyType() uint16 {
@@ -926,9 +954,9 @@ type DetachSlave struct {
 	DeviceId DeviceId
 }
 
-func (ds *DetachSlave) writeTo(w *x.Writer) {
-	w.Write2b(uint16(ds.DeviceId))
-	w.WritePad(2)
+func (ds *DetachSlave) writeTo(b *x.FixedSizeBuf) {
+	b.Write2b(uint16(ds.DeviceId))
+	b.WritePad(2)
 }
 
 func (*DetachSlave) getHierarchyType() uint16 {
@@ -940,17 +968,21 @@ func (ds *DetachSlave) getLen() uint16 {
 }
 
 // #WREQ
-func writeXISetClientPointer(w *x.Writer, window x.Window, deviceId DeviceId) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-	w.Write2b(uint16(deviceId))
-	w.WritePad(2)
+func encodeXISetClientPointer(window x.Window, deviceId DeviceId) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(window)).
+		Write2b(uint16(deviceId)).
+		WritePad(2).
+		End()
+	return
 }
 
 // #WREQ
-func writeXIGetClientPointer(w *x.Writer, window x.Window) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
+func encodeXIGetClientPointer(window x.Window) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(window)).
+		End()
+	return
 }
 
 type XIGetClientPointerReply struct {
@@ -1005,19 +1037,23 @@ func readXIGetClientPointerReply(r *x.Reader, v *XIGetClientPointerReply) error 
 }
 
 // #WREQ
-func writeXISetFocus(w *x.Writer, focus x.Window, time x.Timestamp, deviceId DeviceId) {
-	w.WritePad(4)
-	w.Write4b(uint32(focus))
-	w.Write4b(uint32(time))
-	w.Write2b(uint16(deviceId))
-	w.WritePad(2)
+func encodeXISetFocus(focus x.Window, time x.Timestamp, deviceId DeviceId) (b x.RequestBody) {
+	b.AddBlock(3).
+		Write4b(uint32(focus)).
+		Write4b(uint32(time)).
+		Write2b(uint16(deviceId)).
+		WritePad(2).
+		End()
+	return
 }
 
 // #WREQ
-func writeXIGetFocus(w *x.Writer, deviceId DeviceId) {
-	w.WritePad(4)
-	w.Write2b(uint16(deviceId))
-	w.WritePad(2)
+func encodeXIGetFocus(deviceId DeviceId) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write2b(uint16(deviceId)).
+		WritePad(2).
+		End()
+	return
 }
 
 type XIGetFocusReply struct {
@@ -1056,24 +1092,28 @@ func readXIGetFocusReply(r *x.Reader, v *XIGetFocusReply) error {
 }
 
 // #WREQ
-func writeXIGrabDevice(w *x.Writer, window x.Window, time x.Timestamp, cursor x.Cursor,
-	deviceId DeviceId, mode, pairedDeviceMode uint8, ownerEvents bool, masks []EventMask) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-	w.Write4b(uint32(time))
-	w.Write4b(uint32(cursor))
-
-	w.Write2b(uint16(deviceId))
-	w.Write1b(mode)
-	w.Write1b(pairedDeviceMode)
-
-	w.Write1b(x.BoolToUint8(ownerEvents))
-	w.WritePad(1)
-	w.Write2b(uint16(len(masks)))
+func encodeXIGrabDevice(window x.Window, time x.Timestamp, cursor x.Cursor, deviceId DeviceId,
+	mode, pairedDeviceMode uint8, ownerEvents bool, masks []EventMask) (b x.RequestBody) {
+	var masksSize int
+	for _, mask := range masks {
+		masksSize += mask.getSizeIn4b()
+	}
+	b0 := b.AddBlock(5 + masksSize).
+		Write4b(uint32(window)).
+		Write4b(uint32(time)).
+		Write4b(uint32(cursor)).
+		Write2b(uint16(deviceId)).
+		Write1b(mode).
+		Write1b(pairedDeviceMode).
+		Write1b(x.BoolToUint8(ownerEvents)).
+		WritePad(1).
+		Write2b(uint16(len(masks)))
 
 	for _, mask := range masks {
-		writeEventMask(w, mask)
+		writeEventMask(b0, mask)
 	}
+	b0.End()
+	return
 }
 
 type XIGrabDeviceReply struct {
@@ -1117,55 +1157,57 @@ func readXIGrabDeviceReply(r *x.Reader, v *XIGrabDeviceReply) error {
 }
 
 // #WREQ
-func writeXIUngrabDevice(w *x.Writer, time x.Timestamp, deviceId DeviceId) {
-	w.WritePad(4)
-	w.Write4b(uint32(time))
-	w.Write2b(uint16(deviceId))
-	w.WritePad(2)
+func encodeXIUngrabDevice(time x.Timestamp, deviceId DeviceId) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(time)).
+		Write2b(uint16(deviceId)).
+		WritePad(2).
+		End()
+	return
 }
 
 // #WREQ
-func writeXIAllowEvents(w *x.Writer, time x.Timestamp, deviceId DeviceId, eventMode uint8,
-	touchId uint32, grabWindow x.Window) {
-	w.WritePad(4)
-	w.Write4b(uint32(time))
-
-	w.Write2b(uint16(deviceId))
-	w.Write1b(eventMode)
-	w.WritePad(1)
-
-	w.Write4b(touchId)
-	w.Write4b(uint32(grabWindow))
+func encodeXIAllowEvents(time x.Timestamp, deviceId DeviceId, eventMode uint8,
+	touchId uint32, grabWindow x.Window) (b x.RequestBody) {
+	b.AddBlock(4).
+		Write4b(uint32(time)).
+		Write2b(uint16(deviceId)).
+		Write1b(eventMode).
+		WritePad(1).
+		Write4b(touchId).
+		Write4b(uint32(grabWindow)).
+		End()
+	return
 }
 
 // #WREQ
-func writeXIPassiveGrabDevice(w *x.Writer, grabWindow x.Window, cursor x.Cursor,
-	detail uint32, deviceId DeviceId, grabType, grabMode, pairedDeviceMode uint8,
-	ownerEvents bool, masks []uint32, modifiers []uint32) {
-	w.WritePad(4)
-	w.WritePad(4) // unused time field
-	w.Write4b(uint32(grabWindow))
-	w.Write4b(uint32(cursor))
-	w.Write4b(detail)
+func encodeXIPassiveGrabDevice(grabWindow x.Window, cursor x.Cursor, detail uint32,
+	deviceId DeviceId, grabType, grabMode, pairedDeviceMode uint8, ownerEvents bool,
+	masks []uint32, modifiers []uint32) (b x.RequestBody) {
 
-	w.Write2b(uint16(deviceId))
-	w.Write2b(uint16(len(modifiers)))
-
-	w.Write2b(uint16(len(masks)))
-	w.Write1b(grabType)
-	w.Write1b(grabMode)
-
-	w.Write1b(pairedDeviceMode)
-	w.Write1b(x.BoolToUint8(ownerEvents))
-	w.WritePad(2)
+	b0 := b.AddBlock(7 + len(masks) + len(modifiers)).
+		WritePad(4). // unused time field
+		Write4b(uint32(grabWindow)).
+		Write4b(uint32(cursor)).
+		Write4b(detail).
+		Write2b(uint16(deviceId)).
+		Write2b(uint16(len(modifiers))).
+		Write2b(uint16(len(masks))).
+		Write1b(grabType).
+		Write1b(grabMode).
+		Write1b(pairedDeviceMode).
+		Write1b(x.BoolToUint8(ownerEvents)).
+		WritePad(2)
 
 	for _, mask := range masks {
-		w.Write4b(mask)
+		b0.Write4b(mask)
 	}
 
 	for _, mod := range modifiers {
-		w.Write4b(mod)
+		b0.Write4b(mod)
 	}
+	b0.End()
+	return
 }
 
 type XIPassiveGrabDeviceReply struct {
@@ -1242,28 +1284,31 @@ func readGrabModifierInfo(r *x.Reader, v *GrabModifierInfo) error {
 }
 
 // #WREQ
-func writeXIPassiveUngrabDevice(w *x.Writer, grabWindow x.Window, detail uint32,
-	deviceId DeviceId, grabType uint8, modifiers []uint32) {
-	w.WritePad(4)
-	w.Write4b(uint32(grabWindow))
-	w.Write4b(detail)
+func encodeXIPassiveUngrabDevice(grabWindow x.Window, detail uint32,
+	deviceId DeviceId, grabType uint8, modifiers []uint32) (b x.RequestBody) {
 
-	w.Write2b(uint16(deviceId))
-	w.Write2b(uint16(len(modifiers)))
-
-	w.Write1b(grabType)
-	w.WritePad(3)
+	b0 := b.AddBlock(4 + len(modifiers)).
+		Write4b(uint32(grabWindow)).
+		Write4b(detail).
+		Write2b(uint16(deviceId)).
+		Write2b(uint16(len(modifiers))).
+		Write1b(grabType).
+		WritePad(3)
 
 	for _, mod := range modifiers {
-		w.Write4b(mod)
+		b0.Write4b(mod)
 	}
+	b0.End()
+	return
 }
 
 // #WREQ
-func writeXIListProperties(w *x.Writer, deviceId DeviceId) {
-	w.WritePad(4)
-	w.Write2b(uint16(deviceId))
-	w.WritePad(2)
+func encodeXIListProperties(deviceId DeviceId) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write2b(uint16(deviceId)).
+		WritePad(2).
+		End()
+	return
 }
 
 type XIListPropertiesReply struct {
@@ -1316,48 +1361,46 @@ func readXIListPropertiesReply(r *x.Reader, v *XIListPropertiesReply) error {
 }
 
 // #WREQ
-func writeXIChangeProperty(w *x.Writer, deviceId DeviceId, mode uint8, format uint8,
-	property x.Atom, Type x.Atom, data []byte) {
-
-	w.WritePad(4)
-
-	w.Write2b(uint16(deviceId))
-	w.Write1b(mode)
-	w.Write1b(format)
-
-	w.Write4b(uint32(property))
-	w.Write4b(uint32(Type))
+func encodeXIChangeProperty(deviceId DeviceId, mode uint8, format uint8,
+	property x.Atom, Type x.Atom, data []byte) (b x.RequestBody) {
 
 	dataLen := len(data)
-	w.Write4b(uint32(dataLen / (int(format) / 8)))
-	w.WriteBytes(data)
-	w.WritePad(x.Pad(dataLen))
+	b.AddBlock(4).
+		Write2b(uint16(deviceId)).
+		Write1b(mode).
+		Write1b(format).
+		Write4b(uint32(property)).
+		Write4b(uint32(Type)).
+		Write4b(uint32(dataLen / (int(format) / 8))).
+		End()
+	b.AddBytes(data)
+	return
 }
 
 // #WREQ
-func writeXIDeleteProperty(w *x.Writer, deviceId DeviceId, property x.Atom) {
-
-	w.WritePad(4)
-
-	w.Write2b(uint16(deviceId))
-	w.WritePad(2)
-
-	w.Write4b(uint32(property))
+func encodeXIDeleteProperty(deviceId DeviceId, property x.Atom) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write2b(uint16(deviceId)).
+		WritePad(2).
+		Write4b(uint32(property)).
+		End()
+	return
 }
 
 // #WREQ
-func writeXIGetProperty(w *x.Writer, deviceId DeviceId, delete bool, property x.Atom,
-	Type x.Atom, offset, len uint32) {
-	w.WritePad(4)
+func encodeXIGetProperty(deviceId DeviceId, delete bool, property x.Atom,
+	Type x.Atom, offset, len uint32) (b x.RequestBody) {
 
-	w.Write2b(uint16(deviceId))
-	w.Write1b(x.BoolToUint8(delete))
-	w.WritePad(1)
-
-	w.Write4b(uint32(property))
-	w.Write4b(uint32(Type))
-	w.Write4b(offset)
-	w.Write4b(len)
+	b.AddBlock(5).
+		Write2b(uint16(deviceId)).
+		Write1b(x.BoolToUint8(delete)).
+		WritePad(1).
+		Write4b(uint32(property)).
+		Write4b(uint32(Type)).
+		Write4b(offset).
+		Write4b(len).
+		End()
+	return
 }
 
 type XIGetPropertyReply struct {

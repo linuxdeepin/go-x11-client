@@ -1,12 +1,18 @@
 package xfixes
 
-import "github.com/linuxdeepin/go-x11-client"
+import (
+	"math"
+
+	"github.com/linuxdeepin/go-x11-client"
+)
 
 // #WREQ
-func writeQueryVersion(w *x.Writer, majorVersion, minorVersion uint32) {
-	w.WritePad(4)
-	w.Write4b(majorVersion)
-	w.Write4b(minorVersion)
+func encodeQueryVersion(majorVersion, minorVersion uint32) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(majorVersion).
+		Write4b(minorVersion).
+		End()
+	return
 }
 
 type QueryVersionReply struct {
@@ -56,15 +62,15 @@ func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
 }
 
 // #WREQ
-func writeChangeSaveSet(w *x.Writer, mode, target, map0 uint8, window x.Window) {
-	w.WritePad(4)
-
-	w.Write1b(mode)
-	w.Write1b(target)
-	w.Write1b(map0)
-	w.WritePad(1)
-
-	w.Write4b(uint32(window))
+func encodeChangeSaveSet(mode, target, map0 uint8, window x.Window) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write1b(mode).
+		Write1b(target).
+		Write1b(map0).
+		WritePad(1).
+		Write4b(uint32(window)).
+		End()
+	return
 }
 
 type SelectionNotifyEvent struct {
@@ -127,11 +133,14 @@ func readSelectionNotifyEvent(r *x.Reader, v *SelectionNotifyEvent) error {
 }
 
 // #WREQ
-func writeSelectSelectionInput(w *x.Writer, window x.Window, selection x.Atom, eventMask uint32) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-	w.Write4b(uint32(selection))
-	w.Write4b(eventMask)
+func encodeSelectSelectionInput(window x.Window, selection x.Atom,
+	eventMask uint32) (b x.RequestBody) {
+	b.AddBlock(3).
+		Write4b(uint32(window)).
+		Write4b(uint32(selection)).
+		Write4b(eventMask).
+		End()
+	return
 }
 
 type CursorNotifyEvent struct {
@@ -188,15 +197,17 @@ func readCursorNotifyEvent(r *x.Reader, v *CursorNotifyEvent) error {
 }
 
 // #WREQ
-func writeSelectCursorInput(w *x.Writer, window x.Window, eventMask uint32) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
-	w.Write4b(eventMask)
+func encodeSelectCursorInput(window x.Window, eventMask uint32) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(window)).
+		Write4b(eventMask).
+		End()
+	return
 }
 
 // #WREQ
-func writeGetCursorImage(w *x.Writer) {
-	w.WritePad(4)
+func encodeGetCursorImage() (b x.RequestBody) {
+	return
 }
 
 type GetCursorImageReply struct {
@@ -283,107 +294,133 @@ func readGetCursorImageReply(r *x.Reader, v *GetCursorImageReply) error {
 }
 
 // #WREQ
-func writeCreateRegion(w *x.Writer, region Region, rects []x.Rectangle) {
-	w.WritePad(4)
-	w.Write4b(uint32(region))
+func encodeCreateRegion(region Region, rects []x.Rectangle) (b x.RequestBody) {
+	b0 := b.AddBlock(1 + 2*len(rects)).
+		Write4b(uint32(region))
 	for _, rect := range rects {
-		x.WriteRectangle(w, rect)
+		x.WriteRectangle(b0, rect)
 	}
+	b0.End()
+	return
 }
 
 // #WREQ
-func writeCreateRegionFromBitmap(w *x.Writer, region Region, bitmap x.Pixmap) {
-	w.WritePad(4)
-	w.Write4b(uint32(region))
-	w.Write4b(uint32(bitmap))
+func encodeCreateRegionFromBitmap(region Region, bitmap x.Pixmap) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(region)).
+		Write4b(uint32(bitmap)).
+		End()
+	return
 }
 
 // #WREQ
-//func writeCreateRegionFromWindow
+//func encodeCreateRegionFromWindow
 
 // #WREQ
-func writeCreateRegionFromGC(w *x.Writer, region Region, gc x.GContext) {
-	w.WritePad(4)
-	w.Write4b(uint32(region))
-	w.Write4b(uint32(gc))
+func encodeCreateRegionFromGC(region Region, gc x.GContext) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(region)).
+		Write4b(uint32(gc)).
+		End()
+	return
 }
 
 // #WREQ
-//func writeCreateRegionFromPicture
+//func encodeCreateRegionFromPicture
 
 // #WREQ
-func writeDestroyRegion(w *x.Writer, region Region) {
-	w.WritePad(4)
-	w.Write4b(uint32(region))
+func encodeDestroyRegion(region Region) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(region)).
+		End()
+	return
 }
 
 // #WREQ
-func writeSetRegion(w *x.Writer, region Region, rects []x.Rectangle) {
-	w.WritePad(4)
-	w.Write4b(uint32(region))
+func encodeSetRegion(region Region, rects []x.Rectangle) (b x.RequestBody) {
+	b0 := b.AddBlock(1 + 2*len(rects)).
+		Write4b(uint32(region))
 	for _, rect := range rects {
-		x.WriteRectangle(w, rect)
+		x.WriteRectangle(b0, rect)
 	}
+	b0.End()
+	return
 }
 
 // #WREQ
-func writeCopyRegion(w *x.Writer, source, destination Region) {
-	w.WritePad(4)
-	w.Write4b(uint32(source))
-	w.Write4b(uint32(destination))
+func encodeCopyRegion(source, destination Region) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(source)).
+		Write4b(uint32(destination)).
+		End()
+	return
 }
 
 // #WREQ
-func writeUnionRegion(w *x.Writer, source1, source2, destination Region) {
-	w.WritePad(4)
-	w.Write4b(uint32(source1))
-	w.Write4b(uint32(source2))
-	w.Write4b(uint32(destination))
+func encodeUnionRegion(source1, source2, destination Region) (b x.RequestBody) {
+	b.AddBlock(3).
+		Write4b(uint32(source1)).
+		Write4b(uint32(source2)).
+		Write4b(uint32(destination)).
+		End()
+	return
 }
 
 // #WREQ
-func writeIntersectRegion(w *x.Writer, source1, source2, destination Region) {
-	w.WritePad(4)
-	w.Write4b(uint32(source1))
-	w.Write4b(uint32(source2))
-	w.Write4b(uint32(destination))
+func encodeIntersectRegion(source1, source2, destination Region) (b x.RequestBody) {
+	b.AddBlock(3).
+		Write4b(uint32(source1)).
+		Write4b(uint32(source2)).
+		Write4b(uint32(destination)).
+		End()
+	return
 }
 
 // #WREQ
-func writeSubtractRegion(w *x.Writer, source1, source2, destination Region) {
-	w.WritePad(4)
-	w.Write4b(uint32(source1))
-	w.Write4b(uint32(source2))
-	w.Write4b(uint32(destination))
+func encodeSubtractRegion(source1, source2, destination Region) (b x.RequestBody) {
+	b.AddBlock(3).
+		Write4b(uint32(source1)).
+		Write4b(uint32(source2)).
+		Write4b(uint32(destination)).
+		End()
+	return
 }
 
 // #WREQ
-func writeInvertRegion(w *x.Writer, source Region, bounds x.Rectangle, destination Region) {
-	w.WritePad(4)
-	w.Write4b(uint32(source))
-	x.WriteRectangle(w, bounds)
-	w.Write4b(uint32(destination))
+func encodeInvertRegion(source Region, bounds x.Rectangle, destination Region) (b x.RequestBody) {
+	b0 := b.AddBlock(4).
+		Write4b(uint32(source))
+	x.WriteRectangle(b0, bounds)
+	b0.Write4b(uint32(destination)).
+		End()
+	return
 }
 
 // #WREQ
-func writeTranslateRegion(w *x.Writer, region Region, dx, dy int16) {
-	w.WritePad(4)
-	w.Write4b(uint32(region))
-	w.Write2b(uint16(dx))
-	w.Write2b(uint16(dy))
+func encodeTranslateRegion(region Region, dx, dy int16) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(region)).
+		Write2b(uint16(dx)).
+		Write2b(uint16(dy)).
+		End()
+	return
 }
 
 // #WREQ
-func writeRegionExtents(w *x.Writer, source, destination Region) {
-	w.WritePad(4)
-	w.Write4b(uint32(source))
-	w.Write4b(uint32(destination))
+func encodeRegionExtents(source, destination Region) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(source)).
+		Write4b(uint32(destination)).
+		End()
+	return
 }
 
 // #WREQ
-func writeFetchRegion(w *x.Writer, region Region) {
-	w.WritePad(4)
-	w.Write4b(uint32(region))
+func encodeFetchRegion(region Region) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(region)).
+		End()
+	return
 }
 
 type FetchRegionReply struct {
@@ -440,33 +477,35 @@ func readFetchRegionReply(r *x.Reader, v *FetchRegionReply) error {
 }
 
 // #WREQ
-func writeSetGCClipRegion(w *x.Writer, gc x.GContext, clipXOrigin, clipYOrigin int16,
-	region Region) {
+func encodeSetGCClipRegion(gc x.GContext, clipXOrigin, clipYOrigin int16,
+	region Region) (b x.RequestBody) {
 
-	w.WritePad(4)
-	w.Write4b(uint32(gc))
-	w.Write4b(uint32(region))
-	w.Write2b(uint16(clipXOrigin))
-	w.Write2b(uint16(clipYOrigin))
+	b.AddBlock(3).
+		Write4b(uint32(gc)).
+		Write4b(uint32(region)).
+		Write2b(uint16(clipXOrigin)).
+		Write2b(uint16(clipYOrigin)).
+		End()
+	return
 }
 
 // #WREQ
-func writeSetCursorName(w *x.Writer, cursor x.Cursor, name string) {
-	w.WritePad(4)
-	w.Write4b(uint32(cursor))
+func encodeSetCursorName(cursor x.Cursor, name string) (b x.RequestBody) {
+	name = x.TruncateStr(name, math.MaxUint16)
 	nameLen := len(name)
-	if nameLen > 0xffff {
-		name = name[:0xffff]
-		nameLen = 0xffff
-	}
-	w.Write2b(uint16(nameLen))
-	w.WriteString(name)
-	w.WritePad(x.Pad(nameLen))
+	b.AddBlock(2 + x.SizeIn4bWithPad(nameLen)).
+		Write4b(uint32(cursor)).
+		Write2b(uint16(nameLen)).
+		WritePad(2).
+		WriteString(name).
+		WritePad(x.Pad(nameLen)).
+		End()
+	return
 }
 
 // #WREQ
-func writeGetCursorImageAndName(w *x.Writer) {
-	w.WritePad(4)
+func encodeGetCursorImageAndName() (b x.RequestBody) {
+	return
 }
 
 type GetCursorImageAndNameReply struct {
@@ -572,75 +611,87 @@ func readGetCursorImageAndNameReply(r *x.Reader, v *GetCursorImageAndNameReply) 
 }
 
 // #WREQ
-func writeChangeCursor(w *x.Writer, source, destination x.Cursor) {
-	w.WritePad(4)
-	w.Write4b(uint32(source))
-	w.Write4b(uint32(destination))
+func encodeChangeCursor(source, destination x.Cursor) (b x.RequestBody) {
+	b.AddBlock(2).
+		Write4b(uint32(source)).
+		Write4b(uint32(destination)).
+		End()
+	return
 }
 
 // #WREQ
-func writeChangeCursorByName(w *x.Writer, src x.Cursor, name string) {
-	w.WritePad(4)
-	w.Write4b(uint32(src))
+func encodeChangeCursorByName(src x.Cursor, name string) (b x.RequestBody) {
+	name = x.TruncateStr(name, math.MaxUint16)
 	nameLen := len(name)
-	if nameLen > 0xffff {
-		name = name[:0xffff]
-		nameLen = 0xffff
-	}
-	w.Write2b(uint16(nameLen))
-	w.WritePad(2)
-
-	w.WriteString(name)
-	w.WritePad(x.Pad(nameLen))
+	b.AddBlock(2 + x.SizeIn4bWithPad(nameLen)).
+		Write4b(uint32(src)).
+		Write2b(uint16(nameLen)).
+		WritePad(2).
+		WriteString(name).
+		WritePad(x.Pad(nameLen)).
+		End()
+	return
 }
 
 // #WREQ
-func writeExpandRegion(w *x.Writer, source, destination Region, left, right,
-	top, bottom uint16) {
+func encodeExpandRegion(source, destination Region, left, right,
+	top, bottom uint16) (b x.RequestBody) {
 
-	w.WritePad(4)
-	w.Write4b(uint32(source))
-	w.Write4b(uint32(destination))
-	w.Write2b(left)
-	w.Write2b(right)
-	w.Write2b(top)
-	w.Write2b(bottom)
+	b.AddBlock(4).
+		Write4b(uint32(source)).
+		Write4b(uint32(destination)).
+		Write2b(left).
+		Write2b(right).
+		Write2b(top).
+		Write2b(bottom).
+		End()
+	return
 }
 
 // #WREQ
-func writeHideCursor(w *x.Writer, window x.Window) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
+func encodeHideCursor(window x.Window) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(window)).
+		End()
+	return
 }
 
 // #WREQ
-func writeShowCursor(w *x.Writer, window x.Window) {
-	w.WritePad(4)
-	w.Write4b(uint32(window))
+func encodeShowCursor(window x.Window) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(window)).
+		End()
+	return
 }
 
 // #WREQ
-func writeCreatePointerBarrier(w *x.Writer, barrier Barrier, drawable x.Drawable,
-	x1, y1, x2, y2 int16, directions uint32, devices []uint16) {
-	w.WritePad(4)
-	w.Write4b(uint32(barrier))
-	w.Write4b(uint32(drawable))
-	w.Write2b(uint16(x1))
-	w.Write2b(uint16(y1))
-	w.Write2b(uint16(x2))
-	w.Write2b(uint16(y2))
-	w.Write4b(directions)
-	w.WritePad(2)
-	w.Write2b(uint16(len(devices)))
+func encodeCreatePointerBarrier(barrier Barrier, drawable x.Drawable,
+	x1, y1, x2, y2 int16, directions uint32, devices []uint16) (b x.RequestBody) {
+	devicesLen := len(devices)
+	b0 := b.AddBlock(6 + x.SizeIn4bWithPad(devicesLen*2)).
+		Write4b(uint32(barrier)).
+		Write4b(uint32(drawable)).
+		Write2b(uint16(x1)).
+		Write2b(uint16(y1)).
+		Write2b(uint16(x2)).
+		Write2b(uint16(y2)).
+		Write4b(directions).
+		WritePad(2).
+		Write2b(uint16(len(devices)))
 	for _, device := range devices {
-		w.Write2b(device)
+		b0.Write2b(device)
 	}
+	b0.WritePad(x.Pad(devicesLen * 2))
+	b0.End()
+	return
 }
 
 // #WREQ
-func writeDeletePointerBarrier(w *x.Writer, barrier Barrier) {
-	w.WritePad(4)
-	w.Write4b(uint32(barrier))
+func encodeDeletePointerBarrier(barrier Barrier) (b x.RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(barrier)).
+		End()
+	return
 }
 
 type BadRegionError struct {
