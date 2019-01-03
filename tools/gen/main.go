@@ -161,7 +161,7 @@ func main() {
 			// cookie Reply method
 			g.p("\nfunc (cookie %sCookie) Reply(conn *%sConn) (*%sReply, error) {\n",
 				reqFunc.name, xPrefix, reqFunc.name)
-			g.p(`replyBuf, err := conn.WaitForReply(uint64(cookie))
+			g.p(`replyBuf, err := conn.WaitForReply(%sSeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func main() {
 	}
 	return &reply, nil
 }
-`, xPrefix, reqFunc.name, reqFunc.name)
+`, xPrefix, xPrefix, reqFunc.name, reqFunc.name)
 		}
 
 	}

@@ -16,7 +16,7 @@ func OpenDevice(conn *x.Conn, deviceId uint8) OpenDeviceCookie {
 }
 
 func (cookie OpenDeviceCookie) Reply(conn *x.Conn) (*OpenDeviceReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}

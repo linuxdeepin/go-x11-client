@@ -16,7 +16,7 @@ func QueryVersion(conn *x.Conn, clientMajorVersion, clientMinorVersion uint32) Q
 }
 
 func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func GetCrtcInfo(conn *x.Conn, crtc Crtc, configTimestamp x.Timestamp) GetCrtcIn
 }
 
 func (cookie GetCrtcInfoCookie) Reply(conn *x.Conn) (*GetCrtcInfoReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func GetOutputInfo(conn *x.Conn, output Output, configTimestamp x.Timestamp) Get
 }
 
 func (cookie GetOutputInfoCookie) Reply(conn *x.Conn) (*GetOutputInfoReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func GetScreenResources(conn *x.Conn, window x.Window) GetScreenResourcesCookie 
 }
 
 func (cookie GetScreenResourcesCookie) Reply(conn *x.Conn) (*GetScreenResourcesReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func GetOutputPrimary(conn *x.Conn, window x.Window) GetOutputPrimaryCookie {
 }
 
 func (cookie GetOutputPrimaryCookie) Reply(conn *x.Conn) (*GetOutputPrimaryReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func GetOutputProperty(conn *x.Conn, output Output, property, Type x.Atom, longO
 }
 
 func (cookie GetOutputPropertyCookie) Reply(conn *x.Conn) (*GetOutputPropertyReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func SetCrtcConfig(conn *x.Conn, crtc Crtc, timestamp, configTimestamp x.Timesta
 }
 
 func (cookie SetCrtcConfigCookie) Reply(conn *x.Conn) (*SetCrtcConfigReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func GetCrtcGammaSize(conn *x.Conn, crtc Crtc) GetCrtcGammaSizeCookie {
 }
 
 func (cookie GetCrtcGammaSizeCookie) Reply(conn *x.Conn) (*GetCrtcGammaSizeReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}

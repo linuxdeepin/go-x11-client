@@ -16,7 +16,7 @@ func QueryVersion(conn *x.Conn, majorVersion, minorVersion uint32) QueryVersionC
 }
 
 func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}

@@ -87,7 +87,7 @@ func (c *Conn) readPacket() error {
 	// KeymapNotifyEvent 没有 sequence
 	if genReply.responseType != KeymapNotifyEventCode {
 		lastRead := c.in.requestRead
-		c.in.requestRead = (lastRead & 0xffffffffffff0000) | uint64(genReply.sequence)
+		c.in.requestRead = (lastRead & 0xffffffffffff0000) | SeqNum(genReply.sequence)
 		if c.in.requestRead < lastRead {
 			c.in.requestRead += 0x10000
 		}
@@ -172,7 +172,7 @@ func (c *Conn) readPacket() error {
 	return nil
 }
 
-func (c *Conn) pollForReply(request uint64) (replyBuf []byte, isErr, stop bool) {
+func (c *Conn) pollForReply(request SeqNum) (replyBuf []byte, isErr, stop bool) {
 	if c.isClosed() {
 		stop = true
 		return
@@ -230,7 +230,7 @@ func (c *Conn) pollForReply(request uint64) (replyBuf []byte, isErr, stop bool) 
 	return
 }
 
-func (c *Conn) waitForReply(request uint64) (replyBuf []byte, err error) {
+func (c *Conn) waitForReply(request SeqNum) (replyBuf []byte, err error) {
 	err = c.out.flushTo(request)
 	if err != nil {
 		c.Close()
@@ -262,7 +262,7 @@ func (c *Conn) waitForReply(request uint64) (replyBuf []byte, err error) {
 	return replyBuf, nil
 }
 
-func (c *Conn) WaitForReply(request uint64) (replyBuf []byte, err error) {
+func (c *Conn) WaitForReply(request SeqNum) (replyBuf []byte, err error) {
 	if c.isClosed() {
 		return nil, errConnClosed
 	}
@@ -280,10 +280,10 @@ func (cookie VoidCookie) Check(c *Conn) error {
 		return errConnClosed
 	}
 
-	return c.requestCheck(uint64(cookie))
+	return c.requestCheck(SeqNum(cookie))
 }
 
-func (c *Conn) requestCheck(request uint64) error {
+func (c *Conn) requestCheck(request SeqNum) error {
 	c.ioMu.Lock()
 	if request >= c.in.requestExpected &&
 		request > c.in.requestCompleted {

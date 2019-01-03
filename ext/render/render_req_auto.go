@@ -16,7 +16,7 @@ func QueryVersion(conn *x.Conn, majorVersion, minorVersion uint32) QueryVersionC
 }
 
 func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func QueryPictFormats(conn *x.Conn) QueryPictFormatsCookie {
 }
 
 func (cookie QueryPictFormatsCookie) Reply(conn *x.Conn) (*QueryPictFormatsReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func QueryPictIndexValues(conn *x.Conn, format PictFormat) QueryPictIndexValuesC
 }
 
 func (cookie QueryPictIndexValuesCookie) Reply(conn *x.Conn) (*QueryPictIndexValuesReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func QueryFilters(conn *x.Conn, drawable x.Drawable) QueryFiltersCookie {
 }
 
 func (cookie QueryFiltersCookie) Reply(conn *x.Conn) (*QueryFiltersReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}

@@ -16,7 +16,7 @@ func XIQueryVersion(conn *x.Conn, majorVersion, minorVersion uint16) XIQueryVers
 }
 
 func (cookie XIQueryVersionCookie) Reply(conn *x.Conn) (*XIQueryVersionReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func XIQueryDevice(conn *x.Conn, deviceId DeviceId) XIQueryDeviceCookie {
 }
 
 func (cookie XIQueryDeviceCookie) Reply(conn *x.Conn) (*XIQueryDeviceReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func XIGetSelectedEvents(conn *x.Conn, window x.Window) XIGetSelectedEventsCooki
 }
 
 func (cookie XIGetSelectedEventsCookie) Reply(conn *x.Conn) (*XIGetSelectedEventsReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func XIQueryPointer(conn *x.Conn, window x.Window, deviceId DeviceId) XIQueryPoi
 }
 
 func (cookie XIQueryPointerCookie) Reply(conn *x.Conn) (*XIQueryPointerReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +259,7 @@ func XIGetClientPointer(conn *x.Conn, window x.Window) XIGetClientPointerCookie 
 }
 
 func (cookie XIGetClientPointerCookie) Reply(conn *x.Conn) (*XIGetClientPointerReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +313,7 @@ func XIGetFocus(conn *x.Conn, deviceId DeviceId) XIGetFocusCookie {
 }
 
 func (cookie XIGetFocusCookie) Reply(conn *x.Conn) (*XIGetFocusReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -340,7 +340,7 @@ func XIGrabDevice(conn *x.Conn, window x.Window, time x.Timestamp, cursor x.Curs
 }
 
 func (cookie XIGrabDeviceCookie) Reply(conn *x.Conn) (*XIGrabDeviceReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -421,7 +421,7 @@ func XIPassiveGrabDevice(conn *x.Conn, grabWindow x.Window, cursor x.Cursor, det
 }
 
 func (cookie XIPassiveGrabDeviceCookie) Reply(conn *x.Conn) (*XIPassiveGrabDeviceReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -475,7 +475,7 @@ func XIListProperties(conn *x.Conn, deviceId DeviceId) XIListPropertiesCookie {
 }
 
 func (cookie XIListPropertiesCookie) Reply(conn *x.Conn) (*XIListPropertiesReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -556,7 +556,7 @@ func XIGetProperty(conn *x.Conn, deviceId DeviceId, delete bool, property x.Atom
 }
 
 func (cookie XIGetPropertyCookie) Reply(conn *x.Conn) (*XIGetPropertyReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}

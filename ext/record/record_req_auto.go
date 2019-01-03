@@ -16,7 +16,7 @@ func QueryVersion(conn *x.Conn, majorVersion, minorVersion uint16) QueryVersionC
 }
 
 func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func GetContext(conn *x.Conn, context Context) GetContextCookie {
 }
 
 func (cookie GetContextCookie) Reply(conn *x.Conn) (*GetContextReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func EnableContext(conn *x.Conn, context Context) EnableContextCookie {
 }
 
 func (cookie EnableContextCookie) Reply(conn *x.Conn) (*EnableContextReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}

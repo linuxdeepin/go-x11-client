@@ -16,7 +16,7 @@ func GetVersion(conn *x.Conn, majorVersion uint8, minorVersion uint16) GetVersio
 }
 
 func (cookie GetVersionCookie) Reply(conn *x.Conn) (*GetVersionReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func CompareCursor(conn *x.Conn, window x.Window, cursor x.Cursor) CompareCursor
 }
 
 func (cookie CompareCursorCookie) Reply(conn *x.Conn) (*CompareCursorReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}

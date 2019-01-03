@@ -16,7 +16,7 @@ func GetVersion(conn *x.Conn, clientMajorVersion, clientMinorVersion uint16) Get
 }
 
 func (cookie GetVersionCookie) Reply(conn *x.Conn) (*GetVersionReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func Capable(conn *x.Conn) CapableCookie {
 }
 
 func (cookie CapableCookie) Reply(conn *x.Conn) (*CapableReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func GetTimeouts(conn *x.Conn) GetTimeoutsCookie {
 }
 
 func (cookie GetTimeoutsCookie) Reply(conn *x.Conn) (*GetTimeoutsReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func Info(conn *x.Conn) InfoCookie {
 }
 
 func (cookie InfoCookie) Reply(conn *x.Conn) (*InfoReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}

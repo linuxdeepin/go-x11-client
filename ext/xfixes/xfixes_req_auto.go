@@ -16,7 +16,7 @@ func QueryVersion(conn *x.Conn, majorVersion, minorVersion uint32) QueryVersionC
 }
 
 func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func GetCursorImage(conn *x.Conn) GetCursorImageCookie {
 }
 
 func (cookie GetCursorImageCookie) Reply(conn *x.Conn) (*GetCursorImageReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -475,7 +475,7 @@ func FetchRegion(conn *x.Conn, region Region) FetchRegionCookie {
 }
 
 func (cookie FetchRegionCookie) Reply(conn *x.Conn) (*FetchRegionReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -556,7 +556,7 @@ func GetCursorImageAndName(conn *x.Conn) GetCursorImageAndNameCookie {
 }
 
 func (cookie GetCursorImageAndNameCookie) Reply(conn *x.Conn) (*GetCursorImageAndNameReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}

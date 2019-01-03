@@ -8,12 +8,12 @@ import (
 )
 
 type in struct {
-	requestExpected  uint64
-	requestRead      uint64
-	requestCompleted uint64
+	requestExpected  SeqNum
+	requestRead      SeqNum
+	requestCompleted SeqNum
 
 	currentReply   *list.List
-	replies        map[uint64]*list.List
+	replies        map[SeqNum]*list.List
 	pendingReplies *list.List
 
 	readers    *list.List
@@ -25,7 +25,7 @@ type in struct {
 }
 
 func (in *in) init(ioMu *sync.Mutex) {
-	in.replies = make(map[uint64]*list.List)
+	in.replies = make(map[SeqNum]*list.List)
 	in.pendingReplies = list.New()
 	in.readers = list.New()
 	in.events = list.New()
@@ -111,11 +111,11 @@ func (in *in) closeEventChans() {
 }
 
 type ReplyReader struct {
-	request uint64
+	request SeqNum
 	cond    *sync.Cond
 }
 
-func (in *in) insertNewReader(request uint64, cond *sync.Cond) *ReplyReader {
+func (in *in) insertNewReader(request SeqNum, cond *sync.Cond) *ReplyReader {
 	r := &ReplyReader{
 		request: request,
 		cond:    cond,
@@ -187,13 +187,13 @@ func (in *in) wakeUpNextReader() {
 }
 
 type PendingReply struct {
-	firstRequest uint64
-	lastRequest  uint64
+	firstRequest SeqNum
+	lastRequest  SeqNum
 	workaround   uint
 	flags        uint
 }
 
-func (in *in) expectReply(request uint64, workaround uint, flags uint) {
+func (in *in) expectReply(request SeqNum, workaround uint, flags uint) {
 	pend := &PendingReply{
 		firstRequest: request,
 		lastRequest:  request,

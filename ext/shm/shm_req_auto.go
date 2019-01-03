@@ -16,7 +16,7 @@ func QueryVersion(conn *x.Conn) QueryVersionCookie {
 }
 
 func (cookie QueryVersionCookie) Reply(conn *x.Conn) (*QueryVersionReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func GetImage(conn *x.Conn, drawable x.Drawable, X, y int16, width, height uint1
 }
 
 func (cookie GetImageCookie) Reply(conn *x.Conn) (*GetImageReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}

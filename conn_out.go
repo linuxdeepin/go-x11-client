@@ -31,13 +31,16 @@ func (c *Conn) SendSync() {
 	c.ioMu.Unlock()
 }
 
+// sequence number
+type SeqNum uint64
+
 type out struct {
-	request        uint64
-	requestWritten uint64
+	request        SeqNum
+	requestWritten SeqNum
 	bw             *bufio.Writer
 }
 
-func (o *out) flushTo(request uint64) error {
+func (o *out) flushTo(request SeqNum) error {
 	if !(request <= o.request) {
 		panic("assert request < o.request failed")
 	}
@@ -114,7 +117,7 @@ type ProtocolRequest struct {
 }
 
 // return sequence id
-func (c *Conn) SendRequest(flags uint, req *ProtocolRequest) uint64 {
+func (c *Conn) SendRequest(flags uint, req *ProtocolRequest) SeqNum {
 	if c.isClosed() {
 		return 0
 	}

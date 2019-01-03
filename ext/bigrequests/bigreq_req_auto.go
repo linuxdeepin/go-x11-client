@@ -16,7 +16,7 @@ func Enable(conn *x.Conn) EnableCookie {
 }
 
 func (cookie EnableCookie) Reply(conn *x.Conn) (*EnableReply, error) {
-	replyBuf, err := conn.WaitForReply(uint64(cookie))
+	replyBuf, err := conn.WaitForReply(x.SeqNum(cookie))
 	if err != nil {
 		return nil, err
 	}
