@@ -292,6 +292,7 @@ func (c *Conn) requestCheck(request SeqNum) error {
 		c.sendSync()
 		err := c.out.flushTo(c.out.request)
 		if err != nil {
+			c.ioMu.Unlock()
 			return err
 		}
 	}
