@@ -180,12 +180,7 @@ func (c *Conn) pollForReply(request SeqNum) (replyBuf []byte, isErr, stop bool) 
 
 	logPrintln("pollForReply", request)
 	var front *list.Element
-	if request == 0 {
-		//replyBuf = nil
-		//isErr = false
-		stop = true
-		return
-	} else if request < c.in.requestRead {
+	if request < c.in.requestRead {
 		/* We've read requests past the one we want, so if it has replies we have
 		 * them all and they're in the replies map. */
 		l := c.in.replies[request]
@@ -266,6 +261,10 @@ func (c *Conn) WaitForReply(request SeqNum) (replyBuf []byte, err error) {
 	if c.isClosed() {
 		return nil, errConnClosed
 	}
+	err = request.err()
+	if err != nil {
+		return nil, err
+	}
 
 	c.ioMu.Lock()
 	replyBuf, err = c.waitForReply(request)
@@ -273,11 +272,15 @@ func (c *Conn) WaitForReply(request SeqNum) (replyBuf []byte, err error) {
 	return
 }
 
-type VoidCookie uint64
+type VoidCookie SeqNum
 
 func (cookie VoidCookie) Check(c *Conn) error {
 	if c.isClosed() {
 		return errConnClosed
+	}
+	err := SeqNum(cookie).err()
+	if err != nil {
+		return err
 	}
 
 	return c.requestCheck(SeqNum(cookie))

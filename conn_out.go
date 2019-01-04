@@ -2,7 +2,9 @@ package x
 
 import (
 	"bufio"
+	"errors"
 	"io"
+	"math"
 )
 
 func (c *Conn) Flush() (err error) {
@@ -33,6 +35,28 @@ func (c *Conn) SendSync() {
 
 // sequence number
 type SeqNum uint64
+
+const (
+	seqNumConnClosed    SeqNum = 0
+	seqNumExtNotPresent SeqNum = math.MaxUint64 - iota
+	seqNumQueryExtErr
+)
+
+var errExtNotPresent = errors.New("extension not present")
+var errQueryExtErr = errors.New("query extension error")
+
+func (n SeqNum) err() error {
+	switch n {
+	case seqNumConnClosed:
+		return errConnClosed
+	case seqNumExtNotPresent:
+		return errExtNotPresent
+	case seqNumQueryExtErr:
+		return errQueryExtErr
+	default:
+		return nil
+	}
+}
 
 type out struct {
 	request        SeqNum
@@ -119,17 +143,18 @@ type ProtocolRequest struct {
 // return sequence id
 func (c *Conn) SendRequest(flags uint, req *ProtocolRequest) SeqNum {
 	if c.isClosed() {
-		return 0
+		return seqNumConnClosed
 	}
 
 	// process data auto field
 	// set the major opcode, and the minor opcode for extensions
 	if req.Ext != nil {
 		extension := c.GetExtensionData(req.Ext)
-		if !(extension != nil && extension.Present) {
-			// TODO
-			// return 0
-			panic("ext not supported")
+		if extension == nil {
+			return seqNumQueryExtErr
+		}
+		if !extension.Present {
+			return seqNumExtNotPresent
 		}
 
 		req.Header.Opcode = extension.MajorOpcode
