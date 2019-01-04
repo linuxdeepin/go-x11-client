@@ -774,7 +774,7 @@ const (
 
 const GetWindowAttributesOpcode = 3
 
-type GetWindowAttributesCookie uint64
+type GetWindowAttributesCookie SeqNum
 
 const DestroyWindowOpcode = 4
 const DestroySubwindowsOpcode = 5
@@ -823,19 +823,19 @@ const (
 const CirculateWindowOpcode = 13
 const GetGeometryOpcode = 14
 
-type GetGeometryCookie uint64
+type GetGeometryCookie SeqNum
 
 const QueryTreeOpcode = 15
 
-type QueryTreeCookie uint64
+type QueryTreeCookie SeqNum
 
 const InternAtomOpcode = 16
 
-type InternAtomCookie uint64
+type InternAtomCookie SeqNum
 
 const GetAtomNameOpcode = 17
 
-type GetAtomNameCookie uint64
+type GetAtomNameCookie SeqNum
 
 // enum PropMode
 const (
@@ -854,16 +854,16 @@ const (
 
 const GetPropertyOpcode = 20
 
-type GetPropertyCookie uint64
+type GetPropertyCookie SeqNum
 
 const ListPropertiesOpcode = 21
 
-type ListPropertiesCookie uint64
+type ListPropertiesCookie SeqNum
 
 const SetSelectionOwnerOpcode = 22
 const GetSelectionOwnerOpcode = 23
 
-type GetSelectionOwnerCookie uint64
+type GetSelectionOwnerCookie SeqNum
 
 const ConvertSelectionOpcode = 24
 
@@ -897,7 +897,7 @@ const (
 
 const GrabPointerOpcode = 26
 
-type GrabPointerCookie uint64
+type GrabPointerCookie SeqNum
 
 const UngrabPointerOpcode = 27
 
@@ -916,7 +916,7 @@ const UngrabButtonOpcode = 29
 const ChangeActivePointerGrabOpcode = 30
 const GrabKeyboardOpcode = 31
 
-type GrabKeyboardCookie uint64
+type GrabKeyboardCookie SeqNum
 
 const UngrabKeyboardOpcode = 32
 
@@ -945,15 +945,15 @@ const GrabServerOpcode = 36
 const UngrabServerOpcode = 37
 const QueryPointerOpcode = 38
 
-type QueryPointerCookie uint64
+type QueryPointerCookie SeqNum
 
 const GetMotionEventsOpcode = 39
 
-type GetMotionEventsCookie uint64
+type GetMotionEventsCookie SeqNum
 
 const TranslateCoordinatesOpcode = 40
 
-type TranslateCoordinatesCookie uint64
+type TranslateCoordinatesCookie SeqNum
 
 const WarpPointerOpcode = 41
 
@@ -968,11 +968,11 @@ const (
 const SetInputFocusOpcode = 42
 const GetInputFocusOpcode = 43
 
-type GetInputFocusCookie uint64
+type GetInputFocusCookie SeqNum
 
 const QueryKeymapOpcode = 44
 
-type QueryKeymapCookie uint64
+type QueryKeymapCookie SeqNum
 
 const OpenFontOpcode = 45
 const CloseFontOpcode = 46
@@ -985,24 +985,24 @@ const (
 
 const QueryFontOpcode = 47
 
-type QueryFontCookie uint64
+type QueryFontCookie SeqNum
 
 const QueryTextExtentsOpcode = 48
 
-type QueryTextExtentsCookie uint64
+type QueryTextExtentsCookie SeqNum
 
 const ListFontsOpcode = 49
 
-type ListFontsCookie uint64
+type ListFontsCookie SeqNum
 
 const ListFontsWithInfoOpcode = 50
 
-type ListFontsWithInfoCookie uint64
+type ListFontsWithInfoCookie SeqNum
 
 const SetFontPathOpcode = 51
 const GetFontPathOpcode = 52
 
-type GetFontPathCookie uint64
+type GetFontPathCookie SeqNum
 
 const CreatePixmapOpcode = 53
 const FreePixmapOpcode = 54
@@ -1154,7 +1154,7 @@ const (
 const PutImageOpcode = 72
 const GetImageOpcode = 73
 
-type GetImageCookie uint64
+type GetImageCookie SeqNum
 
 const PolyText8Opcode = 74
 const PolyText16Opcode = 75
@@ -1174,23 +1174,23 @@ const InstallColormapOpcode = 81
 const UninstallColormapOpcode = 82
 const ListInstalledColormapsOpcode = 83
 
-type ListInstalledColormapsCookie uint64
+type ListInstalledColormapsCookie SeqNum
 
 const AllocColorOpcode = 84
 
-type AllocColorCookie uint64
+type AllocColorCookie SeqNum
 
 const AllocNamedColorOpcode = 85
 
-type AllocNamedColorCookie uint64
+type AllocNamedColorCookie SeqNum
 
 const AllocColorCellsOpcode = 86
 
-type AllocColorCellsCookie uint64
+type AllocColorCellsCookie SeqNum
 
 const AllocColorPlanesOpcode = 87
 
-type AllocColorPlanesCookie uint64
+type AllocColorPlanesCookie SeqNum
 
 const FreeColorsOpcode = 88
 
@@ -1205,11 +1205,11 @@ const StoreColorsOpcode = 89
 const StoreNamedColorOpcode = 90
 const QueryColorsOpcode = 91
 
-type QueryColorsCookie uint64
+type QueryColorsCookie SeqNum
 
 const LookupColorOpcode = 92
 
-type LookupColorCookie uint64
+type LookupColorCookie SeqNum
 
 // enum Pixmap
 const (
@@ -1236,20 +1236,20 @@ const (
 
 const QueryBestSizeOpcode = 97
 
-type QueryBestSizeCookie uint64
+type QueryBestSizeCookie SeqNum
 
 const QueryExtensionOpcode = 98
 
-type QueryExtensionCookie uint64
+type QueryExtensionCookie SeqNum
 
 const ListExtensionsOpcode = 99
 
-type ListExtensionsCookie uint64
+type ListExtensionsCookie SeqNum
 
 const ChangeKeyboardMappingOpcode = 100
 const GetKeyboardMappingOpcode = 101
 
-type GetKeyboardMappingCookie uint64
+type GetKeyboardMappingCookie SeqNum
 
 // enum KB
 const (
@@ -1279,13 +1279,13 @@ const (
 const ChangeKeyboardControlOpcode = 102
 const GetKeyboardControlOpcode = 103
 
-type GetKeyboardControlCookie uint64
+type GetKeyboardControlCookie SeqNum
 
 const BellOpcode = 104
 const ChangePointerControlOpcode = 105
 const GetPointerControlOpcode = 106
 
-type GetPointerControlCookie uint64
+type GetPointerControlCookie SeqNum
 
 // enum Blanking
 const (
@@ -1304,7 +1304,7 @@ const (
 const SetScreenSaverOpcode = 107
 const GetScreenSaverOpcode = 108
 
-type GetScreenSaverCookie uint64
+type GetScreenSaverCookie SeqNum
 
 // enum HostMode
 const (
@@ -1324,7 +1324,7 @@ const (
 const ChangeHostsOpcode = 109
 const ListHostsOpcode = 110
 
-type ListHostsCookie uint64
+type ListHostsCookie SeqNum
 
 // enum AccessControl
 const (
@@ -1368,11 +1368,11 @@ const (
 
 const SetPointerMappingOpcode = 116
 
-type SetPointerMappingCookie uint64
+type SetPointerMappingCookie SeqNum
 
 const GetPointerMappingOpcode = 117
 
-type GetPointerMappingCookie uint64
+type GetPointerMappingCookie SeqNum
 
 // enum MapIndex
 const (
@@ -1388,11 +1388,11 @@ const (
 
 const SetModifierMappingOpcode = 118
 
-type SetModifierMappingCookie uint64
+type SetModifierMappingCookie SeqNum
 
 const GetModifierMappingOpcode = 119
 
-type GetModifierMappingCookie uint64
+type GetModifierMappingCookie SeqNum
 
 const NoOperationOpcode = 127
 

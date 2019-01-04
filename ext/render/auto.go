@@ -149,15 +149,15 @@ const GlyphSetErrorCode = 3
 const GlyphErrorCode = 4
 const QueryVersionOpcode = 0
 
-type QueryVersionCookie uint64
+type QueryVersionCookie x.SeqNum
 
 const QueryPictFormatsOpcode = 1
 
-type QueryPictFormatsCookie uint64
+type QueryPictFormatsCookie x.SeqNum
 
 const QueryPictIndexValuesOpcode = 2
 
-type QueryPictIndexValuesCookie uint64
+type QueryPictIndexValuesCookie x.SeqNum
 
 const CreatePictureOpcode = 4
 const ChangePictureOpcode = 5
@@ -181,7 +181,7 @@ const CreateCursorOpcode = 27
 const SetPictureTransformOpcode = 28
 const QueryFiltersOpcode = 29
 
-type QueryFiltersCookie uint64
+type QueryFiltersCookie x.SeqNum
 
 const SetPictureFilterOpcode = 30
 const CreateAnimCursorOpcode = 31

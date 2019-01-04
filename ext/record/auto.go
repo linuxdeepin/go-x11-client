@@ -38,18 +38,18 @@ const (
 const BadContextErrorCode = 0
 const QueryVersionOpcode = 0
 
-type QueryVersionCookie uint64
+type QueryVersionCookie x.SeqNum
 
 const CreateContextOpcode = 1
 const RegisterClientsOpcode = 2
 const UnregisterClientsOpcode = 3
 const GetContextOpcode = 4
 
-type GetContextCookie uint64
+type GetContextCookie x.SeqNum
 
 const EnableContextOpcode = 5
 
-type EnableContextCookie uint64
+type EnableContextCookie x.SeqNum
 
 const DisableContextOpcode = 6
 const FreeContextOpcode = 7

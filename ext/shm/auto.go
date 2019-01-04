@@ -30,20 +30,20 @@ func NewCompletionEvent(data []byte) (*CompletionEvent, error) {
 const BadSegErrorCode = 0
 const QueryVersionOpcode = 0
 
-type QueryVersionCookie uint64
+type QueryVersionCookie x.SeqNum
 
 const AttachOpcode = 1
 const DetachOpcode = 2
 const PutImageOpcode = 3
 const GetImageOpcode = 4
 
-type GetImageCookie uint64
+type GetImageCookie x.SeqNum
 
 const CreatePixmapOpcode = 5
 const AttachFdOpcode = 6
 const CreateSegmentOpcode = 7
 
-type CreateSegmentCookie uint64
+type CreateSegmentCookie x.SeqNum
 
 var readErrorFuncMap = make(map[uint8]x.ReadErrorFunc, 1)
 

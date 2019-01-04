@@ -26,7 +26,7 @@ type Fp1616 int32
 
 const GetExtensionVersionOpcode = 1
 
-type GetExtensionVersionCookie uint64
+type GetExtensionVersionCookie x.SeqNum
 
 // enum DeviceUse
 const (
@@ -56,24 +56,24 @@ const (
 
 const ListInputDevicesOpcode = 2
 
-type ListInputDevicesCookie uint64
+type ListInputDevicesCookie x.SeqNum
 
 // simple ('xcb', 'Input', 'EventTypeBase')
 type EventTypeBase uint8
 
 const OpenDeviceOpcode = 3
 
-type OpenDeviceCookie uint64
+type OpenDeviceCookie x.SeqNum
 
 const CloseDeviceOpcode = 4
 const SetDeviceModeOpcode = 5
 
-type SetDeviceModeCookie uint64
+type SetDeviceModeCookie x.SeqNum
 
 const SelectExtensionEventOpcode = 6
 const GetSelectedExtensionEventsOpcode = 7
 
-type GetSelectedExtensionEventsCookie uint64
+type GetSelectedExtensionEventsCookie x.SeqNum
 
 // enum PropagateMode
 const (
@@ -84,23 +84,23 @@ const (
 const ChangeDeviceDontPropagateListOpcode = 8
 const GetDeviceDontPropagateListOpcode = 9
 
-type GetDeviceDontPropagateListCookie uint64
+type GetDeviceDontPropagateListCookie x.SeqNum
 
 const GetDeviceMotionEventsOpcode = 10
 
-type GetDeviceMotionEventsCookie uint64
+type GetDeviceMotionEventsCookie x.SeqNum
 
 const ChangeKeyboardDeviceOpcode = 11
 
-type ChangeKeyboardDeviceCookie uint64
+type ChangeKeyboardDeviceCookie x.SeqNum
 
 const ChangePointerDeviceOpcode = 12
 
-type ChangePointerDeviceCookie uint64
+type ChangePointerDeviceCookie x.SeqNum
 
 const GrabDeviceOpcode = 13
 
-type GrabDeviceCookie uint64
+type GrabDeviceCookie x.SeqNum
 
 const UngrabDeviceOpcode = 14
 
@@ -127,7 +127,7 @@ const (
 const AllowDeviceEventsOpcode = 19
 const GetDeviceFocusOpcode = 20
 
-type GetDeviceFocusCookie uint64
+type GetDeviceFocusCookie x.SeqNum
 
 const SetDeviceFocusOpcode = 21
 
@@ -143,7 +143,7 @@ const (
 
 const GetFeedbackControlOpcode = 22
 
-type GetFeedbackControlCookie uint64
+type GetFeedbackControlCookie x.SeqNum
 
 // enum ChangeFeedbackControlMask
 const (
@@ -165,24 +165,24 @@ const (
 const ChangeFeedbackControlOpcode = 23
 const GetDeviceKeyMappingOpcode = 24
 
-type GetDeviceKeyMappingCookie uint64
+type GetDeviceKeyMappingCookie x.SeqNum
 
 const ChangeDeviceKeyMappingOpcode = 25
 const GetDeviceModifierMappingOpcode = 26
 
-type GetDeviceModifierMappingCookie uint64
+type GetDeviceModifierMappingCookie x.SeqNum
 
 const SetDeviceModifierMappingOpcode = 27
 
-type SetDeviceModifierMappingCookie uint64
+type SetDeviceModifierMappingCookie x.SeqNum
 
 const GetDeviceButtonMappingOpcode = 28
 
-type GetDeviceButtonMappingCookie uint64
+type GetDeviceButtonMappingCookie x.SeqNum
 
 const SetDeviceButtonMappingOpcode = 29
 
-type SetDeviceButtonMappingCookie uint64
+type SetDeviceButtonMappingCookie x.SeqNum
 
 // enum ValuatorStateModeMask
 const (
@@ -192,12 +192,12 @@ const (
 
 const QueryDeviceStateOpcode = 30
 
-type QueryDeviceStateCookie uint64
+type QueryDeviceStateCookie x.SeqNum
 
 const DeviceBellOpcode = 32
 const SetDeviceValuatorsOpcode = 33
 
-type SetDeviceValuatorsCookie uint64
+type SetDeviceValuatorsCookie x.SeqNum
 
 // enum DeviceControl
 const (
@@ -210,15 +210,15 @@ const (
 
 const GetDeviceControlOpcode = 34
 
-type GetDeviceControlCookie uint64
+type GetDeviceControlCookie x.SeqNum
 
 const ChangeDeviceControlOpcode = 35
 
-type ChangeDeviceControlCookie uint64
+type ChangeDeviceControlCookie x.SeqNum
 
 const ListDevicePropertiesOpcode = 36
 
-type ListDevicePropertiesCookie uint64
+type ListDevicePropertiesCookie x.SeqNum
 
 // enum PropertyFormat
 const (
@@ -231,7 +231,7 @@ const ChangeDevicePropertyOpcode = 37
 const DeleteDevicePropertyOpcode = 38
 const GetDevicePropertyOpcode = 39
 
-type GetDevicePropertyCookie uint64
+type GetDevicePropertyCookie x.SeqNum
 
 // enum Device
 const (
@@ -241,7 +241,7 @@ const (
 
 const XIQueryPointerOpcode = 40
 
-type XIQueryPointerCookie uint64
+type XIQueryPointerCookie x.SeqNum
 
 const XIWarpPointerOpcode = 41
 const XIChangeCursorOpcode = 42
@@ -264,7 +264,7 @@ const XIChangeHierarchyOpcode = 43
 const XISetClientPointerOpcode = 44
 const XIGetClientPointerOpcode = 45
 
-type XIGetClientPointerCookie uint64
+type XIGetClientPointerCookie x.SeqNum
 
 // enum XIEventMask
 const (
@@ -299,7 +299,7 @@ const (
 const XISelectEventsOpcode = 46
 const XIQueryVersionOpcode = 47
 
-type XIQueryVersionCookie uint64
+type XIQueryVersionCookie x.SeqNum
 
 // enum DeviceClassType
 const (
@@ -339,12 +339,12 @@ const (
 
 const XIQueryDeviceOpcode = 48
 
-type XIQueryDeviceCookie uint64
+type XIQueryDeviceCookie x.SeqNum
 
 const XISetFocusOpcode = 49
 const XIGetFocusOpcode = 50
 
-type XIGetFocusCookie uint64
+type XIGetFocusCookie x.SeqNum
 
 // enum GrabOwner
 const (
@@ -354,7 +354,7 @@ const (
 
 const XIGrabDeviceOpcode = 51
 
-type XIGrabDeviceCookie uint64
+type XIGrabDeviceCookie x.SeqNum
 
 const XIUngrabDeviceOpcode = 52
 
@@ -395,22 +395,22 @@ const (
 
 const XIPassiveGrabDeviceOpcode = 54
 
-type XIPassiveGrabDeviceCookie uint64
+type XIPassiveGrabDeviceCookie x.SeqNum
 
 const XIPassiveUngrabDeviceOpcode = 55
 const XIListPropertiesOpcode = 56
 
-type XIListPropertiesCookie uint64
+type XIListPropertiesCookie x.SeqNum
 
 const XIChangePropertyOpcode = 57
 const XIDeletePropertyOpcode = 58
 const XIGetPropertyOpcode = 59
 
-type XIGetPropertyCookie uint64
+type XIGetPropertyCookie x.SeqNum
 
 const XIGetSelectedEventsOpcode = 60
 
-type XIGetSelectedEventsCookie uint64
+type XIGetSelectedEventsCookie x.SeqNum
 
 const XIBarrierReleasePointerOpcode = 61
 const DeviceValuatorEventCode = 0

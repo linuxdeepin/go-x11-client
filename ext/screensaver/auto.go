@@ -35,11 +35,11 @@ const (
 
 const QueryVersionOpcode = 0
 
-type QueryVersionCookie uint64
+type QueryVersionCookie x.SeqNum
 
 const QueryInfoOpcode = 1
 
-type QueryInfoCookie uint64
+type QueryInfoCookie x.SeqNum
 
 const SelectInputOpcode = 2
 const SetAttributesOpcode = 3

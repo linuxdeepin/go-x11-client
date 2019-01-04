@@ -20,7 +20,7 @@ const (
 
 const QueryVersionOpcode = 0
 
-type QueryVersionCookie uint64
+type QueryVersionCookie x.SeqNum
 
 const RedirectWindowOpcode = 1
 const RedirectSubwindowsOpcode = 2
@@ -30,7 +30,7 @@ const CreateRegionFromBorderClipOpcode = 5
 const NameWindowPixmapOpcode = 6
 const GetOverlayWindowOpcode = 7
 
-type GetOverlayWindowCookie uint64
+type GetOverlayWindowCookie x.SeqNum
 
 const ReleaseOverlayWindowOpcode = 8
 

@@ -14,15 +14,15 @@ func Ext() *x.Extension {
 
 const GetVersionOpcode = 0
 
-type GetVersionCookie uint64
+type GetVersionCookie x.SeqNum
 
 const CapableOpcode = 1
 
-type CapableCookie uint64
+type CapableCookie x.SeqNum
 
 const GetTimeoutsOpcode = 2
 
-type GetTimeoutsCookie uint64
+type GetTimeoutsCookie x.SeqNum
 
 const SetTimeoutsOpcode = 3
 const EnableOpcode = 4
@@ -39,7 +39,7 @@ const (
 const ForceLevelOpcode = 6
 const InfoOpcode = 7
 
-type InfoCookie uint64
+type InfoCookie x.SeqNum
 
 func init() {
 	_ext = x.NewExtension("DPMS", 0, nil)

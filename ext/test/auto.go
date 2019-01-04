@@ -14,7 +14,7 @@ func Ext() *x.Extension {
 
 const GetVersionOpcode = 0
 
-type GetVersionCookie uint64
+type GetVersionCookie x.SeqNum
 
 // enum Cursor
 const (
@@ -24,7 +24,7 @@ const (
 
 const CompareCursorOpcode = 1
 
-type CompareCursorCookie uint64
+type CompareCursorCookie x.SeqNum
 
 const FakeInputOpcode = 2
 const GrabControlOpcode = 3

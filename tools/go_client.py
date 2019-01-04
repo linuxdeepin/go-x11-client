@@ -119,7 +119,7 @@ def go_request(self, name):
     l("const %s = %s", opcode_name, self.opcode)
 
     if self.reply:
-        l("type %s uint64", name_base + "Cookie")
+        l("type %s %sSeqNum", name_base + "Cookie", x_prefix)
 
 def go_event(self, name):
     type_name = get_type_name(name) + "Event"

@@ -14,7 +14,7 @@ func Ext() *x.Extension {
 
 const QueryVersionOpcode = 0
 
-type QueryVersionCookie uint64
+type QueryVersionCookie x.SeqNum
 
 // enum SaveSetMode
 const (
@@ -89,7 +89,7 @@ func NewCursorNotifyEvent(data []byte) (*CursorNotifyEvent, error) {
 const SelectCursorInputOpcode = 3
 const GetCursorImageOpcode = 4
 
-type GetCursorImageCookie uint64
+type GetCursorImageCookie x.SeqNum
 
 // simple ('xcb', 'XFixes', 'REGION')
 type Region uint32
@@ -117,7 +117,7 @@ const TranslateRegionOpcode = 17
 const RegionExtentsOpcode = 18
 const FetchRegionOpcode = 19
 
-type FetchRegionCookie uint64
+type FetchRegionCookie x.SeqNum
 
 const SetGCClipRegionOpcode = 20
 const SetWindowShapeRegionOpcode = 21
@@ -125,11 +125,11 @@ const SetPictureClipRegionOpcode = 22
 const SetCursorNameOpcode = 23
 const GetCursorNameOpcode = 24
 
-type GetCursorNameCookie uint64
+type GetCursorNameCookie x.SeqNum
 
 const GetCursorImageAndNameOpcode = 25
 
-type GetCursorImageAndNameCookie uint64
+type GetCursorImageAndNameCookie x.SeqNum
 
 const ChangeCursorOpcode = 26
 const ChangeCursorByNameOpcode = 27

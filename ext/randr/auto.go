@@ -44,7 +44,7 @@ const (
 
 const QueryVersionOpcode = 0
 
-type QueryVersionCookie uint64
+type QueryVersionCookie x.SeqNum
 
 // enum SetConfig
 const (
@@ -56,7 +56,7 @@ const (
 
 const SetScreenConfigOpcode = 2
 
-type SetScreenConfigCookie uint64
+type SetScreenConfigCookie x.SeqNum
 
 // enum NotifyMask
 const (
@@ -73,11 +73,11 @@ const (
 const SelectInputOpcode = 4
 const GetScreenInfoOpcode = 5
 
-type GetScreenInfoCookie uint64
+type GetScreenInfoCookie x.SeqNum
 
 const GetScreenSizeRangeOpcode = 6
 
-type GetScreenSizeRangeCookie uint64
+type GetScreenSizeRangeCookie x.SeqNum
 
 const SetScreenSizeOpcode = 7
 
@@ -101,7 +101,7 @@ const (
 
 const GetScreenResourcesOpcode = 8
 
-type GetScreenResourcesCookie uint64
+type GetScreenResourcesCookie x.SeqNum
 
 // enum Connection
 const (
@@ -112,50 +112,50 @@ const (
 
 const GetOutputInfoOpcode = 9
 
-type GetOutputInfoCookie uint64
+type GetOutputInfoCookie x.SeqNum
 
 const ListOutputPropertiesOpcode = 10
 
-type ListOutputPropertiesCookie uint64
+type ListOutputPropertiesCookie x.SeqNum
 
 const QueryOutputPropertyOpcode = 11
 
-type QueryOutputPropertyCookie uint64
+type QueryOutputPropertyCookie x.SeqNum
 
 const ConfigureOutputPropertyOpcode = 12
 const ChangeOutputPropertyOpcode = 13
 const DeleteOutputPropertyOpcode = 14
 const GetOutputPropertyOpcode = 15
 
-type GetOutputPropertyCookie uint64
+type GetOutputPropertyCookie x.SeqNum
 
 const CreateModeOpcode = 16
 
-type CreateModeCookie uint64
+type CreateModeCookie x.SeqNum
 
 const DestroyModeOpcode = 17
 const AddOutputModeOpcode = 18
 const DeleteOutputModeOpcode = 19
 const GetCrtcInfoOpcode = 20
 
-type GetCrtcInfoCookie uint64
+type GetCrtcInfoCookie x.SeqNum
 
 const SetCrtcConfigOpcode = 21
 
-type SetCrtcConfigCookie uint64
+type SetCrtcConfigCookie x.SeqNum
 
 const GetCrtcGammaSizeOpcode = 22
 
-type GetCrtcGammaSizeCookie uint64
+type GetCrtcGammaSizeCookie x.SeqNum
 
 const GetCrtcGammaOpcode = 23
 
-type GetCrtcGammaCookie uint64
+type GetCrtcGammaCookie x.SeqNum
 
 const SetCrtcGammaOpcode = 24
 const GetScreenResourcesCurrentOpcode = 25
 
-type GetScreenResourcesCurrentCookie uint64
+type GetScreenResourcesCurrentCookie x.SeqNum
 
 // enum Transform
 const (
@@ -168,24 +168,24 @@ const (
 const SetCrtcTransformOpcode = 26
 const GetCrtcTransformOpcode = 27
 
-type GetCrtcTransformCookie uint64
+type GetCrtcTransformCookie x.SeqNum
 
 const GetPanningOpcode = 28
 
-type GetPanningCookie uint64
+type GetPanningCookie x.SeqNum
 
 const SetPanningOpcode = 29
 
-type SetPanningCookie uint64
+type SetPanningCookie x.SeqNum
 
 const SetOutputPrimaryOpcode = 30
 const GetOutputPrimaryOpcode = 31
 
-type GetOutputPrimaryCookie uint64
+type GetOutputPrimaryCookie x.SeqNum
 
 const GetProvidersOpcode = 32
 
-type GetProvidersCookie uint64
+type GetProvidersCookie x.SeqNum
 
 // enum ProviderCapability
 const (
@@ -197,24 +197,24 @@ const (
 
 const GetProviderInfoOpcode = 33
 
-type GetProviderInfoCookie uint64
+type GetProviderInfoCookie x.SeqNum
 
 const SetProviderOffloadSinkOpcode = 34
 const SetProviderOutputSourceOpcode = 35
 const ListProviderPropertiesOpcode = 36
 
-type ListProviderPropertiesCookie uint64
+type ListProviderPropertiesCookie x.SeqNum
 
 const QueryProviderPropertyOpcode = 37
 
-type QueryProviderPropertyCookie uint64
+type QueryProviderPropertyCookie x.SeqNum
 
 const ConfigureProviderPropertyOpcode = 38
 const ChangeProviderPropertyOpcode = 39
 const DeleteProviderPropertyOpcode = 40
 const GetProviderPropertyOpcode = 41
 
-type GetProviderPropertyCookie uint64
+type GetProviderPropertyCookie x.SeqNum
 
 const ScreenChangeNotifyEventCode = 0
 
@@ -241,13 +241,13 @@ const (
 
 const GetMonitorsOpcode = 42
 
-type GetMonitorsCookie uint64
+type GetMonitorsCookie x.SeqNum
 
 const SetMonitorOpcode = 43
 const DeleteMonitorOpcode = 44
 const CreateLeaseOpcode = 45
 
-type CreateLeaseCookie uint64
+type CreateLeaseCookie x.SeqNum
 
 const FreeLeaseOpcode = 46
 const NotifyEventCode = 1

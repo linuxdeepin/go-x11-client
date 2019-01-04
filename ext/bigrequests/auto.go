@@ -14,7 +14,7 @@ func Ext() *x.Extension {
 
 const EnableOpcode = 0
 
-type EnableCookie uint64
+type EnableCookie x.SeqNum
 
 func init() {
 	_ext = x.NewExtension("BIG-REQUESTS", 0, nil)

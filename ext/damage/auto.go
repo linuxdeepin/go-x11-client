@@ -26,7 +26,7 @@ const (
 const BadDamageErrorCode = 0
 const QueryVersionOpcode = 0
 
-type QueryVersionCookie uint64
+type QueryVersionCookie x.SeqNum
 
 const CreateOpcode = 1
 const DestroyOpcode = 2

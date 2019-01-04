@@ -14,7 +14,7 @@ func Ext() *x.Extension {
 
 const QueryVersionOpcode = 0
 
-type QueryVersionCookie uint64
+type QueryVersionCookie x.SeqNum
 
 func init() {
 	_ext = x.NewExtension("Generic Event Extension", 0, nil)
