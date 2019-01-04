@@ -1,43 +1,60 @@
 package x
 
-import (
-	"fmt"
-)
+import "fmt"
 
-// generic error
-type GenericError struct {
-	// ResponseType uint8  // type of the response === 0
-	ErrorCode  uint8  // ErrorCode
+type Error struct {
+	conn       *Conn
+	Code       uint8  // ErrorCode
 	Sequence   uint16 // Sequence number
 	ResourceID uint32 // Resource ID for requests with side effects only
 	MinorCode  uint16 // Minor opcode of the failed request
 	MajorCode  uint8  // Major opcode of the faield request
-	Data       []byte
 }
 
-func (err *GenericError) GetCode() uint8 {
-	return err.ErrorCode
+func (err *Error) Error() string {
+	var errName string
+	var ext *Extension
+	if 1 <= err.Code && err.Code <= 127 {
+		// core error code in range [1,127]
+		errName = errorCodeNameMap[err.Code]
+	} else {
+		// ext error code in range [128,255]
+		var code uint8
+		ext, code = err.conn.ext.getExtAndErrorCode(err.Code)
+		errName = ext.errCodeNameMap[code]
+	}
+	if errName == "" {
+		errName = "unknown"
+	}
+
+	var majorCodeDesc, minorCodeDesc string
+
+	if 1 <= err.MajorCode && err.MajorCode <= 127 {
+		// is core request
+		reqName := requestOpcodeNameMap[uint(err.MajorCode)]
+		if reqName != "" {
+			majorCodeDesc = " (" + reqName + ")"
+		}
+	} else {
+		// is ext request
+		if ext != nil {
+			reqName := ext.reqOpcodeNameMap[uint(err.MinorCode)]
+			if reqName != "" {
+				minorCodeDesc = " (" + reqName + ")"
+			}
+			majorCodeDesc = " (" + ext.name + ")"
+		}
+	}
+
+	return fmt.Sprintf("x.Error: %d (%s), sequence: %d, resource id: %d,"+
+		" major code: %d%s, minor code: %d%s",
+		err.Code, errName, err.Sequence, err.ResourceID,
+		err.MajorCode, majorCodeDesc,
+		err.MinorCode, minorCodeDesc)
 }
 
-func (err *GenericError) GetSequenceNumber() uint16 {
-	return err.Sequence
-}
-
-func (err *GenericError) GetMajorOpcode() uint8 {
-	return err.MajorCode
-}
-
-func (err *GenericError) GetMinorOpcode() uint16 {
-	return err.MinorCode
-}
-
-func (err *GenericError) Error() string {
-	return fmt.Sprintf("GenericError{ ErrorCode: %d, Sequence: %d, ResourceID: %d, MajorCode: %d, MinorCode: %d }",
-		err.ErrorCode, err.Sequence, err.ResourceID, err.MajorCode, err.MinorCode)
-}
-
-func NewGenericError(data []byte) *GenericError {
-	var v GenericError
+func newError(data []byte) *Error {
+	var v Error
 
 	responseType := data[0]
 	if responseType != ResponseTypeError {
@@ -45,7 +62,7 @@ func NewGenericError(data []byte) *GenericError {
 	}
 	b := 1
 
-	v.ErrorCode = data[b]
+	v.Code = data[b]
 	b += 1
 
 	v.Sequence = Get16(data[b:])
@@ -58,30 +75,12 @@ func NewGenericError(data []byte) *GenericError {
 	b += 2
 
 	v.MajorCode = data[b]
-	//b += 1
-
-	v.Data = data
 
 	return &v
 }
 
-func (c *Conn) NewError(data []byte) Error {
-	genericErr := NewGenericError(data)
-	errCode := genericErr.ErrorCode
-
-	if 1 <= errCode && errCode <= 127 {
-		// core error code in range [1,127]
-		fn, ok := readErrorFuncMap[errCode]
-		if ok {
-			r := NewReaderFromData(data)
-			return fn(r)
-		}
-	} else {
-		// ext error code in range [128,255]
-		err := c.ext.newError(errCode, data)
-		if err != nil {
-			return err
-		}
-	}
-	return genericErr
+func (c *Conn) NewError(data []byte) *Error {
+	err := newError(data)
+	err.conn = c
+	return err
 }

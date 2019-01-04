@@ -56,6 +56,16 @@ func NewNotifyEvent(data []byte) (*NotifyEvent, error) {
 	}
 	return &ev, nil
 }
+
+var requestOpcodeNameMap = map[uint]string{
+	QueryVersionOpcode:    "QueryVersion",
+	QueryInfoOpcode:       "QueryInfo",
+	SelectInputOpcode:     "SelectInput",
+	SetAttributesOpcode:   "SetAttributes",
+	UnsetAttributesOpcode: "UnsetAttributes",
+	SuspendOpcode:         "Suspend",
+}
+
 func init() {
-	_ext = x.NewExtension("MIT-SCREEN-SAVER", 0, nil)
+	_ext = x.NewExtension("MIT-SCREEN-SAVER", 0, nil, requestOpcodeNameMap)
 }

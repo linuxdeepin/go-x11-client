@@ -151,9 +151,45 @@ const (
 const CreatePointerBarrierOpcode = 31
 const DeletePointerBarrierOpcode = 32
 
-var readErrorFuncMap = make(map[uint8]x.ReadErrorFunc, 1)
+var errorCodeNameMap = map[uint8]string{
+	BadRegionErrorCode: "BadRegion",
+}
+var requestOpcodeNameMap = map[uint]string{
+	QueryVersionOpcode:            "QueryVersion",
+	ChangeSaveSetOpcode:           "ChangeSaveSet",
+	SelectSelectionInputOpcode:    "SelectSelectionInput",
+	SelectCursorInputOpcode:       "SelectCursorInput",
+	GetCursorImageOpcode:          "GetCursorImage",
+	CreateRegionOpcode:            "CreateRegion",
+	CreateRegionFromBitmapOpcode:  "CreateRegionFromBitmap",
+	CreateRegionFromWindowOpcode:  "CreateRegionFromWindow",
+	CreateRegionFromGCOpcode:      "CreateRegionFromGC",
+	CreateRegionFromPictureOpcode: "CreateRegionFromPicture",
+	DestroyRegionOpcode:           "DestroyRegion",
+	SetRegionOpcode:               "SetRegion",
+	CopyRegionOpcode:              "CopyRegion",
+	UnionRegionOpcode:             "UnionRegion",
+	IntersectRegionOpcode:         "IntersectRegion",
+	SubtractRegionOpcode:          "SubtractRegion",
+	InvertRegionOpcode:            "InvertRegion",
+	TranslateRegionOpcode:         "TranslateRegion",
+	RegionExtentsOpcode:           "RegionExtents",
+	FetchRegionOpcode:             "FetchRegion",
+	SetGCClipRegionOpcode:         "SetGCClipRegion",
+	SetWindowShapeRegionOpcode:    "SetWindowShapeRegion",
+	SetPictureClipRegionOpcode:    "SetPictureClipRegion",
+	SetCursorNameOpcode:           "SetCursorName",
+	GetCursorNameOpcode:           "GetCursorName",
+	GetCursorImageAndNameOpcode:   "GetCursorImageAndName",
+	ChangeCursorOpcode:            "ChangeCursor",
+	ChangeCursorByNameOpcode:      "ChangeCursorByName",
+	ExpandRegionOpcode:            "ExpandRegion",
+	HideCursorOpcode:              "HideCursor",
+	ShowCursorOpcode:              "ShowCursor",
+	CreatePointerBarrierOpcode:    "CreatePointerBarrier",
+	DeletePointerBarrierOpcode:    "DeletePointerBarrier",
+}
 
 func init() {
-	readErrorFuncMap[BadRegionErrorCode] = readBadRegionError
-	_ext = x.NewExtension("XFIXES", 0, readErrorFuncMap)
+	_ext = x.NewExtension("XFIXES", 0, errorCodeNameMap, requestOpcodeNameMap)
 }

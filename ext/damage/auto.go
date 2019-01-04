@@ -44,9 +44,17 @@ func NewNotifyEvent(data []byte) (*NotifyEvent, error) {
 	return &ev, nil
 }
 
-var readErrorFuncMap = make(map[uint8]x.ReadErrorFunc, 1)
+var errorCodeNameMap = map[uint8]string{
+	BadDamageErrorCode: "BadDamage",
+}
+var requestOpcodeNameMap = map[uint]string{
+	QueryVersionOpcode: "QueryVersion",
+	CreateOpcode:       "Create",
+	DestroyOpcode:      "Destroy",
+	SubtractOpcode:     "Subtract",
+	AddOpcode:          "Add",
+}
 
 func init() {
-	readErrorFuncMap[BadDamageErrorCode] = readBadDamageError
-	_ext = x.NewExtension("DAMAGE", 0, readErrorFuncMap)
+	_ext = x.NewExtension("DAMAGE", 0, errorCodeNameMap, requestOpcodeNameMap)
 }

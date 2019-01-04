@@ -41,6 +41,17 @@ const InfoOpcode = 7
 
 type InfoCookie x.SeqNum
 
+var requestOpcodeNameMap = map[uint]string{
+	GetVersionOpcode:  "GetVersion",
+	CapableOpcode:     "Capable",
+	GetTimeoutsOpcode: "GetTimeouts",
+	SetTimeoutsOpcode: "SetTimeouts",
+	EnableOpcode:      "Enable",
+	DisableOpcode:     "Disable",
+	ForceLevelOpcode:  "ForceLevel",
+	InfoOpcode:        "Info",
+}
+
 func init() {
-	_ext = x.NewExtension("DPMS", 0, nil)
+	_ext = x.NewExtension("DPMS", 0, nil, requestOpcodeNameMap)
 }

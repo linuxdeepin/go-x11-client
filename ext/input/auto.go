@@ -1040,13 +1040,77 @@ const ModeErrorCode = 2
 const DeviceBusyErrorCode = 3
 const ClassErrorCode = 4
 
-var readErrorFuncMap = make(map[uint8]x.ReadErrorFunc, 5)
+var errorCodeNameMap = map[uint8]string{
+	DeviceErrorCode:     "BadDevice",
+	EventErrorCode:      "BadEvent",
+	ModeErrorCode:       "BadMode",
+	DeviceBusyErrorCode: "DeviceBusy",
+	ClassErrorCode:      "BadClass",
+}
+var requestOpcodeNameMap = map[uint]string{
+	GetExtensionVersionOpcode:           "GetExtensionVersion",
+	ListInputDevicesOpcode:              "ListInputDevices",
+	OpenDeviceOpcode:                    "OpenDevice",
+	CloseDeviceOpcode:                   "CloseDevice",
+	SetDeviceModeOpcode:                 "SetDeviceMode",
+	SelectExtensionEventOpcode:          "SelectExtensionEvent",
+	GetSelectedExtensionEventsOpcode:    "GetSelectedExtensionEvents",
+	ChangeDeviceDontPropagateListOpcode: "ChangeDeviceDontPropagateList",
+	GetDeviceDontPropagateListOpcode:    "GetDeviceDontPropagateList",
+	GetDeviceMotionEventsOpcode:         "GetDeviceMotionEvents",
+	ChangeKeyboardDeviceOpcode:          "ChangeKeyboardDevice",
+	ChangePointerDeviceOpcode:           "ChangePointerDevice",
+	GrabDeviceOpcode:                    "GrabDevice",
+	UngrabDeviceOpcode:                  "UngrabDevice",
+	GrabDeviceKeyOpcode:                 "GrabDeviceKey",
+	UngrabDeviceKeyOpcode:               "UngrabDeviceKey",
+	GrabDeviceButtonOpcode:              "GrabDeviceButton",
+	UngrabDeviceButtonOpcode:            "UngrabDeviceButton",
+	AllowDeviceEventsOpcode:             "AllowDeviceEvents",
+	GetDeviceFocusOpcode:                "GetDeviceFocus",
+	SetDeviceFocusOpcode:                "SetDeviceFocus",
+	GetFeedbackControlOpcode:            "GetFeedbackControl",
+	ChangeFeedbackControlOpcode:         "ChangeFeedbackControl",
+	GetDeviceKeyMappingOpcode:           "GetDeviceKeyMapping",
+	ChangeDeviceKeyMappingOpcode:        "ChangeDeviceKeyMapping",
+	GetDeviceModifierMappingOpcode:      "GetDeviceModifierMapping",
+	SetDeviceModifierMappingOpcode:      "SetDeviceModifierMapping",
+	GetDeviceButtonMappingOpcode:        "GetDeviceButtonMapping",
+	SetDeviceButtonMappingOpcode:        "SetDeviceButtonMapping",
+	QueryDeviceStateOpcode:              "QueryDeviceState",
+	DeviceBellOpcode:                    "DeviceBell",
+	SetDeviceValuatorsOpcode:            "SetDeviceValuators",
+	GetDeviceControlOpcode:              "GetDeviceControl",
+	ChangeDeviceControlOpcode:           "ChangeDeviceControl",
+	ListDevicePropertiesOpcode:          "ListDeviceProperties",
+	ChangeDevicePropertyOpcode:          "ChangeDeviceProperty",
+	DeleteDevicePropertyOpcode:          "DeleteDeviceProperty",
+	GetDevicePropertyOpcode:             "GetDeviceProperty",
+	XIQueryPointerOpcode:                "XIQueryPointer",
+	XIWarpPointerOpcode:                 "XIWarpPointer",
+	XIChangeCursorOpcode:                "XIChangeCursor",
+	XIChangeHierarchyOpcode:             "XIChangeHierarchy",
+	XISetClientPointerOpcode:            "XISetClientPointer",
+	XIGetClientPointerOpcode:            "XIGetClientPointer",
+	XISelectEventsOpcode:                "XISelectEvents",
+	XIQueryVersionOpcode:                "XIQueryVersion",
+	XIQueryDeviceOpcode:                 "XIQueryDevice",
+	XISetFocusOpcode:                    "XISetFocus",
+	XIGetFocusOpcode:                    "XIGetFocus",
+	XIGrabDeviceOpcode:                  "XIGrabDevice",
+	XIUngrabDeviceOpcode:                "XIUngrabDevice",
+	XIAllowEventsOpcode:                 "XIAllowEvents",
+	XIPassiveGrabDeviceOpcode:           "XIPassiveGrabDevice",
+	XIPassiveUngrabDeviceOpcode:         "XIPassiveUngrabDevice",
+	XIListPropertiesOpcode:              "XIListProperties",
+	XIChangePropertyOpcode:              "XIChangeProperty",
+	XIDeletePropertyOpcode:              "XIDeleteProperty",
+	XIGetPropertyOpcode:                 "XIGetProperty",
+	XIGetSelectedEventsOpcode:           "XIGetSelectedEvents",
+	XIBarrierReleasePointerOpcode:       "XIBarrierReleasePointer",
+	SendExtensionEventOpcode:            "SendExtensionEvent",
+}
 
 func init() {
-	readErrorFuncMap[DeviceErrorCode] = readDeviceError
-	readErrorFuncMap[EventErrorCode] = readEventError
-	readErrorFuncMap[ModeErrorCode] = readModeError
-	readErrorFuncMap[DeviceBusyErrorCode] = readDeviceBusyError
-	readErrorFuncMap[ClassErrorCode] = readClassError
-	_ext = x.NewExtension("XInputExtension", 4, readErrorFuncMap)
+	_ext = x.NewExtension("XInputExtension", 4, errorCodeNameMap, requestOpcodeNameMap)
 }

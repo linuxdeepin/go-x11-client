@@ -163,6 +163,8 @@ func (c *Conn) readPacket() error {
 		// is unchecked error
 		if c.errorCb != nil {
 			c.errorCb(c.NewError(buf))
+		} else {
+			c.in.addEvent(GenericEvent(buf))
 		}
 	} else {
 		// is event

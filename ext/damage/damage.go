@@ -1,8 +1,6 @@
 package damage
 
 import (
-	"fmt"
-
 	x "github.com/linuxdeepin/go-x11-client"
 )
 
@@ -60,50 +58,6 @@ func readNotifyEvent(r *x.Reader, v *NotifyEvent) error {
 	}
 
 	return nil
-}
-
-type BadDamageError struct {
-	Code        uint8
-	Sequence    uint16
-	Bad         Damage
-	MinorOpcode uint16
-	MajorOpcode uint8
-}
-
-func (e BadDamageError) GetCode() uint8 {
-	return e.Code
-}
-
-func (e BadDamageError) GetSequenceNumber() uint16 {
-	return e.Sequence
-}
-
-func (e BadDamageError) GetMinorOpcode() uint16 {
-	return e.MinorOpcode
-}
-
-func (e BadDamageError) GetMajorOpcode() uint8 {
-	return e.MajorOpcode
-}
-
-func (e BadDamageError) Error() string {
-	return fmt.Sprintf("damage.BadDamageError{code=%d, seq=%d, minor=%d, major=%d, bad=%d}", e.Code, e.Sequence, e.MinorOpcode, e.MajorOpcode, e.Bad)
-}
-
-func readBadDamageError(r *x.Reader) x.Error {
-	var e BadDamageError
-	// Error
-	r.Read1b()
-	e.Code = r.Read1b()
-	e.Sequence = r.Read2b()
-
-	e.Bad = Damage(r.Read4b())
-
-	e.MinorOpcode = r.Read2b()
-	e.MajorOpcode = r.Read1b()
-
-	r.ReadPad(21)
-	return e
 }
 
 // #WREQ

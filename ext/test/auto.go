@@ -29,6 +29,13 @@ type CompareCursorCookie x.SeqNum
 const FakeInputOpcode = 2
 const GrabControlOpcode = 3
 
+var requestOpcodeNameMap = map[uint]string{
+	GetVersionOpcode:    "GetVersion",
+	CompareCursorOpcode: "CompareCursor",
+	FakeInputOpcode:     "FakeInput",
+	GrabControlOpcode:   "GrabControl",
+}
+
 func init() {
-	_ext = x.NewExtension("XTEST", 0, nil)
+	_ext = x.NewExtension("XTEST", 0, nil, requestOpcodeNameMap)
 }

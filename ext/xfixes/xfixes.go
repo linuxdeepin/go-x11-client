@@ -693,15 +693,3 @@ func encodeDeletePointerBarrier(barrier Barrier) (b x.RequestBody) {
 		End()
 	return
 }
-
-type BadRegionError struct {
-	x.ResourceErrorBase
-}
-
-func readBadRegionError(r *x.Reader) x.Error {
-	return BadRegionError{x.ReadResourceErrorBase(r)}
-}
-
-func (e BadRegionError) Error() string {
-	return "BadRegionError" + e.Msg()
-}

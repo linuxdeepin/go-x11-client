@@ -18,7 +18,8 @@ type Extension struct {
 	id               int
 	name             string // extension-xname
 	maxErrCode       uint8
-	readErrorFuncMap map[uint8]ReadErrorFunc
+	errCodeNameMap   map[uint8]string
+	reqOpcodeNameMap map[uint]string
 }
 
 func (ext *Extension) Name() string {
@@ -29,14 +30,15 @@ var nextExtId = 1
 
 // only call it in init() func
 func NewExtension(name string, maxErrCode uint8,
-	readErrorFuncMap map[uint8]ReadErrorFunc) *Extension {
+	errCodeNameMap map[uint8]string, reqOpcodeNameMap map[uint]string) *Extension {
 	id := nextExtId
 	nextExtId++
 	return &Extension{
 		id:               id,
 		name:             name,
 		maxErrCode:       maxErrCode,
-		readErrorFuncMap: readErrorFuncMap,
+		errCodeNameMap:   errCodeNameMap,
+		reqOpcodeNameMap: reqOpcodeNameMap,
 	}
 }
 
@@ -72,21 +74,6 @@ func (e *ext) getById(id int) *extAndData {
 		e.grow(id * 2)
 	}
 	return &e.extensions[id-1]
-}
-
-func (e *ext) newError(errCode uint8, data []byte) Error {
-	e.mu.RLock()
-	ext, code := e.getExtAndErrorCode(errCode)
-	e.mu.RUnlock()
-
-	if ext != nil {
-		fn, ok := ext.readErrorFuncMap[code]
-		if ok {
-			r := NewReaderFromData(data)
-			return fn(r)
-		}
-	}
-	return nil
 }
 
 func (e *ext) getExtAndErrorCode(errCode uint8) (*Extension, uint8) {

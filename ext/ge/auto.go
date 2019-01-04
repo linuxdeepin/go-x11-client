@@ -16,6 +16,10 @@ const QueryVersionOpcode = 0
 
 type QueryVersionCookie x.SeqNum
 
+var requestOpcodeNameMap = map[uint]string{
+	QueryVersionOpcode: "QueryVersion",
+}
+
 func init() {
-	_ext = x.NewExtension("Generic Event Extension", 0, nil)
+	_ext = x.NewExtension("Generic Event Extension", 0, nil, requestOpcodeNameMap)
 }

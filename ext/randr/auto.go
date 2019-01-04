@@ -262,12 +262,60 @@ func NewNotifyEvent(data []byte) (*NotifyEvent, error) {
 	return &ev, nil
 }
 
-var readErrorFuncMap = make(map[uint8]x.ReadErrorFunc, 4)
+var errorCodeNameMap = map[uint8]string{
+	BadOutputErrorCode:   "BadOutput",
+	BadCrtcErrorCode:     "BadCrtc",
+	BadModeErrorCode:     "BadMode",
+	BadProviderErrorCode: "BadProvider",
+}
+var requestOpcodeNameMap = map[uint]string{
+	QueryVersionOpcode:              "QueryVersion",
+	SetScreenConfigOpcode:           "SetScreenConfig",
+	SelectInputOpcode:               "SelectInput",
+	GetScreenInfoOpcode:             "GetScreenInfo",
+	GetScreenSizeRangeOpcode:        "GetScreenSizeRange",
+	SetScreenSizeOpcode:             "SetScreenSize",
+	GetScreenResourcesOpcode:        "GetScreenResources",
+	GetOutputInfoOpcode:             "GetOutputInfo",
+	ListOutputPropertiesOpcode:      "ListOutputProperties",
+	QueryOutputPropertyOpcode:       "QueryOutputProperty",
+	ConfigureOutputPropertyOpcode:   "ConfigureOutputProperty",
+	ChangeOutputPropertyOpcode:      "ChangeOutputProperty",
+	DeleteOutputPropertyOpcode:      "DeleteOutputProperty",
+	GetOutputPropertyOpcode:         "GetOutputProperty",
+	CreateModeOpcode:                "CreateMode",
+	DestroyModeOpcode:               "DestroyMode",
+	AddOutputModeOpcode:             "AddOutputMode",
+	DeleteOutputModeOpcode:          "DeleteOutputMode",
+	GetCrtcInfoOpcode:               "GetCrtcInfo",
+	SetCrtcConfigOpcode:             "SetCrtcConfig",
+	GetCrtcGammaSizeOpcode:          "GetCrtcGammaSize",
+	GetCrtcGammaOpcode:              "GetCrtcGamma",
+	SetCrtcGammaOpcode:              "SetCrtcGamma",
+	GetScreenResourcesCurrentOpcode: "GetScreenResourcesCurrent",
+	SetCrtcTransformOpcode:          "SetCrtcTransform",
+	GetCrtcTransformOpcode:          "GetCrtcTransform",
+	GetPanningOpcode:                "GetPanning",
+	SetPanningOpcode:                "SetPanning",
+	SetOutputPrimaryOpcode:          "SetOutputPrimary",
+	GetOutputPrimaryOpcode:          "GetOutputPrimary",
+	GetProvidersOpcode:              "GetProviders",
+	GetProviderInfoOpcode:           "GetProviderInfo",
+	SetProviderOffloadSinkOpcode:    "SetProviderOffloadSink",
+	SetProviderOutputSourceOpcode:   "SetProviderOutputSource",
+	ListProviderPropertiesOpcode:    "ListProviderProperties",
+	QueryProviderPropertyOpcode:     "QueryProviderProperty",
+	ConfigureProviderPropertyOpcode: "ConfigureProviderProperty",
+	ChangeProviderPropertyOpcode:    "ChangeProviderProperty",
+	DeleteProviderPropertyOpcode:    "DeleteProviderProperty",
+	GetProviderPropertyOpcode:       "GetProviderProperty",
+	GetMonitorsOpcode:               "GetMonitors",
+	SetMonitorOpcode:                "SetMonitor",
+	DeleteMonitorOpcode:             "DeleteMonitor",
+	CreateLeaseOpcode:               "CreateLease",
+	FreeLeaseOpcode:                 "FreeLease",
+}
 
 func init() {
-	readErrorFuncMap[BadOutputErrorCode] = readBadOutputError
-	readErrorFuncMap[BadCrtcErrorCode] = readBadCrtcError
-	readErrorFuncMap[BadModeErrorCode] = readBadModeError
-	readErrorFuncMap[BadProviderErrorCode] = readBadProviderError
-	_ext = x.NewExtension("RANDR", 3, readErrorFuncMap)
+	_ext = x.NewExtension("RANDR", 3, errorCodeNameMap, requestOpcodeNameMap)
 }

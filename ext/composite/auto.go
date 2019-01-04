@@ -34,6 +34,18 @@ type GetOverlayWindowCookie x.SeqNum
 
 const ReleaseOverlayWindowOpcode = 8
 
+var requestOpcodeNameMap = map[uint]string{
+	QueryVersionOpcode:               "QueryVersion",
+	RedirectWindowOpcode:             "RedirectWindow",
+	RedirectSubwindowsOpcode:         "RedirectSubwindows",
+	UnredirectWindowOpcode:           "UnredirectWindow",
+	UnredirectSubwindowsOpcode:       "UnredirectSubwindows",
+	CreateRegionFromBorderClipOpcode: "CreateRegionFromBorderClip",
+	NameWindowPixmapOpcode:           "NameWindowPixmap",
+	GetOverlayWindowOpcode:           "GetOverlayWindow",
+	ReleaseOverlayWindowOpcode:       "ReleaseOverlayWindow",
+}
+
 func init() {
-	_ext = x.NewExtension("Composite", 0, nil)
+	_ext = x.NewExtension("Composite", 0, nil, requestOpcodeNameMap)
 }

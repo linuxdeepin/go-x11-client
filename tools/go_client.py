@@ -4,7 +4,8 @@ from enum import *
 import argparse
 import subprocess
 
-error_types = []
+error_names = []
+request_names = []
 max_error_code = 0
 x_prefix = ''
 
@@ -53,24 +54,39 @@ def go_open(self):
 def go_close(self):
     # handle errors
     _ns = get_namespace()
-    global error_types
+    global error_names
+    global request_names
     global x_prefix
-    if len(error_types) > 0:
-        l("var readErrorFuncMap = make(map[uint8]%sReadErrorFunc, %d)", x_prefix, len(error_types))
-        l("func init() {")
-        for error_type in error_types:
-            l("readErrorFuncMap[%sCode] = read%s", error_type, error_type)
-        
-        # new ext
-        if _ns.is_ext:
-            l('_ext = %sNewExtension("%s", %d, readErrorFuncMap)', x_prefix, _ns.ext_xname,
-             max_error_code)
-        l("}") # end func init
-    else:
-        l("func init() {")
-        l('_ext = %sNewExtension("%s", 0, nil)', x_prefix, _ns.ext_xname)
-        l("}")
 
+    if len(error_names) > 0:
+        l("var errorCodeNameMap = map[uint8]string{")
+        for name in error_names:
+            error_code = get_type_name(name) + "ErrorCode"
+            error_name = get_type_name(name)
+            if not error_name.startswith("Bad"):
+                error_name = "Bad" + error_name
+            if error_name == "BadDeviceBusy":
+                error_name = "DeviceBusy"
+            l("%s : \"%s\",", error_code, error_name)
+        l("}") # end error code name map
+
+    if len(request_names) > 0:
+        l("var requestOpcodeNameMap = map[uint]string{")
+        for name in request_names:
+            l("%sOpcode : \"%s\",", name, name)
+        l("}") # end request opcode name map
+
+    if _ns.is_ext:
+        l("func init() {")
+        errMap = "nil"
+        if len(error_names) > 0:
+            errMap = "errorCodeNameMap"
+        reqMap = "nil"
+        if len(request_names) > 0:
+            reqMap = "requestOpcodeNameMap"
+    
+        l('_ext = %sNewExtension("%s", %d, %s, %s)', x_prefix, _ns.ext_xname, max_error_code, errMap, reqMap)
+        l("}") # end func init
 
     # write source file
     global args
@@ -114,9 +130,11 @@ def go_union(self, name):
     pass
 
 def go_request(self, name):
+    global request_names
     name_base = get_request_name(name)
     opcode_name = name_base + "Opcode"
     l("const %s = %s", opcode_name, self.opcode)
+    request_names.append(name_base)
 
     if self.reply:
         l("type %s %sSeqNum", name_base + "Cookie", x_prefix)
@@ -143,11 +161,12 @@ def define_go_event_new_func(go_type):
 
 def go_error(self, name):
     global max_error_code
+    global error_names
     type_name = get_type_name(name) + 'Error'
     code_name = type_name + "Code"
     code = int(self.opcodes[name])
     l('const %s = %d', code_name, code)
-    error_types.append(type_name)
+    error_names.append(name)
     if code > max_error_code:
         max_error_code = code
 

@@ -54,9 +54,20 @@ type EnableContextCookie x.SeqNum
 const DisableContextOpcode = 6
 const FreeContextOpcode = 7
 
-var readErrorFuncMap = make(map[uint8]x.ReadErrorFunc, 1)
+var errorCodeNameMap = map[uint8]string{
+	BadContextErrorCode: "BadContext",
+}
+var requestOpcodeNameMap = map[uint]string{
+	QueryVersionOpcode:      "QueryVersion",
+	CreateContextOpcode:     "CreateContext",
+	RegisterClientsOpcode:   "RegisterClients",
+	UnregisterClientsOpcode: "UnregisterClients",
+	GetContextOpcode:        "GetContext",
+	EnableContextOpcode:     "EnableContext",
+	DisableContextOpcode:    "DisableContext",
+	FreeContextOpcode:       "FreeContext",
+}
 
 func init() {
-	readErrorFuncMap[BadContextErrorCode] = readBadContextError
-	_ext = x.NewExtension("RECORD", 0, readErrorFuncMap)
+	_ext = x.NewExtension("RECORD", 0, errorCodeNameMap, requestOpcodeNameMap)
 }

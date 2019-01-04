@@ -51,7 +51,7 @@ type Conn struct {
 	ridAllocator resourceIdAllocator
 	atomCache    *AtomCache
 	atomCacheMu  sync.Mutex
-	errorCb      func(err Error)
+	errorCb      func(err *Error)
 }
 
 func (c *Conn) GetSetup() *Setup {
@@ -101,6 +101,6 @@ func (c *Conn) RemoveEventChan(eventChan chan<- GenericEvent) {
 	c.in.removeEventChan(eventChan)
 }
 
-func (c *Conn) SetErrorCallback(fn func(err Error)) {
+func (c *Conn) SetErrorCallback(fn func(err *Error)) {
 	c.errorCb = fn
 }

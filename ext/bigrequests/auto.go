@@ -16,6 +16,10 @@ const EnableOpcode = 0
 
 type EnableCookie x.SeqNum
 
+var requestOpcodeNameMap = map[uint]string{
+	EnableOpcode: "Enable",
+}
+
 func init() {
-	_ext = x.NewExtension("BIG-REQUESTS", 0, nil)
+	_ext = x.NewExtension("BIG-REQUESTS", 0, nil, requestOpcodeNameMap)
 }

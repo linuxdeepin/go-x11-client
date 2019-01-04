@@ -2,18 +2,6 @@ package shm
 
 import "github.com/linuxdeepin/go-x11-client"
 
-type BadSegError struct {
-	x.ResourceErrorBase
-}
-
-func (e BadSegError) Error() string {
-	return "shm.BadSegError" + e.Msg()
-}
-
-func readBadSegError(r *x.Reader) x.Error {
-	return BadSegError{x.ReadResourceErrorBase(r)}
-}
-
 type CompletionEvent struct {
 }
 

@@ -191,13 +191,47 @@ const CreateLinearGradientOpcode = 34
 const CreateRadialGradientOpcode = 35
 const CreateConicalGradientOpcode = 36
 
-var readErrorFuncMap = make(map[uint8]x.ReadErrorFunc, 5)
+var errorCodeNameMap = map[uint8]string{
+	PictFormatErrorCode: "BadPictFormat",
+	PictureErrorCode:    "BadPicture",
+	PictOpErrorCode:     "BadPictOp",
+	GlyphSetErrorCode:   "BadGlyphSet",
+	GlyphErrorCode:      "BadGlyph",
+}
+var requestOpcodeNameMap = map[uint]string{
+	QueryVersionOpcode:             "QueryVersion",
+	QueryPictFormatsOpcode:         "QueryPictFormats",
+	QueryPictIndexValuesOpcode:     "QueryPictIndexValues",
+	CreatePictureOpcode:            "CreatePicture",
+	ChangePictureOpcode:            "ChangePicture",
+	SetPictureClipRectanglesOpcode: "SetPictureClipRectangles",
+	FreePictureOpcode:              "FreePicture",
+	CompositeOpcode:                "Composite",
+	TrapezoidsOpcode:               "Trapezoids",
+	TrianglesOpcode:                "Triangles",
+	TriStripOpcode:                 "TriStrip",
+	TriFanOpcode:                   "TriFan",
+	CreateGlyphSetOpcode:           "CreateGlyphSet",
+	ReferenceGlyphSetOpcode:        "ReferenceGlyphSet",
+	FreeGlyphSetOpcode:             "FreeGlyphSet",
+	AddGlyphsOpcode:                "AddGlyphs",
+	FreeGlyphsOpcode:               "FreeGlyphs",
+	CompositeGlyphs8Opcode:         "CompositeGlyphs8",
+	CompositeGlyphs16Opcode:        "CompositeGlyphs16",
+	CompositeGlyphs32Opcode:        "CompositeGlyphs32",
+	FillRectanglesOpcode:           "FillRectangles",
+	CreateCursorOpcode:             "CreateCursor",
+	SetPictureTransformOpcode:      "SetPictureTransform",
+	QueryFiltersOpcode:             "QueryFilters",
+	SetPictureFilterOpcode:         "SetPictureFilter",
+	CreateAnimCursorOpcode:         "CreateAnimCursor",
+	AddTrapsOpcode:                 "AddTraps",
+	CreateSolidFillOpcode:          "CreateSolidFill",
+	CreateLinearGradientOpcode:     "CreateLinearGradient",
+	CreateRadialGradientOpcode:     "CreateRadialGradient",
+	CreateConicalGradientOpcode:    "CreateConicalGradient",
+}
 
 func init() {
-	readErrorFuncMap[PictFormatErrorCode] = readPictFormatError
-	readErrorFuncMap[PictureErrorCode] = readPictureError
-	readErrorFuncMap[PictOpErrorCode] = readPictOpError
-	readErrorFuncMap[GlyphSetErrorCode] = readGlyphSetError
-	readErrorFuncMap[GlyphErrorCode] = readGlyphError
-	_ext = x.NewExtension("RENDER", 4, readErrorFuncMap)
+	_ext = x.NewExtension("RENDER", 4, errorCodeNameMap, requestOpcodeNameMap)
 }

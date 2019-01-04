@@ -1,8 +1,6 @@
 package record
 
 import (
-	"fmt"
-
 	"github.com/linuxdeepin/go-x11-client"
 )
 
@@ -183,46 +181,6 @@ func readClientInfo(r *x.Reader, v *ClientInfo) error {
 	}
 
 	return nil
-}
-
-type ContextError struct {
-	Code     uint8
-	Sequence uint16
-	Bad      Context
-}
-
-func (e ContextError) GetCode() uint8 {
-	return e.Code
-}
-
-func (e ContextError) GetSequenceNumber() uint16 {
-	return e.Sequence
-}
-
-func (e ContextError) GetMinorOpcode() uint16 {
-	return 0
-}
-
-func (e ContextError) GetMajorOpcode() uint8 {
-	return 0
-}
-
-func (e ContextError) Error() string {
-	return fmt.Sprintf("record.ContextError{code=%d, seq=%d, bad=%d}",
-		e.Code, e.Sequence, e.Bad)
-}
-
-func readBadContextError(r *x.Reader) x.Error {
-	var e ContextError
-	// Error
-	r.Read1b()
-	e.Code = r.Read1b()
-	e.Sequence = r.Read2b()
-
-	e.Bad = Context(r.Read4b())
-
-	r.ReadPad(24)
-	return e
 }
 
 // #WREQ

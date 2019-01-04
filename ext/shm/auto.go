@@ -45,9 +45,20 @@ const CreateSegmentOpcode = 7
 
 type CreateSegmentCookie x.SeqNum
 
-var readErrorFuncMap = make(map[uint8]x.ReadErrorFunc, 1)
+var errorCodeNameMap = map[uint8]string{
+	BadSegErrorCode: "BadSeg",
+}
+var requestOpcodeNameMap = map[uint]string{
+	QueryVersionOpcode:  "QueryVersion",
+	AttachOpcode:        "Attach",
+	DetachOpcode:        "Detach",
+	PutImageOpcode:      "PutImage",
+	GetImageOpcode:      "GetImage",
+	CreatePixmapOpcode:  "CreatePixmap",
+	AttachFdOpcode:      "AttachFd",
+	CreateSegmentOpcode: "CreateSegment",
+}
 
 func init() {
-	readErrorFuncMap[BadSegErrorCode] = readBadSegError
-	_ext = x.NewExtension("MIT-SHM", 0, readErrorFuncMap)
+	_ext = x.NewExtension("MIT-SHM", 0, errorCodeNameMap, requestOpcodeNameMap)
 }
