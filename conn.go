@@ -104,3 +104,9 @@ func (c *Conn) RemoveEventChan(eventChan chan<- GenericEvent) {
 func (c *Conn) SetErrorCallback(fn func(err *Error)) {
 	c.errorCb = fn
 }
+
+func (c *Conn) MakeAndAddEventChan(bufSize int) chan GenericEvent {
+	ch := make(chan GenericEvent, bufSize)
+	c.AddEventChan(ch)
+	return ch
+}

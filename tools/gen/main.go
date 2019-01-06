@@ -56,7 +56,7 @@ func (g *Generator) format() []byte {
 type requestFunc struct {
 	name           string
 	encodeFuncName string
-	writeFuncArgs  string
+	encodeFuncArgs string
 	args           string
 	noReply        bool
 }
@@ -95,13 +95,22 @@ func main() {
 		funcName := funcDel.Name.Name
 		if strings.HasPrefix(funcName, "encode") {
 
-			if !strings.Contains(funcDel.Doc.Text(), "#WREQ") {
+			docText := funcDel.Doc.Text()
+			if !strings.Contains(docText, "#WREQ") {
 				return false
+			}
+			wreqOption := strings.TrimSpace(strings.TrimPrefix(docText, "#WREQ"))
+			wreqOptions := strings.Split(wreqOption, " ")
+			var varargs []string
+			for _, value := range wreqOptions {
+				if strings.HasPrefix(value, "vararg:") {
+					varargs = append(varargs, value[len("vararg:"):])
+				}
 			}
 
 			params := funcDel.Type.Params.List
 			var args []string
-			var writeFuncArgs []string
+			var encodeFuncArgs []string
 			for _, param := range params {
 				log.Println(param.Names)
 
@@ -117,12 +126,17 @@ func main() {
 				argNamesType := strings.Join(paramNames, ",") + " " + typeStr
 
 				args = append(args, argNamesType)
-				writeFuncArgs = append(writeFuncArgs, paramNames...)
+				for _, value := range paramNames {
+					if strv.Strv(varargs).Contains(value) {
+						value = "options..."
+					}
+					encodeFuncArgs = append(encodeFuncArgs, value)
+				}
 			}
 
 			requestFuncs = append(requestFuncs, &requestFunc{
 				encodeFuncName: funcName,
-				writeFuncArgs:  strings.Join(writeFuncArgs, ","),
+				encodeFuncArgs: strings.Join(encodeFuncArgs, ","),
 				name:           strings.TrimPrefix(funcName, "encode"),
 				args:           strings.Join(args, ","),
 			})
@@ -207,9 +221,9 @@ func (g *Generator) pRequestFunc(reqFunc *requestFunc, check bool) {
 		returnType)
 
 	if optIsExt {
-		g.p("body := %s(%s)\n", reqFunc.encodeFuncName, reqFunc.writeFuncArgs)
+		g.p("body := %s(%s)\n", reqFunc.encodeFuncName, reqFunc.encodeFuncArgs)
 	} else {
-		g.p("headerData, body := %s(%s)\n", reqFunc.encodeFuncName, reqFunc.writeFuncArgs)
+		g.p("headerData, body := %s(%s)\n", reqFunc.encodeFuncName, reqFunc.encodeFuncArgs)
 	}
 	g.p("req := &%sProtocolRequest{\n", xPrefix)
 

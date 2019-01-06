@@ -141,3 +141,41 @@ func (r *Reader) Read8b() uint64 {
 	v |= uint64(r.buf[7]) << 56
 	return v
 }
+
+func (r *Reader) ReadReplyHeader() (data uint8, length uint32) {
+	r.Read1b()
+	if r.Err() != nil {
+		return
+	}
+
+	data = r.Read1b()
+	if r.Err() != nil {
+		return
+	}
+
+	// seq
+	r.Read2b()
+	if r.Err() != nil {
+		return
+	}
+
+	// length
+	length = r.Read4b()
+	return
+}
+
+func (r *Reader) ReadEventHeader() (data uint8, seq uint16) {
+	r.Read1b()
+	if r.Err() != nil {
+		return
+	}
+
+	data = r.Read1b()
+	if r.Err() != nil {
+		return
+	}
+
+	// seq
+	seq = r.Read2b()
+	return
+}
