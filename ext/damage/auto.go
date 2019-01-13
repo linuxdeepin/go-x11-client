@@ -37,8 +37,11 @@ const NotifyEventCode = 0
 func NewNotifyEvent(data []byte) (*NotifyEvent, error) {
 	var ev NotifyEvent
 	r := x.NewReaderFromData(data)
-	readNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil

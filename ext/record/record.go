@@ -381,66 +381,30 @@ type EnableContextReply struct {
 }
 
 func readEnableContextReply(r *x.Reader, v *EnableContextReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	v.Category = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// len
-	replyLen := r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	var replyLen uint32
+	v.Category, replyLen = r.ReadReplyHeader() // 2
 
 	v.ElementHeader = ElementHeader(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.ClientSwapped = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(2) // 3
 
 	v.XidBase = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.ServerTime = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.RecSequenceNum = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.RecSequenceNum = r.Read4b() // 6
 
 	// unused
-	r.ReadPad(8)
+	r.ReadPad(8) // 8
 
 	dataLen := 4 * int(replyLen)
-	v.Data = r.ReadBytes(dataLen)
-	if r.Err() != nil {
-		return r.Err()
+	var err error
+	v.Data, err = r.ReadBytes(dataLen)
+	if err != nil {
+		return err
 	}
 
 	return nil

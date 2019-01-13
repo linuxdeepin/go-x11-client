@@ -311,9 +311,10 @@ func readGetOutputInfoReply(r *x.Reader, v *GetOutputInfoReply) error {
 		}
 	}
 
-	v.Name = r.ReadString(nameLen)
-	if r.Err() != nil {
-		return r.Err()
+	var err error
+	v.Name, err = r.ReadString(nameLen)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -519,19 +520,15 @@ func readGetScreenResourcesReply(r *x.Reader, v *GetScreenResourcesReply) error 
 	for i := 0; i < modesLen; i++ {
 		modeNameLen := int(v.Modes[i].nameLen)
 		b += modeNameLen
-		v.Modes[i].Name = r.ReadString(modeNameLen)
-		if r.Err() != nil {
-			return r.Err()
+		var err error
+		v.Modes[i].Name, err = r.ReadString(modeNameLen)
+		if err != nil {
+			return err
 		}
 	}
 
 	if b != modeNamesLen {
 		return errors.New("mode names len not equal")
-	}
-
-	r.ReadPad(x.Pad(b))
-	if r.Err() != nil {
-		return r.Err()
 	}
 
 	return nil
@@ -653,16 +650,11 @@ func readGetOutputPropertyReply(r *x.Reader, v *GetOutputPropertyReply) error {
 		return r.Err()
 	}
 
+	var err error
 	n := int(v.ValueLen) * int(v.Format/8)
-	v.Value = r.ReadBytes(n)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(x.Pad(n))
-	if r.Err() != nil {
-		return r.Err()
+	v.Value, err = r.ReadBytes(n)
+	if err != nil {
+		return err
 	}
 
 	return nil

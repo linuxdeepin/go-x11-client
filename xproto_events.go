@@ -472,7 +472,7 @@ func readKeymapNotifyEvent(r *Reader, v *KeymapNotifyEvent) error {
 		return r.Err()
 	}
 
-	v.Keys = r.ReadBytes(31)
+	v.Keys = r.MustReadBytes(31)
 	if r.Err() != nil {
 		return r.Err()
 	}
@@ -1701,7 +1701,7 @@ func readClientMessageEvent(r *Reader, v *ClientMessageEvent) error {
 		return r.Err()
 	}
 
-	data := r.ReadBytes(20)
+	data := r.MustReadBytes(20)
 	if r.Err() != nil {
 		return r.Err()
 	}
@@ -1805,9 +1805,10 @@ func readGeGenericEvent(r *Reader, v *GeGenericEvent) error {
 		return r.Err()
 	}
 
-	v.Data = r.ReadBytes(22 + (int(v.Length) * 4))
-	if r.Err() != nil {
-		return r.Err()
+	var err error
+	v.Data, err = r.ReadBytes(22 + (int(v.Length) * 4))
+	if err != nil {
+		return err
 	}
 
 	return nil

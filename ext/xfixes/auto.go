@@ -55,8 +55,11 @@ const SelectionNotifyEventCode = 0
 func NewSelectionNotifyEvent(data []byte) (*SelectionNotifyEvent, error) {
 	var ev SelectionNotifyEvent
 	r := x.NewReaderFromData(data)
-	readSelectionNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readSelectionNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -79,8 +82,11 @@ const CursorNotifyEventCode = 1
 func NewCursorNotifyEvent(data []byte) (*CursorNotifyEvent, error) {
 	var ev CursorNotifyEvent
 	r := x.NewReaderFromData(data)
-	readCursorNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readCursorNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil

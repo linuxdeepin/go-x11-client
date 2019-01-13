@@ -602,9 +602,10 @@ func readGetCursorImageAndNameReply(r *x.Reader, v *GetCursorImageAndNameReply) 
 		}
 	}
 
-	v.CursorName = r.ReadString(cursorNameLen)
-	if r.Err() != nil {
-		return r.Err()
+	var err error
+	v.CursorName, err = r.ReadString(cursorNameLen)
+	if err != nil {
+		return err
 	}
 
 	return nil

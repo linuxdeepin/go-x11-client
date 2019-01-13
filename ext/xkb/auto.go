@@ -583,8 +583,11 @@ const NewKeyboardNotifyEventCode = 0
 func NewNewKeyboardNotifyEvent(data []byte) (*NewKeyboardNotifyEvent, error) {
 	var ev NewKeyboardNotifyEvent
 	r := x.NewReaderFromData(data)
-	readNewKeyboardNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readNewKeyboardNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -595,8 +598,11 @@ const MapNotifyEventCode = 1
 func NewMapNotifyEvent(data []byte) (*MapNotifyEvent, error) {
 	var ev MapNotifyEvent
 	r := x.NewReaderFromData(data)
-	readMapNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readMapNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -607,8 +613,11 @@ const StateNotifyEventCode = 2
 func NewStateNotifyEvent(data []byte) (*StateNotifyEvent, error) {
 	var ev StateNotifyEvent
 	r := x.NewReaderFromData(data)
-	readStateNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readStateNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -619,8 +628,11 @@ const ControlsNotifyEventCode = 3
 func NewControlsNotifyEvent(data []byte) (*ControlsNotifyEvent, error) {
 	var ev ControlsNotifyEvent
 	r := x.NewReaderFromData(data)
-	readControlsNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readControlsNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -631,8 +643,11 @@ const IndicatorStateNotifyEventCode = 4
 func NewIndicatorStateNotifyEvent(data []byte) (*IndicatorStateNotifyEvent, error) {
 	var ev IndicatorStateNotifyEvent
 	r := x.NewReaderFromData(data)
-	readIndicatorStateNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readIndicatorStateNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -643,8 +658,11 @@ const IndicatorMapNotifyEventCode = 5
 func NewIndicatorMapNotifyEvent(data []byte) (*IndicatorMapNotifyEvent, error) {
 	var ev IndicatorMapNotifyEvent
 	r := x.NewReaderFromData(data)
-	readIndicatorMapNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readIndicatorMapNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -655,8 +673,11 @@ const NamesNotifyEventCode = 6
 func NewNamesNotifyEvent(data []byte) (*NamesNotifyEvent, error) {
 	var ev NamesNotifyEvent
 	r := x.NewReaderFromData(data)
-	readNamesNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readNamesNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -667,8 +688,11 @@ const CompatMapNotifyEventCode = 7
 func NewCompatMapNotifyEvent(data []byte) (*CompatMapNotifyEvent, error) {
 	var ev CompatMapNotifyEvent
 	r := x.NewReaderFromData(data)
-	readCompatMapNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readCompatMapNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -679,8 +703,11 @@ const BellNotifyEventCode = 8
 func NewBellNotifyEvent(data []byte) (*BellNotifyEvent, error) {
 	var ev BellNotifyEvent
 	r := x.NewReaderFromData(data)
-	readBellNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readBellNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -691,8 +718,11 @@ const ActionMessageEventCode = 9
 func NewActionMessageEvent(data []byte) (*ActionMessageEvent, error) {
 	var ev ActionMessageEvent
 	r := x.NewReaderFromData(data)
-	readActionMessageEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readActionMessageEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -703,8 +733,11 @@ const AccessXNotifyEventCode = 10
 func NewAccessXNotifyEvent(data []byte) (*AccessXNotifyEvent, error) {
 	var ev AccessXNotifyEvent
 	r := x.NewReaderFromData(data)
-	readAccessXNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readAccessXNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -715,8 +748,11 @@ const ExtensionDeviceNotifyEventCode = 11
 func NewExtensionDeviceNotifyEvent(data []byte) (*ExtensionDeviceNotifyEvent, error) {
 	var ev ExtensionDeviceNotifyEvent
 	r := x.NewReaderFromData(data)
-	readExtensionDeviceNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readExtensionDeviceNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil

@@ -5,7 +5,7 @@ type ClientMessageData struct {
 }
 
 func ClientMessageDataRead(r *Reader, v *ClientMessageData) int {
-	v.data = r.ReadBytes(20)
+	v.data = r.MustReadBytes(20)
 	return 20
 }
 

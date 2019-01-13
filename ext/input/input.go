@@ -185,9 +185,10 @@ func readXIDeviceInfo(r *x.Reader, v *XIDeviceInfo) error {
 		return r.Err()
 	}
 
-	v.Name = r.ReadString(nameLen)
-	if r.Err() != nil {
-		return r.Err()
+	var err error
+	v.Name, err = r.ReadString(nameLen)
+	if err != nil {
+		return err
 	}
 
 	r.ReadPad(x.Pad(nameLen))
@@ -196,7 +197,6 @@ func readXIDeviceInfo(r *x.Reader, v *XIDeviceInfo) error {
 	}
 
 	// classes
-	var err error
 	if classesLen > 0 {
 		v.Classes = make([]DeviceClass, classesLen)
 		for i := 0; i < classesLen; i++ {
@@ -300,9 +300,10 @@ func readGenericDeviceClass(r *x.Reader, v *GenericDeviceClass) error {
 		return r.Err()
 	}
 
-	v.Data = r.ReadBytes((int(v.Len) * 4) - 6)
-	if r.Err() != nil {
-		return r.Err()
+	var err error
+	v.Data, err = r.ReadBytes((int(v.Len) * 4) - 6)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -1461,15 +1462,10 @@ func readXIGetPropertyReply(r *x.Reader, v *XIGetPropertyReply) error {
 	}
 
 	n := int(v.NumItems) * int(v.Format/8)
-	v.Data = r.ReadBytes(n)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(x.Pad(n))
-	if r.Err() != nil {
-		return r.Err()
+	var err error
+	v.Data, err = r.ReadBytes(n)
+	if err != nil {
+		return err
 	}
 
 	return nil

@@ -180,8 +180,8 @@ func (c *Conn) postConnect() error {
 
 	var setup Setup
 	r := NewReaderFromData(buf)
-	readSetup(r, &setup)
-	if err := r.Err(); err != nil {
+	err = readSetup(r, &setup)
+	if err != nil {
 		return err
 	}
 	c.setup = &setup

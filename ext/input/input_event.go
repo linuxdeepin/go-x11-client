@@ -1128,12 +1128,12 @@ func readDeviceStateNotifyEvent(r *x.Reader, v *DeviceStateNotifyEvent) error {
 		return r.Err()
 	}
 
-	v.Buttons = r.ReadBytes(4)
+	v.Buttons = r.MustReadBytes(4)
 	if r.Err() != nil {
 		return r.Err()
 	}
 
-	v.Keys = r.ReadBytes(4)
+	v.Keys = r.MustReadBytes(4)
 	if r.Err() != nil {
 		return r.Err()
 	}
@@ -1273,7 +1273,7 @@ func readDeviceKeyStateNotifyEvent(r *x.Reader, v *DeviceKeyStateNotifyEvent) er
 		return r.Err()
 	}
 
-	v.Keys = r.ReadBytes(28)
+	v.Keys = r.MustReadBytes(28)
 	if r.Err() != nil {
 		return r.Err()
 	}
@@ -1304,7 +1304,7 @@ func readDeviceButtonStateNotifyEvent(r *x.Reader, v *DeviceButtonStateNotifyEve
 		return r.Err()
 	}
 
-	v.Buttons = r.ReadBytes(28)
+	v.Buttons = r.MustReadBytes(28)
 	if r.Err() != nil {
 		return r.Err()
 	}

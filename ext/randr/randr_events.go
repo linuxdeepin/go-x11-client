@@ -110,10 +110,7 @@ func readNotifyEvent(r *x.Reader, v *NotifyEvent) error {
 		return r.Err()
 	}
 
-	v.Data = r.ReadBytes(28)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Data = r.MustReadBytes(28)
 
 	return nil
 }

@@ -11,17 +11,8 @@ type eventHeader struct {
 
 func readEventHeader(r *x.Reader, v *eventHeader) {
 	v.XkbType, v.Sequence = r.ReadEventHeader()
-	if r.Err() != nil {
-		return
-	}
-
 	v.Time = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return
-	}
-
 	v.DeviceID = r.Read1b()
-	return
 }
 
 type NewKeyboardNotifyEvent struct {
@@ -38,47 +29,15 @@ type NewKeyboardNotifyEvent struct {
 
 func readNewKeyboardNotifyEvent(r *x.Reader, v *NewKeyboardNotifyEvent) error {
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.OldDeviceID = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MinKeyCode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MaxKeyCode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.OldMinKeyCode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.OldMaxKeyCode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.RequestMajor = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.RequestMinor = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Changed = r.Read2b()
-	return r.Err()
+	return nil
 }
 
 type MapNotifyEvent struct {
@@ -106,102 +65,26 @@ type MapNotifyEvent struct {
 
 func readMapNotifyEvent(r *x.Reader, v *MapNotifyEvent) error {
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.PtrBtnActions = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Changed = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MinKeyCode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MaxKeyCode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstType = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NTypes = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstKeySym = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NKeySyms = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstKeyAct = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NKeyActs = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstKeyBehavior = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NKeyBehavior = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstKeyExplicit = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NKeyExplicit = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstModMapKey = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NModMapKeys = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstVModMapKey = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NVModMapKeys = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.VirtualMods = r.Read2b()
-	return r.Err()
+	return nil
 }
 
 type StateNotifyEvent struct {
@@ -663,7 +546,7 @@ func readActionMessageEvent(r *x.Reader, v *ActionMessageEvent) error {
 		return r.Err()
 	}
 
-	msg := r.ReadBytes(8)
+	msg := r.MustReadBytes(8)
 	if r.Err() != nil {
 		return r.Err()
 	}

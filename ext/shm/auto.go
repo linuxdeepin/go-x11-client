@@ -20,8 +20,11 @@ const CompletionEventCode = 0
 func NewCompletionEvent(data []byte) (*CompletionEvent, error) {
 	var ev CompletionEvent
 	r := x.NewReaderFromData(data)
-	readCompletionEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readCompletionEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil

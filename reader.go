@@ -2,179 +2,145 @@ package x
 
 import (
 	"bytes"
-	"io"
+	"errors"
 )
 
+var ErrDataLenShort = errors.New("data length is short")
+
 type Reader struct {
-	r   io.Reader
-	buf [8]byte
-	err error
+	pos  int
+	data []byte
 }
 
-func NewReader(r io.Reader) *Reader {
+func NewReaderFromData(data []byte) *Reader {
 	return &Reader{
-		r: r,
+		data: data,
 	}
 }
 
-func NewReaderFromData(b []byte) *Reader {
-	// TODO Implement a simple bytes reader
-	return NewReader(bytes.NewReader(b))
+func (r *Reader) Pos() int {
+	return r.pos
 }
 
+// TODO remove
 func (r *Reader) Err() error {
-	return r.err
-}
-
-func (r *Reader) ReadPad(n int) {
-	quotient := n / 8
-	//log.Println("quotient:", quotient)
-	for i := 0; i < quotient; i++ {
-		length, err := r.r.Read(r.buf[:])
-		if err != nil {
-			r.err = err
-			return
-		}
-		if length < 8 {
-			r.err = io.ErrUnexpectedEOF
-			return
-		}
-	}
-	remainder := n % 8
-	//log.Println("remainder:", remainder)
-	if remainder > 0 {
-		length, err := r.r.Read(r.buf[:remainder])
-		if err != nil {
-			r.err = err
-			return
-		}
-		if length < remainder {
-			r.err = io.ErrUnexpectedEOF
-			return
-		}
-	}
-}
-
-func (r *Reader) ReadBytes(n int) []byte {
-	// TODO avoid panic makeSlice
-	buf := make([]byte, n)
-	_, err := io.ReadFull(r.r, buf)
-	if err != nil {
-		r.err = err
-		return nil
-	}
-	return buf
-}
-
-func (r *Reader) ReadString(n int) string {
-	return string(r.ReadBytes(n))
+	return nil
 }
 
 func (r *Reader) Read1b() uint8 {
-	length, err := r.r.Read(r.buf[:1])
-	if err != nil {
-		r.err = err
-		return 0
-	}
-	if length < 1 {
-		r.err = io.ErrUnexpectedEOF
-		return 0
-	}
-	return r.buf[0]
+	v := r.data[r.pos]
+	r.pos++
+	return v
 }
 
 func (r *Reader) Read2b() uint16 {
-	length, err := r.r.Read(r.buf[:2])
-	if err != nil {
-		r.err = err
-		return 0
-	}
-
-	if length < 2 {
-		r.err = io.ErrUnexpectedEOF
-		return 0
-	}
-
-	v := uint16(r.buf[0])
-	v |= uint16(r.buf[1]) << 8
+	v := uint16(r.data[r.pos])
+	v |= uint16(r.data[r.pos+1]) << 8
+	r.pos += 2
 	return v
 }
 
 func (r *Reader) Read4b() uint32 {
-	length, err := r.r.Read(r.buf[:4])
-	if err != nil {
-		r.err = err
-		return 0
-	}
-
-	if length < 4 {
-		r.err = io.ErrUnexpectedEOF
-		return 0
-	}
-
-	v := uint32(r.buf[0])
-	v |= uint32(r.buf[1]) << 8
-	v |= uint32(r.buf[2]) << 16
-	v |= uint32(r.buf[3]) << 24
+	v := uint32(r.data[r.pos])
+	v |= uint32(r.data[r.pos+1]) << 8
+	v |= uint32(r.data[r.pos+2]) << 16
+	v |= uint32(r.data[r.pos+3]) << 24
+	r.pos += 4
 	return v
 }
 
-func (r *Reader) Read8b() uint64 {
-	length, err := r.r.Read(r.buf[:8])
-	if err != nil {
-		r.err = err
-		return 0
-	}
-
-	if length < 8 {
-		r.err = io.ErrUnexpectedEOF
-		return 0
-	}
-
-	v := uint64(r.buf[0])
-	v |= uint64(r.buf[1]) << 8
-	v |= uint64(r.buf[2]) << 16
-	v |= uint64(r.buf[3]) << 24
-	v |= uint64(r.buf[4]) << 32
-	v |= uint64(r.buf[5]) << 40
-	v |= uint64(r.buf[6]) << 48
-	v |= uint64(r.buf[7]) << 56
+func (r *Reader) MustReadBytes(n int) []byte {
+	v := r.data[r.pos : r.pos+n]
+	r.pos += n
 	return v
+}
+
+func (r *Reader) ReadBytes(n int) ([]byte, error) {
+	if !r.RemainAtLeast(n) {
+		return nil, ErrDataLenShort
+	}
+
+	v := r.data[r.pos : r.pos+n]
+	r.pos += n
+	return v, nil
+}
+
+func (r *Reader) ReadBytesWithPad(n int) (int, []byte, error) {
+	total := n + Pad(n)
+	if !r.RemainAtLeast(total) {
+		return 0, nil, ErrDataLenShort
+	}
+
+	v := r.data[r.pos : r.pos+n]
+	r.pos += total
+	return total, v, nil
+}
+
+func (r *Reader) ReadString(n int) (string, error) {
+	v, err := r.ReadBytes(n)
+	if err != nil {
+		return "", err
+	}
+	return string(v), nil
+}
+
+func (r *Reader) ReadStrWithPad(n int) (int, string, error) {
+	n, v, err := r.ReadBytesWithPad(n)
+	if err != nil {
+		return 0, "", err
+	}
+	return n, string(v), nil
+}
+
+func (r *Reader) ReadNulTermStr() string {
+	idx := bytes.IndexByte(r.data[r.pos:], 0)
+	var v []byte
+	if idx == -1 {
+		v = r.data[r.pos:]
+		r.pos = len(r.data)
+	} else {
+		v = r.data[r.pos : r.pos+idx]
+		r.pos += idx
+	}
+	return string(v)
+}
+
+func (r *Reader) ReadBool() bool {
+	return Uint8ToBool(r.Read1b())
+}
+
+func (r *Reader) ReadPad(n int) {
+	if r.pos+n > len(r.data) {
+		panic("index out of range")
+	}
+	r.pos += n
+}
+
+func (r *Reader) Reset() {
+	r.pos = 0
+}
+
+func (r *Reader) RemainAtLeast(n int) bool {
+	return r.pos+n <= len(r.data)
+}
+
+func (r *Reader) RemainAtLeast4b(n int) bool {
+	return r.RemainAtLeast(n << 2)
 }
 
 func (r *Reader) ReadReplyHeader() (data uint8, length uint32) {
-	r.Read1b()
-	if r.Err() != nil {
-		return
-	}
-
+	r.ReadPad(1)
 	data = r.Read1b()
-	if r.Err() != nil {
-		return
-	}
-
 	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return
-	}
-
+	r.ReadPad(2)
 	// length
 	length = r.Read4b()
 	return
 }
 
 func (r *Reader) ReadEventHeader() (data uint8, seq uint16) {
-	r.Read1b()
-	if r.Err() != nil {
-		return
-	}
-
+	r.ReadPad(1)
 	data = r.Read1b()
-	if r.Err() != nil {
-		return
-	}
-
 	// seq
 	seq = r.Read2b()
 	return

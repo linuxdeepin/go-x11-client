@@ -418,8 +418,11 @@ const DeviceValuatorEventCode = 0
 func NewDeviceValuatorEvent(data []byte) (*DeviceValuatorEvent, error) {
 	var ev DeviceValuatorEvent
 	r := x.NewReaderFromData(data)
-	readDeviceValuatorEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceValuatorEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -435,8 +438,11 @@ const DeviceKeyPressEventCode = 1
 func NewDeviceKeyPressEvent(data []byte) (*DeviceKeyPressEvent, error) {
 	var ev DeviceKeyPressEvent
 	r := x.NewReaderFromData(data)
-	readDeviceKeyPressEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceKeyPressEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -447,8 +453,11 @@ const DeviceKeyReleaseEventCode = 2
 func NewDeviceKeyReleaseEvent(data []byte) (*DeviceKeyReleaseEvent, error) {
 	var ev DeviceKeyReleaseEvent
 	r := x.NewReaderFromData(data)
-	readDeviceKeyReleaseEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceKeyReleaseEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -459,8 +468,11 @@ const DeviceButtonPressEventCode = 3
 func NewDeviceButtonPressEvent(data []byte) (*DeviceButtonPressEvent, error) {
 	var ev DeviceButtonPressEvent
 	r := x.NewReaderFromData(data)
-	readDeviceButtonPressEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceButtonPressEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -471,8 +483,11 @@ const DeviceButtonReleaseEventCode = 4
 func NewDeviceButtonReleaseEvent(data []byte) (*DeviceButtonReleaseEvent, error) {
 	var ev DeviceButtonReleaseEvent
 	r := x.NewReaderFromData(data)
-	readDeviceButtonReleaseEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceButtonReleaseEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -483,8 +498,11 @@ const DeviceMotionNotifyEventCode = 5
 func NewDeviceMotionNotifyEvent(data []byte) (*DeviceMotionNotifyEvent, error) {
 	var ev DeviceMotionNotifyEvent
 	r := x.NewReaderFromData(data)
-	readDeviceMotionNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceMotionNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -495,8 +513,11 @@ const DeviceFocusInEventCode = 6
 func NewDeviceFocusInEvent(data []byte) (*DeviceFocusInEvent, error) {
 	var ev DeviceFocusInEvent
 	r := x.NewReaderFromData(data)
-	readDeviceFocusInEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceFocusInEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -507,8 +528,11 @@ const DeviceFocusOutEventCode = 7
 func NewDeviceFocusOutEvent(data []byte) (*DeviceFocusOutEvent, error) {
 	var ev DeviceFocusOutEvent
 	r := x.NewReaderFromData(data)
-	readDeviceFocusOutEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceFocusOutEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -519,8 +543,11 @@ const ProximityInEventCode = 8
 func NewProximityInEvent(data []byte) (*ProximityInEvent, error) {
 	var ev ProximityInEvent
 	r := x.NewReaderFromData(data)
-	readProximityInEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readProximityInEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -531,8 +558,11 @@ const ProximityOutEventCode = 9
 func NewProximityOutEvent(data []byte) (*ProximityOutEvent, error) {
 	var ev ProximityOutEvent
 	r := x.NewReaderFromData(data)
-	readProximityOutEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readProximityOutEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -552,8 +582,11 @@ const DeviceStateNotifyEventCode = 10
 func NewDeviceStateNotifyEvent(data []byte) (*DeviceStateNotifyEvent, error) {
 	var ev DeviceStateNotifyEvent
 	r := x.NewReaderFromData(data)
-	readDeviceStateNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceStateNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -564,8 +597,11 @@ const DeviceMappingNotifyEventCode = 11
 func NewDeviceMappingNotifyEvent(data []byte) (*DeviceMappingNotifyEvent, error) {
 	var ev DeviceMappingNotifyEvent
 	r := x.NewReaderFromData(data)
-	readDeviceMappingNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceMappingNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -582,8 +618,11 @@ const ChangeDeviceNotifyEventCode = 12
 func NewChangeDeviceNotifyEvent(data []byte) (*ChangeDeviceNotifyEvent, error) {
 	var ev ChangeDeviceNotifyEvent
 	r := x.NewReaderFromData(data)
-	readChangeDeviceNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readChangeDeviceNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -594,8 +633,11 @@ const DeviceKeyStateNotifyEventCode = 13
 func NewDeviceKeyStateNotifyEvent(data []byte) (*DeviceKeyStateNotifyEvent, error) {
 	var ev DeviceKeyStateNotifyEvent
 	r := x.NewReaderFromData(data)
-	readDeviceKeyStateNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceKeyStateNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -606,8 +648,11 @@ const DeviceButtonStateNotifyEventCode = 14
 func NewDeviceButtonStateNotifyEvent(data []byte) (*DeviceButtonStateNotifyEvent, error) {
 	var ev DeviceButtonStateNotifyEvent
 	r := x.NewReaderFromData(data)
-	readDeviceButtonStateNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceButtonStateNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -628,8 +673,11 @@ const DevicePresenceNotifyEventCode = 15
 func NewDevicePresenceNotifyEvent(data []byte) (*DevicePresenceNotifyEvent, error) {
 	var ev DevicePresenceNotifyEvent
 	r := x.NewReaderFromData(data)
-	readDevicePresenceNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDevicePresenceNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -640,8 +688,11 @@ const DevicePropertyNotifyEventCode = 16
 func NewDevicePropertyNotifyEvent(data []byte) (*DevicePropertyNotifyEvent, error) {
 	var ev DevicePropertyNotifyEvent
 	r := x.NewReaderFromData(data)
-	readDevicePropertyNotifyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDevicePropertyNotifyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -658,8 +709,11 @@ const DeviceChangedEventCode = 1
 func NewDeviceChangedEvent(data []byte) (*DeviceChangedEvent, error) {
 	var ev DeviceChangedEvent
 	r := x.NewReaderFromData(data)
-	readDeviceChangedEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readDeviceChangedEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -675,8 +729,11 @@ const KeyPressEventCode = 2
 func NewKeyPressEvent(data []byte) (*KeyPressEvent, error) {
 	var ev KeyPressEvent
 	r := x.NewReaderFromData(data)
-	readKeyPressEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readKeyPressEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -687,8 +744,11 @@ const KeyReleaseEventCode = 3
 func NewKeyReleaseEvent(data []byte) (*KeyReleaseEvent, error) {
 	var ev KeyReleaseEvent
 	r := x.NewReaderFromData(data)
-	readKeyReleaseEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readKeyReleaseEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -704,8 +764,11 @@ const ButtonPressEventCode = 4
 func NewButtonPressEvent(data []byte) (*ButtonPressEvent, error) {
 	var ev ButtonPressEvent
 	r := x.NewReaderFromData(data)
-	readButtonPressEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readButtonPressEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -716,8 +779,11 @@ const ButtonReleaseEventCode = 5
 func NewButtonReleaseEvent(data []byte) (*ButtonReleaseEvent, error) {
 	var ev ButtonReleaseEvent
 	r := x.NewReaderFromData(data)
-	readButtonReleaseEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readButtonReleaseEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -728,8 +794,11 @@ const MotionEventCode = 6
 func NewMotionEvent(data []byte) (*MotionEvent, error) {
 	var ev MotionEvent
 	r := x.NewReaderFromData(data)
-	readMotionEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readMotionEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -762,8 +831,11 @@ const EnterEventCode = 7
 func NewEnterEvent(data []byte) (*EnterEvent, error) {
 	var ev EnterEvent
 	r := x.NewReaderFromData(data)
-	readEnterEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readEnterEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -774,8 +846,11 @@ const LeaveEventCode = 8
 func NewLeaveEvent(data []byte) (*LeaveEvent, error) {
 	var ev LeaveEvent
 	r := x.NewReaderFromData(data)
-	readLeaveEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readLeaveEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -786,8 +861,11 @@ const FocusInEventCode = 9
 func NewFocusInEvent(data []byte) (*FocusInEvent, error) {
 	var ev FocusInEvent
 	r := x.NewReaderFromData(data)
-	readFocusInEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readFocusInEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -798,8 +876,11 @@ const FocusOutEventCode = 10
 func NewFocusOutEvent(data []byte) (*FocusOutEvent, error) {
 	var ev FocusOutEvent
 	r := x.NewReaderFromData(data)
-	readFocusOutEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readFocusOutEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -822,8 +903,11 @@ const HierarchyEventCode = 11
 func NewHierarchyEvent(data []byte) (*HierarchyEvent, error) {
 	var ev HierarchyEvent
 	r := x.NewReaderFromData(data)
-	readHierarchyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readHierarchyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -841,8 +925,11 @@ const PropertyEventCode = 12
 func NewPropertyEvent(data []byte) (*PropertyEvent, error) {
 	var ev PropertyEvent
 	r := x.NewReaderFromData(data)
-	readPropertyEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readPropertyEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -853,8 +940,11 @@ const RawKeyPressEventCode = 13
 func NewRawKeyPressEvent(data []byte) (*RawKeyPressEvent, error) {
 	var ev RawKeyPressEvent
 	r := x.NewReaderFromData(data)
-	readRawKeyPressEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readRawKeyPressEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -865,8 +955,11 @@ const RawKeyReleaseEventCode = 14
 func NewRawKeyReleaseEvent(data []byte) (*RawKeyReleaseEvent, error) {
 	var ev RawKeyReleaseEvent
 	r := x.NewReaderFromData(data)
-	readRawKeyReleaseEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readRawKeyReleaseEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -877,8 +970,11 @@ const RawButtonPressEventCode = 15
 func NewRawButtonPressEvent(data []byte) (*RawButtonPressEvent, error) {
 	var ev RawButtonPressEvent
 	r := x.NewReaderFromData(data)
-	readRawButtonPressEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readRawButtonPressEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -889,8 +985,11 @@ const RawButtonReleaseEventCode = 16
 func NewRawButtonReleaseEvent(data []byte) (*RawButtonReleaseEvent, error) {
 	var ev RawButtonReleaseEvent
 	r := x.NewReaderFromData(data)
-	readRawButtonReleaseEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readRawButtonReleaseEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -901,8 +1000,11 @@ const RawMotionEventCode = 17
 func NewRawMotionEvent(data []byte) (*RawMotionEvent, error) {
 	var ev RawMotionEvent
 	r := x.NewReaderFromData(data)
-	readRawMotionEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readRawMotionEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -919,8 +1021,11 @@ const TouchBeginEventCode = 18
 func NewTouchBeginEvent(data []byte) (*TouchBeginEvent, error) {
 	var ev TouchBeginEvent
 	r := x.NewReaderFromData(data)
-	readTouchBeginEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readTouchBeginEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -931,8 +1036,11 @@ const TouchUpdateEventCode = 19
 func NewTouchUpdateEvent(data []byte) (*TouchUpdateEvent, error) {
 	var ev TouchUpdateEvent
 	r := x.NewReaderFromData(data)
-	readTouchUpdateEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readTouchUpdateEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -943,8 +1051,11 @@ const TouchEndEventCode = 20
 func NewTouchEndEvent(data []byte) (*TouchEndEvent, error) {
 	var ev TouchEndEvent
 	r := x.NewReaderFromData(data)
-	readTouchEndEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readTouchEndEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -960,8 +1071,11 @@ const TouchOwnershipEventCode = 21
 func NewTouchOwnershipEvent(data []byte) (*TouchOwnershipEvent, error) {
 	var ev TouchOwnershipEvent
 	r := x.NewReaderFromData(data)
-	readTouchOwnershipEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readTouchOwnershipEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -972,8 +1086,11 @@ const RawTouchBeginEventCode = 22
 func NewRawTouchBeginEvent(data []byte) (*RawTouchBeginEvent, error) {
 	var ev RawTouchBeginEvent
 	r := x.NewReaderFromData(data)
-	readRawTouchBeginEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readRawTouchBeginEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -984,8 +1101,11 @@ const RawTouchUpdateEventCode = 23
 func NewRawTouchUpdateEvent(data []byte) (*RawTouchUpdateEvent, error) {
 	var ev RawTouchUpdateEvent
 	r := x.NewReaderFromData(data)
-	readRawTouchUpdateEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readRawTouchUpdateEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -996,8 +1116,11 @@ const RawTouchEndEventCode = 24
 func NewRawTouchEndEvent(data []byte) (*RawTouchEndEvent, error) {
 	var ev RawTouchEndEvent
 	r := x.NewReaderFromData(data)
-	readRawTouchEndEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readRawTouchEndEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -1014,8 +1137,11 @@ const BarrierHitEventCode = 25
 func NewBarrierHitEvent(data []byte) (*BarrierHitEvent, error) {
 	var ev BarrierHitEvent
 	r := x.NewReaderFromData(data)
-	readBarrierHitEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readBarrierHitEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil
@@ -1026,8 +1152,11 @@ const BarrierLeaveEventCode = 26
 func NewBarrierLeaveEvent(data []byte) (*BarrierLeaveEvent, error) {
 	var ev BarrierLeaveEvent
 	r := x.NewReaderFromData(data)
-	readBarrierLeaveEvent(r, &ev)
-	if err := r.Err(); err != nil {
+	if !r.RemainAtLeast4b(8) {
+		return nil, x.ErrDataLenShort
+	}
+	err := readBarrierLeaveEvent(r, &ev)
+	if err != nil {
 		return nil, err
 	}
 	return &ev, nil

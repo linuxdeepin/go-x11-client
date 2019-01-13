@@ -26,131 +26,59 @@ type Setup struct {
 }
 
 func readSetup(r *Reader, v *Setup) error {
+	if !r.RemainAtLeast4b(10) {
+		return ErrDataLenShort
+	}
+
 	// status
 	status := r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 	if status != 1 {
 		return errors.New("status != 1")
 	}
-
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.ProtocolMajorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	r.ReadPad(1)
+	v.ProtocolMajorVersion = r.Read2b() // 1
 	v.ProtocolMinorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	// length in 4-byte units of additional data
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(2) // 2
 
-	v.ReleaseNumber = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.ReleaseNumber = r.Read4b() // 3
 
 	v.ResourceIdBase = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.ResourceIdMask = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.MonitorBufferSize = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	vendorLen := r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.MaximumRequestLength = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MaximumRequestLength = r.Read2b() // 7
 
 	screensLen := r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	formatsLen := r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.ImageByteOrder = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.BitmapFormatBitOrder = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.BitmapFormatBitOrder = r.Read1b() // 8
 
 	v.BitmapFormatScanlineUint = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.BitmapFormatScanlinePad = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MinKeycode = Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.MaxKeycode = Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MaxKeycode = Keycode(r.Read1b()) // 9
 
 	// unused
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.Read4b() // 10
 
-	v.Vendor = r.ReadString(int(vendorLen))
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(Pad(int(vendorLen)))
-	if r.Err() != nil {
-		return r.Err()
+	var err error
+	_, v.Vendor, err = r.ReadStrWithPad(int(vendorLen))
+	if err != nil {
+		return err
 	}
 
 	// formats
 	if formatsLen > 0 {
+		if !r.RemainAtLeast4b(int(formatsLen) * 2) {
+			return ErrDataLenShort
+		}
 		v.PixmapFormats = make([]Format, int(formatsLen))
 		for i := 0; i < int(formatsLen); i++ {
-			err := readFormat(r, &v.PixmapFormats[i])
-			if err != nil {
-				return err
-			}
+			readFormat(r, &v.PixmapFormats[i])
 		}
 	}
 
@@ -168,35 +96,20 @@ func readSetup(r *Reader, v *Setup) error {
 	return nil
 }
 
+// size: 2 * 4b
 type Format struct {
 	Depth        uint8
 	BitsPerPixel uint8
 	ScanlinePad  uint8
 }
 
-func readFormat(r *Reader, v *Format) error {
+func readFormat(r *Reader, v *Format) {
 	v.Depth = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.BitsPerPixel = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.ScanlinePad = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// unused
 	r.ReadPad(5)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	return nil
 }
 
 type Screen struct {
@@ -219,91 +132,35 @@ type Screen struct {
 }
 
 func readScreen(r *Reader, v *Screen) error {
-	v.Root = Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(10) {
+		return ErrDataLenShort
 	}
+
+	v.Root = Window(r.Read4b())
 
 	v.DefaultColorMap = Colormap(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.WhitePixel = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.BlackPixel = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.CurrentInputMask = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.CurrentInputMask = r.Read4b() // 5
 
 	v.WidthInPixels = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.HeightInPixels = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.WidthInMillimeters = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.HeightInMillimeters = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.MinInstalledMaps = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MaxInstalledMaps = r.Read2b() // 8
 
-	v.MaxInstalledMaps = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.RootVisual = VisualID(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.RootVisual = VisualID(r.Read4b()) // 9
 
 	v.BackingStores = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	saveUnders := r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	if saveUnders == 0 {
-		v.SaveUnders = false
-	} else {
-		v.SaveUnders = true
-	}
-
+	v.SaveUnders = r.ReadBool()
 	v.RootDepth = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	depthsLen := r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	depthsLen := r.Read1b() // 10
 
 	// depths
 	if depthsLen > 0 {
@@ -325,42 +182,31 @@ type Depth struct {
 }
 
 func readDepth(r *Reader, v *Depth) error {
+	if !r.RemainAtLeast4b(2) {
+		return ErrDataLenShort
+	}
 	v.Depth = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	r.ReadPad(1)
 	visualsLen := r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// unused
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(4) // 2
 
 	// visuals
 	if visualsLen > 0 {
+		if !r.RemainAtLeast4b(int(visualsLen) * 6) {
+			return ErrDataLenShort
+		}
 		v.Visuals = make([]VisualType, int(visualsLen))
 		for i := 0; i < int(visualsLen); i++ {
-			err := readVisualType(r, &v.Visuals[i])
-			if err != nil {
-				return err
-			}
+			readVisualType(r, &v.Visuals[i])
 		}
 	}
 
 	return nil
 }
 
+// size: 6 * 4b
 type VisualType struct {
 	Id              VisualID
 	Class           uint8
@@ -371,56 +217,30 @@ type VisualType struct {
 	BlueMask        uint32
 }
 
-func readVisualType(r *Reader, v *VisualType) error {
+func readVisualType(r *Reader, v *VisualType) {
 	v.Id = VisualID(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Class = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.BitsPerRGBValue = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.ColorMapEntries = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.RedMask = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.GreenMask = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.BlueMask = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// unused
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	return nil
+	r.ReadPad(4)
 }
 
+// size: 2 * 4b
 type Rectangle struct {
 	X, Y          int16
 	Width, Height uint16
 }
 
+// TODO:
 func ReadRectangle(r *Reader) (Rectangle, error) {
 	var v Rectangle
 	v.X = int16(r.Read2b())
@@ -518,121 +338,37 @@ type GetWindowAttributesReply struct {
 }
 
 func readGetWindowAttributesReply(r *Reader, v *GetWindowAttributesReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(11) {
+		return ErrDataLenShort
 	}
 
-	v.BackingStore = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// sequence
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.BackingStore, _ = r.ReadReplyHeader()
 
 	v.Visual = VisualID(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Class = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.BitGravity = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.WinGravity = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.WinGravity = r.Read1b() // 4
 
 	v.BackingPlanes = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.BackingPixel = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	saveUnder := r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	if saveUnder == 0 {
-		v.SaveUnder = false
-	} else {
-		v.SaveUnder = true
-	}
-
-	mapIsInstalled := r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	if mapIsInstalled == 0 {
-		v.MapIsInstalled = false
-	} else {
-		v.MapIsInstalled = true
-	}
-
+	v.SaveUnder = r.ReadBool()
+	v.MapIsInstalled = r.ReadBool()
 	v.MapState = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	overrideRedirect := r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	if overrideRedirect == 0 {
-		v.OverrideRedirect = false
-	} else {
-		v.OverrideRedirect = true
-	}
+	v.OverrideRedirect = r.ReadBool() // 7
 
 	v.Colormap = Colormap(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.AllEventMasks = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.YourEventMask = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.DoNotPropagateMask = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	// unused
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.Read2b() // 11
+
 	return nil
 }
 
@@ -745,63 +481,23 @@ type GetGeometryReply struct {
 }
 
 func readGetGeometryReply(r *Reader, v *GetGeometryReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
 	}
-
-	v.Depth = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Depth, _ = r.ReadReplyHeader() // 2
 
 	v.Root = Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.X = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Y = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Y = int16(r.Read2b()) // 4
 
 	v.Width = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Height = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Height = r.Read2b() // 5
 
 	v.BorderWidth = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// unused
-	r.ReadPad(10)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(10) // 8
 
 	return nil
 }
@@ -820,56 +516,27 @@ type QueryTreeReply struct {
 }
 
 func readQueryTreeReply(r *Reader, v *QueryTreeReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadReplyHeader() // 2
 
 	v.Root = Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Parent = Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Parent = Window(r.Read4b()) // 4
 
 	childrenLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// unused
-	r.ReadPad(14)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(14) // 8
 
 	if childrenLen > 0 {
+		if !r.RemainAtLeast4b(childrenLen) {
+			return ErrDataLenShort
+		}
 		v.Children = make([]Window, childrenLen)
 		for i := 0; i < childrenLen; i++ {
 			v.Children[i] = Window(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
@@ -895,41 +562,12 @@ type InternAtomReply struct {
 }
 
 func readInternAtomReply(r *Reader, v *InternAtomReply) error {
-	// reply
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return ErrDataLenShort
 	}
+	r.ReadReplyHeader() // 2
 
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Atom = Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	v.Atom = Atom(r.Read4b()) // 3
 	return nil
 }
 
@@ -946,51 +584,21 @@ type GetAtomNameReply struct {
 }
 
 func readGetAtomNameReply(r *Reader, v *GetAtomNameReply) error {
-	// reply
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
 	}
-
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadReplyHeader() // 2
 
 	// name len
 	nameLen := r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// unused
-	r.ReadPad(22)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(22) // 8
 
-	v.Name = r.ReadString(int(nameLen))
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(Pad(int(nameLen)))
-	if r.Err() != nil {
-		return r.Err()
+	var err error
+	v.Name, err = r.ReadString(int(nameLen))
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -1047,59 +655,26 @@ type GetPropertyReply struct {
 }
 
 func readGetPropertyReply(r *Reader, v *GetPropertyReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
 	}
 
-	v.Format = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Format, _ = r.ReadReplyHeader() // 2
 
 	v.Type = Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.BytesAfter = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.ValueLen = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.ValueLen = r.Read4b() // 5
 
 	// unused
-	r.ReadPad(12)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(12) // 8
 
 	n := int(v.ValueLen) * int(v.Format/8)
-	v.Value = r.ReadBytes(n)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(Pad(n))
-	if r.Err() != nil {
-		return r.Err()
+	var err error
+	v.Value, err = r.ReadBytes(n)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -1118,46 +693,23 @@ type ListPropertiesReply struct {
 }
 
 func readListPropertiesReply(r *Reader, v *ListPropertiesReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadReplyHeader() // 2
 
 	atomsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// unused
-	r.ReadPad(22)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(22) // 8
 
 	if atomsLen > 0 {
+		if !r.RemainAtLeast4b(atomsLen) {
+			return ErrDataLenShort
+		}
 		v.Atoms = make([]Atom, atomsLen)
 		for i := 0; i < atomsLen; i++ {
 			v.Atoms[i] = Atom(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
@@ -1187,39 +739,12 @@ type GetSelectionOwnerReply struct {
 }
 
 func readGetSelectionOwnerReply(r *Reader, v *GetSelectionOwnerReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return ErrDataLenShort
 	}
+	r.ReadReplyHeader() // 2
 
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Owner = Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	v.Owner = Window(r.Read4b()) // 3
 	return nil
 }
 
@@ -1269,34 +794,11 @@ type GrabPointerReply struct {
 }
 
 func readGrabPointerReply(r *Reader, v *GrabPointerReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(2) {
+		return ErrDataLenShort
 	}
 
-	v.Status = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(24)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	v.Status, _ = r.ReadReplyHeader() // 2
 	return nil
 }
 
@@ -1370,34 +872,10 @@ type GrabKeyboardReply struct {
 }
 
 func readGrabKeyboardReply(r *Reader, v *GrabKeyboardReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(2) {
+		return ErrDataLenShort
 	}
-
-	v.Status = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(24)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	v.Status, _ = r.ReadReplyHeader() // 2
 	return nil
 }
 
@@ -1474,69 +952,24 @@ type QueryPointerReply struct {
 }
 
 func readQueryPointerReply(r *Reader, v *QueryPointerReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(7) {
+		return ErrDataLenShort
 	}
 
-	v.SameScreen = Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	sameScreen, _ := r.ReadReplyHeader() // 2
+	v.SameScreen = Uint8ToBool(sameScreen)
 
 	v.Root = Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Child = Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.RootX = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.RootY = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.RootY = int16(r.Read2b()) // 5
 
 	v.WinX = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.WinY = int16(r.Read2b()) // 6
 
-	v.WinY = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Mask = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(6)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	v.Mask = r.Read2b() // 7
 	return nil
 }
 
@@ -1554,71 +987,38 @@ type GetMotionEventsReply struct {
 	Events []TimeCoord
 }
 
+// size: 2 * 4b
 type TimeCoord struct {
 	Time Timestamp
 	X, Y int16
 }
 
-func readTimeCoord(r *Reader, v *TimeCoord) error {
+func readTimeCoord(r *Reader, v *TimeCoord) {
 	v.Time = Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.X = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Y = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	return nil
 }
 
 func readGetMotionEventsReply(r *Reader, v *GetMotionEventsReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
 	}
 
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadReplyHeader() // 2
 
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	eventsLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	eventsLen := int(r.Read4b()) // 3
 
 	// unused
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(20) // 8
 
 	if eventsLen > 0 {
+		if !r.RemainAtLeast4b(eventsLen * 2) {
+			return ErrDataLenShort
+		}
 		v.Events = make([]TimeCoord, eventsLen)
 		for i := 0; i < eventsLen; i++ {
-			err := readTimeCoord(r, &v.Events[i])
-			if err != nil {
-				return err
-			}
+			readTimeCoord(r, &v.Events[i])
 		}
 	}
 
@@ -1645,49 +1045,16 @@ type TranslateCoordinatesReply struct {
 }
 
 func readTranslateCoordinatesReply(r *Reader, v *TranslateCoordinatesReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(4) {
+		return ErrDataLenShort
 	}
-
-	v.SameScreen = Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	sameScreen, _ := r.ReadReplyHeader() // 2
+	v.SameScreen = Uint8ToBool(sameScreen)
 
 	v.Child = Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.DstX = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.DstY = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(16)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	v.DstY = int16(r.Read2b()) // 4
 	return nil
 }
 
@@ -1728,38 +1095,12 @@ type GetInputFocusReply struct {
 }
 
 func readGetInputFocusReply(r *Reader, v *GetInputFocusReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return ErrDataLenShort
 	}
+	v.RevertTo, _ = r.ReadReplyHeader()
 
-	v.RevertTo = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Focus = Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	v.Focus = Window(r.Read4b()) // 3
 	return nil
 }
 
@@ -1773,33 +1114,14 @@ type QueryKeymapReply struct {
 }
 
 func readQueryKeymapReply(r *Reader, v *QueryKeymapReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(10) {
+		return ErrDataLenShort
 	}
 
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadReplyHeader() // 2
 
 	// keys
-	v.Keys = r.ReadBytes(32)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Keys = r.MustReadBytes(32) // 10
 
 	return nil
 }
@@ -1853,129 +1175,61 @@ type QueryFontReply struct {
 }
 
 func readQueryFontReply(r *Reader, v *QueryFontReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(15) {
+		return ErrDataLenShort
 	}
+	r.ReadReplyHeader() // 2
+
+	readCharInfo(r, &v.MinBounds) // 5
 
 	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(4) // 6
 
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	err := readCharInfo(r, &v.MinBounds)
-	if err != nil {
-		return err
-	}
+	readCharInfo(r, &v.MaxBounds) // 9
 
 	// unused
-	r.ReadPad(4)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	err = readCharInfo(r, &v.MaxBounds)
-	if err != nil {
-		return err
-	}
-
-	// unused
-	r.ReadPad(4)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(4) // 10
 
 	v.MinCharOrByte2 = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MaxCharOrByte2 = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.DefaultChar = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	propsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	propsLen := int(r.Read2b()) // 12
 
 	v.DrawDirection = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MinByte1 = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MaxByte1 = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.AllCharsExist = Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.AllCharsExist = r.ReadBool()
 
 	v.FontAscent = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FontDescent = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	charInfosLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	charInfosLen := int(r.Read4b()) // 15
 
 	if propsLen > 0 {
+		if !r.RemainAtLeast4b(2 * propsLen) {
+			return ErrDataLenShort
+		}
 		v.Properties = make([]FontProp, propsLen)
 		for i := 0; i < propsLen; i++ {
-			err := readFontProp(r, &v.Properties[i])
-			if err != nil {
-				return err
-			}
+			readFontProp(r, &v.Properties[i])
 		}
 	}
 
 	if charInfosLen > 0 {
+		if !r.RemainAtLeast4b(3 * charInfosLen) {
+			return ErrDataLenShort
+		}
 		v.CharInfos = make([]CharInfo, charInfosLen)
 		for i := 0; i < charInfosLen; i++ {
-			err := readCharInfo(r, &v.CharInfos[i])
-			if err != nil {
-				return err
-			}
+			readCharInfo(r, &v.CharInfos[i])
 		}
 	}
 
 	return nil
 }
 
+// size: 3 * 4b
 type CharInfo struct {
 	LeftSideBearing  int16
 	RightSideBearing int16
@@ -1985,56 +1239,27 @@ type CharInfo struct {
 	Attributes       uint16
 }
 
-func readCharInfo(r *Reader, v *CharInfo) error {
+func readCharInfo(r *Reader, v *CharInfo) {
 	v.LeftSideBearing = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.RightSideBearing = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.CharacterWidth = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Ascent = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Descent = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Attributes = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-	return nil
 }
 
+// size: 2 * 4b
 type FontProp struct {
 	Name  Atom
 	Value uint32
 }
 
-func readFontProp(r *Reader, v *FontProp) error {
+func readFontProp(r *Reader, v *FontProp) {
 	v.Name = Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Value = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	return nil
 }
 
 // TODO: QueryTextExtents
@@ -2057,60 +1282,27 @@ type ListFontsReply struct {
 }
 
 func readListFontsReply(r *Reader, v *ListFontsReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
 	}
-
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadReplyHeader() // 2
 
 	namesLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// unused
-	r.ReadPad(22)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(22) // 8
 
 	// names
-	var n int
 	if namesLen > 0 {
-		names := make([]string, namesLen)
+		v.Names = make([]string, namesLen)
 		for i := 0; i < namesLen; i++ {
 			var str Str
-			nn, err := readStr(r, &str)
+			_, err := readStr(r, &str)
 			if err != nil {
 				return err
 			}
-			n += nn
-			names[i] = str.Value
+			v.Names[i] = str.Value
 		}
-		v.Names = names
-	}
-
-	// unused
-	r.ReadPad(Pad(n))
-	if r.Err() != nil {
-		return r.Err()
 	}
 
 	return nil
@@ -2149,130 +1341,59 @@ type ListFontsWithInfoReply struct {
 }
 
 func readListFontsWithInfoReply(r *Reader, v *ListFontsWithInfoReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(15) {
+		return ErrDataLenShort
 	}
-
-	lastReplyIndicator := r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	replyLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	lastReplyIndicator, replyLen := r.ReadReplyHeader() // 2
 
 	if lastReplyIndicator == 0 {
 		v.LastReply = true
-		r.ReadPad(52)
-		if r.Err() != nil {
-			return r.Err()
-		}
 		return nil
 	} else {
 		v.LastReply = false
 	}
 
-	err := readCharInfo(r, &v.MinBounds)
-	if err != nil {
-		return err
-	}
+	readCharInfo(r, &v.MinBounds) // 5
+
+	// unused
+	r.ReadPad(4) // 6
+
+	readCharInfo(r, &v.MaxBounds) // 9
 
 	// unused
 	r.ReadPad(4)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	err = readCharInfo(r, &v.MaxBounds)
-	if err != nil {
-		return err
-	}
-
-	// unused
-	r.ReadPad(4)
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.MinCharOrByte2 = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.MaxCharOrByte2 = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MaxCharOrByte2 = r.Read2b() // 11
 
 	v.DefaultChar = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	propsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.DrawDirection = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MinByte1 = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MaxByte1 = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.AllCharsExist = Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.AllCharsExist = r.ReadBool() // 13
 
 	v.FontAscent = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FontDescent = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.RepliesHint = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.RepliesHint = r.Read4b() // 15
 
 	if propsLen > 0 {
+		if !r.RemainAtLeast4b(2 * propsLen) {
+			return ErrDataLenShort
+		}
 		v.Properties = make([]FontProp, propsLen)
 		for i := 0; i < propsLen; i++ {
-			err := readFontProp(r, &v.Properties[i])
-			if err != nil {
-				return err
-			}
+			readFontProp(r, &v.Properties[i])
 		}
 	}
 
-	nameLen := (replyLen - 7 - (2 * propsLen)) * 4
-	nameBytes := r.ReadBytes(nameLen)
-	if r.Err() != nil {
-		return r.Err()
+	// TODO: use r.ReadNulTermStr
+	nameLen := (int(replyLen) - 7 - (2 * propsLen)) * 4
+	nameBytes, err := r.ReadBytes(nameLen)
+	if err != nil {
+		return err
 	}
 
 	zeroIdx := bytes.IndexByte(nameBytes, 0)
@@ -2317,56 +1438,26 @@ type GetFontPathReply struct {
 }
 
 func readGetFontPathReply(r *Reader, v *GetFontPathReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadReplyHeader() // 2
 
 	pathsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// unused
-	r.ReadPad(22)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(22) // 8
 
-	var n int
 	if pathsLen > 0 {
 		v.Paths = make([]string, pathsLen)
 		for i := 0; i < pathsLen; i++ {
 			var str Str
-			nn, err := readStr(r, &str)
+			_, err := readStr(r, &str)
 			if err != nil {
 				return err
 			}
-			n += nn
 			v.Paths[i] = str.Value
 		}
-	}
-
-	r.ReadPad(Pad(n))
-	if r.Err() != nil {
-		return r.Err()
 	}
 
 	return nil
@@ -2706,43 +1797,22 @@ type GetImageReply struct {
 }
 
 func readGetImageReply(r *Reader, v *GetImageReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
 	}
+	var replyLen uint32
+	v.Depth, replyLen = r.ReadReplyHeader()
 
-	v.Depth = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	replyLen := r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Visual = VisualID(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Visual = VisualID(r.Read4b()) // 3
 
 	// unused
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(20) // 8
 
 	dataLen := int(replyLen) * 4
-	v.Data = r.ReadBytes(dataLen)
-	if r.Err() != nil {
-		return r.Err()
+	var err error
+	v.Data, err = r.ReadBytes(dataLen)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -2769,53 +1839,16 @@ type QueryExtensionReply struct {
 }
 
 func readQueryExtensionReply(r *Reader, v *QueryExtensionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return ErrDataLenShort
 	}
 
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadReplyHeader() // 2
 
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Present = Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	v.Present = r.ReadBool()
 	v.MajorOpcode = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstEvent = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.FirstError = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.FirstError = r.Read1b() // 3
 
 	return nil
 }
@@ -2843,15 +1876,18 @@ func ReadStr(r *Reader) (string, error) {
 }
 
 func readStr(r *Reader, v *Str) (int, error) {
-	nameLen := int(r.Read1b())
-	if r.Err() != nil {
-		return 0, r.Err()
+	if !r.RemainAtLeast(1) {
+		return 0, ErrDataLenShort
 	}
 
-	v.Value = r.ReadString(nameLen)
-	if r.Err() != nil {
-		return 0, r.Err()
+	nameLen := int(r.Read1b())
+
+	var err error
+	v.Value, err = r.ReadString(nameLen)
+	if err != nil {
+		return 0, err
 	}
+
 	return 1 + nameLen, nil
 }
 
@@ -2862,53 +1898,25 @@ func writeStr(b *FixedSizeBuf, str string) {
 }
 
 func readListExtensionsReply(r *Reader, v *ListExtensionsReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
 	}
-
-	strsLen := int(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	strsLen, _ := r.ReadReplyHeader() // 2
 
 	// unused
-	r.ReadPad(24)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(24) // 8
 
-	var n int
 	if strsLen > 0 {
 		names := make([]string, strsLen)
-		for i := 0; i < strsLen; i++ {
+		for i := 0; i < int(strsLen); i++ {
 			var str Str
-			nn, err := readStr(r, &str)
+			_, err := readStr(r, &str)
 			if err != nil {
 				return err
 			}
-			n += nn
 			names[i] = str.Value
 		}
 		v.Names = names
-	}
-
-	// unused
-	r.ReadPad(Pad(n))
-	if r.Err() != nil {
-		return r.Err()
 	}
 
 	return nil
@@ -2938,40 +1946,21 @@ type GetKeyboardMappingReply struct {
 }
 
 func readGetKeyboardMappingReply(r *Reader, v *GetKeyboardMappingReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
 	}
-
-	v.KeysymsPerKeycode = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	keysymsLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	var keysymsLen uint32
+	v.KeysymsPerKeycode, keysymsLen = r.ReadReplyHeader() // 2
 
 	// unused
-	r.ReadPad(24)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(24) // 8
 
+	if !r.RemainAtLeast4b(int(keysymsLen)) {
+		return ErrDataLenShort
+	}
 	v.Keysyms = make([]Keysym, keysymsLen)
-	for i := 0; i < keysymsLen; i++ {
+	for i := 0; i < int(keysymsLen); i++ {
 		v.Keysyms[i] = Keysym(r.Read4b())
-		if r.Err() != nil {
-			return r.Err()
-		}
 	}
 
 	return nil
@@ -3003,52 +1992,16 @@ type GetScreenSaverReply struct {
 }
 
 func readGetScreenSaverReply(r *Reader, v *GetScreenSaverReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(4) {
+		return ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadReplyHeader() // 2
 
 	v.Timeout = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Interval = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.PreferBlanking = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.AllowExposures = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(18)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.AllowExposures = r.Read1b() // 4
 
 	return nil
 }

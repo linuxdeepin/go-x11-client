@@ -465,8 +465,9 @@ func readGetControlsReply(r *x.Reader, v *GetControlsReply) error {
 		return r.Err()
 	}
 
-	v.PerKeyRepeat = r.ReadBytes(ConstPerKeyBitArraySize)
-	return r.Err()
+	var err error
+	v.PerKeyRepeat, err = r.ReadBytes(ConstPerKeyBitArraySize)
+	return err
 }
 
 type ModDef struct {
@@ -813,7 +814,7 @@ type KeySymMap struct {
 }
 
 func readKeySymMap(r *x.Reader, v *KeySymMap) error {
-	v.KtIndex = r.ReadBytes(4)
+	v.KtIndex = r.MustReadBytes(4)
 	if r.Err() != nil {
 		return r.Err()
 	}
@@ -879,7 +880,7 @@ func readAction(r *x.Reader) (Action, error) {
 		return nil, r.Err()
 	}
 
-	data := r.ReadBytes(7)
+	data := r.MustReadBytes(7)
 	if r.Err() != nil {
 		return nil, r.Err()
 	}
@@ -1175,7 +1176,7 @@ func (SAActionMessage) Type() uint8 {
 func readSAActionMessage(r *x.Reader) Action {
 	var v SAActionMessage
 	v.Flags = r.Read1b()
-	v.Message = r.ReadBytes(6)
+	v.Message = r.MustReadBytes(6)
 	return v
 }
 
@@ -1632,10 +1633,10 @@ func readGetMapReply(r *x.Reader, v *GetMapReply) error {
 
 	if v.Present&MapPartKeyActions != 0 {
 		if v.NKeyActions > 0 {
-			v.ActionsCount = r.ReadBytes(int(v.NKeyActions))
-			r.ReadPad(x.Pad(int(v.NKeyActions)))
-			if r.Err() != nil {
-				return r.Err()
+			var err error
+			_, v.ActionsCount, err = r.ReadBytesWithPad(int(v.NKeyActions))
+			if err != nil {
+				return err
 			}
 		}
 
@@ -1664,15 +1665,12 @@ func readGetMapReply(r *x.Reader, v *GetMapReply) error {
 	if v.Present&MapPartVirtualMods != 0 {
 		length := x.PopCount(int(v.VirtualMods))
 		if length > 0 {
-			v.VMods = r.ReadBytes(length)
-			if r.Err() != nil {
-				return r.Err()
+			var err error
+			_, v.VMods, err = r.ReadBytesWithPad(length)
+			if err != nil {
+				return err
 			}
 
-			r.ReadPad(x.Pad(length))
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 

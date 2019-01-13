@@ -21,49 +21,64 @@ func (s *MySuite) SetUpTest(c *C) {
 }
 
 func (s *MySuite) TestReaderReadBytes(c *C) {
-	c.Assert(s.r.ReadBytes(4), DeepEquals, []byte{1, 2, 3, 4})
-	c.Assert(s.r.Err(), IsNil)
+	v, err := s.r.ReadBytes(4)
+	c.Assert(v, DeepEquals, []byte{1, 2, 3, 4})
+	c.Assert(err, IsNil)
 
-	c.Assert(s.r.ReadBytes(3), DeepEquals, []byte{5, 6, 7})
-	c.Assert(s.r.Err(), IsNil)
+	v, err = s.r.ReadBytes(3)
+	c.Assert(v, DeepEquals, []byte{5, 6, 7})
+	c.Assert(err, IsNil)
+}
 
-	c.Assert(s.r.ReadBytes(2), IsNil)
-	c.Assert(s.r.Err(), NotNil)
+func (s *MySuite) TestReaderReadBytesWithPad(c *C) {
+	_, v, err := s.r.ReadBytesWithPad(3)
+	c.Assert(v, DeepEquals, []byte{1, 2, 3})
+	c.Assert(s.r.Pos(), Equals, 4)
+	c.Assert(err, IsNil)
 }
 
 func (s *MySuite) TestReaderRead1b(c *C) {
 	for i := 1; i <= 8; i++ {
 		c.Assert(s.r.Read1b(), Equals, uint8(i))
-		c.Assert(s.r.Err(), IsNil)
 	}
-	c.Assert(s.r.Read1b(), Equals, uint8(0))
-	c.Assert(s.r.Err(), NotNil)
 }
 
 func (s *MySuite) TestReaderRead2b(c *C) {
 	results := []uint16{0x0201, 0x0403, 0x0605, 0x0807}
 	for _, result := range results {
 		c.Assert(s.r.Read2b(), Equals, result)
-		c.Assert(s.r.Err(), IsNil)
 	}
-	c.Assert(s.r.Read2b(), Equals, uint16(0))
-	c.Assert(s.r.Err(), NotNil)
 }
 
 func (s *MySuite) TestReaderRead4b(c *C) {
 	results := []uint32{0x04030201, 0x08070605}
 	for _, result := range results {
 		c.Assert(s.r.Read4b(), Equals, result)
-		c.Assert(s.r.Err(), IsNil)
 	}
-	c.Assert(s.r.Read4b(), Equals, uint32(0))
-	c.Assert(s.r.Err(), NotNil)
 }
 
-func (s *MySuite) TestReaderRead8b(c *C) {
-	c.Assert(s.r.Read8b(), Equals, uint64(0x0807060504030201))
-	c.Assert(s.r.Err(), IsNil)
+func (s *MySuite) TestReaderReadNulTermStr(c *C) {
+	data := []byte{'h', 'e', 'l', 'l', 'o'}
+	r := NewReaderFromData(data)
+	str := r.ReadNulTermStr()
+	c.Assert(str, Equals, "hello")
+	c.Assert(r.Pos(), Equals, 5)
 
-	c.Assert(s.r.Read8b(), Equals, uint64(0))
-	c.Assert(s.r.Err(), NotNil)
+	data = []byte{'h', 'e', 'l', 'l', 'o', 0, 'w', 'o', 'r', 'l', 'd'}
+	r = NewReaderFromData(data)
+	str = r.ReadNulTermStr()
+	c.Assert(str, Equals, "hello")
+	c.Assert(r.Pos(), Equals, 5)
+}
+
+func (s *MySuite) TestReaderRemainAtLeast(c *C) {
+	s.r.ReadPad(3)
+	c.Assert(s.r.RemainAtLeast(5), Equals, true)
+	c.Assert(s.r.RemainAtLeast(6), Equals, false)
+
+	s.r.Reset()
+	c.Assert(s.r.RemainAtLeast4b(0), Equals, true)
+	c.Assert(s.r.RemainAtLeast4b(1), Equals, true)
+	c.Assert(s.r.RemainAtLeast4b(2), Equals, true)
+	c.Assert(s.r.RemainAtLeast4b(3), Equals, false)
 }
