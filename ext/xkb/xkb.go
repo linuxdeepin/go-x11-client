@@ -22,24 +22,16 @@ type UseExtensionReply struct {
 }
 
 func readUseExtensionReply(r *x.Reader, v *UseExtensionReply) error {
-	data, _ := r.ReadReplyHeader()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
-	v.Supported = x.Uint8ToBool(data)
+	supported, _ := r.ReadReplyHeader()
+	v.Supported = x.Uint8ToBool(supported)
 
 	v.ServerMajor = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.ServerMinor = r.Read2b() // 3
 
-	v.ServerMinor = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(20)
-	return r.Err()
+	return nil
 }
 
 // #WREQ vararg:options
@@ -206,88 +198,32 @@ type GetStateReply struct {
 }
 
 func readGetStateReply(r *x.Reader, v *GetStateReply) error {
-	v.DeviceID, _ = r.ReadReplyHeader()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(7) {
+		return x.ErrDataLenShort
 	}
+	v.DeviceID, _ = r.ReadReplyHeader()
 
 	v.Mods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.BaseMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.LatchedMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.LockedMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.LockedMods = r.Read1b() // 3
 
 	v.Group = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.LockedGroup = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.BaseGroup = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.LatchedGroup = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.CompatState = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.GrabMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.GrabMods = r.Read1b() // 5
 
 	v.CompatGrabMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.LookupMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.CompatLookupMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(1) // 6
 
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.PtrBtnState = r.Read2b() // 7
 
-	v.PtrBtnState = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(6)
-	return r.Err()
+	return nil
 }
 
 // #WREQ
@@ -325,151 +261,57 @@ type GetControlsReply struct {
 }
 
 func readGetControlsReply(r *x.Reader, v *GetControlsReply) error {
-	v.DeviceID, _ = r.ReadReplyHeader()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(15) {
+		return x.ErrDataLenShort
 	}
+	v.DeviceID, _ = r.ReadReplyHeader()
 
 	v.MouseKeysDefaultBtn = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NumGroups = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.GroupsWrap = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Internal.Mask = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Internal.Mask = r.Read1b() // 3
 
 	v.IgnoreLock.Mask = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Internal.RealMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.IgnoreLock.RealMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(1) // 4
 
 	v.Internal.VirtualMods = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.IgnoreLock.VirtualMods = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.IgnoreLock.VirtualMods = r.Read2b() // 5
 
 	v.RepeatDelay = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.RepeatInterval = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.SlowKeysDelay = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.DebounceDelay = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.MouseKeysDelay = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.MouseKeysInterval = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MouseKeysInterval = r.Read2b() // 8
 
 	v.MouseKeysTimeToMax = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MouseKeysMaxSpeed = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.MouseKeysCurve = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.AccessXOption = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.AccessXOption = r.Read2b() // 10
 
 	v.AccessXTimeout = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.AccessXTimeoutOptionsMask = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.AccessXTimeoutOptionsValues = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(2) // 12
 
 	v.AccessXTimeoutMask = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.AccessXTimeoutValues = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.EnabledControls = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.EnabledControls = r.Read4b() // 15
 
 	var err error
 	v.PerKeyRepeat, err = r.ReadBytes(ConstPerKeyBitArraySize)
 	return err
 }
 
+// size: 1 * 4b
 type ModDef struct {
 	// RealMods | VirtualMods mapped to real modifiers
 	Mask uint8
@@ -694,64 +536,38 @@ type KeyType struct {
 }
 
 func readKeyType(r *x.Reader, v *KeyType) error {
+	if !r.RemainAtLeast4b(2) {
+		return x.ErrDataLenShort
+	}
 	v.ModsMask = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.ModsMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.ModsVMods = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.NumLevels = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NMapEntries = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.HasPreserve = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.HasPreserve = r.ReadBool()
+	r.ReadPad(1) // 2
 
 	if v.NMapEntries > 0 {
+		if !r.RemainAtLeast4b(3 * int(v.NMapEntries)) {
+			return x.ErrDataLenShort
+		}
 		v.Map = make([]KTMapEntry, v.NMapEntries)
 		for i := 0; i < int(v.NMapEntries); i++ {
-			err := readKTMapEntry(r, &v.Map[i])
-			if err != nil {
-				return err
-			}
+			readKTMapEntry(r, &v.Map[i])
 		}
 
 		if v.HasPreserve {
 			v.Preserve = make([]ModDef, v.NMapEntries)
 			for i := 0; i < int(v.NMapEntries); i++ {
-				err := readModDef(r, &v.Preserve[i])
-				if err != nil {
-					return err
-				}
+				v.Preserve[i] = readModDef(r)
 			}
 		}
 	}
 	return nil
 }
 
-// key type map entry
+// key type map entry, size: 2 * 4b
 type KTMapEntry struct {
 	Active    bool
 	ModsMask  uint8
@@ -760,49 +576,21 @@ type KTMapEntry struct {
 	ModsVMods uint16
 }
 
-func readModDef(r *x.Reader, v *ModDef) error {
+func readModDef(r *x.Reader) (v ModDef) {
 	v.Mask = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.RealMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.VirtualMods = r.Read2b()
-	return r.Err()
+	return v
 }
 
-func readKTMapEntry(r *x.Reader, v *KTMapEntry) error {
-	v.Active = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+func readKTMapEntry(r *x.Reader, v *KTMapEntry) {
+	v.Active = r.ReadBool()
 	v.ModsMask = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Level = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.ModsMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.ModsVMods = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(2)
-	return r.Err()
+	r.ReadPad(2) // 2
 }
 
 type KeySymMap struct {
@@ -814,38 +602,28 @@ type KeySymMap struct {
 }
 
 func readKeySymMap(r *x.Reader, v *KeySymMap) error {
-	v.KtIndex = r.MustReadBytes(4)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(2) {
+		return x.ErrDataLenShort
 	}
+	v.KtIndex = r.MustReadBytes(4)
 
 	v.GroupInfo = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Width = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.NSyms = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.NSyms = r.Read2b() // 2
 
 	if v.NSyms > 0 {
+		if !r.RemainAtLeast4b(int(v.NSyms)) {
+			return x.ErrDataLenShort
+		}
 		v.Syms = make([]x.Keysym, v.NSyms)
 		for i := 0; i < int(v.NSyms); i++ {
 			v.Syms[i] = x.Keysym(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 	return nil
 }
 
+// size: 2 * 4b
 type Action interface {
 	Type() uint8
 }
@@ -874,25 +652,17 @@ var readActionFuncArray = [...]func(r *x.Reader) Action{
 	readSADeviceValuator, // 20
 }
 
-func readAction(r *x.Reader) (Action, error) {
+func readAction(r *x.Reader) Action {
 	type0 := r.Read1b()
-	if r.Err() != nil {
-		return nil, r.Err()
-	}
-
-	data := r.MustReadBytes(7)
-	if r.Err() != nil {
-		return nil, r.Err()
-	}
+	data := r.MustReadBytes(7) // 2
 
 	dataR := x.NewReaderFromData(data)
 	if type0 <= SATypeDeviceValuator {
 		action := readActionFuncArray[type0](dataR)
-		return action, nil
-	} else {
-		// out of range
-		return UnknownAction{type0: type0, data: data}, nil
+		return action
 	}
+	// out of range
+	return UnknownAction{type0: type0, data: data}
 }
 
 type SANoAction struct {
@@ -1282,56 +1052,48 @@ func (v UnknownAction) Type() uint8 {
 	return v.type0
 }
 
+// size: 1 * 4b
 type SetBehavior struct {
 	Keycode  x.Keycode
 	Behavior Behavior
 }
 
-func readSetBehavior(r *x.Reader, v *SetBehavior) error {
+func readSetBehavior(r *x.Reader, v *SetBehavior) {
 	v.Keycode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	var err error
-	v.Behavior, err = readBehavior(r)
-	if err != nil {
-		return err
-	}
-
-	r.ReadPad(1)
-	return r.Err()
+	v.Behavior = readBehavior(r)
+	r.ReadPad(1) // 1
 }
 
+// size: 2b
 type Behavior interface {
 	Type() uint8
 }
 
-func readBehavior(r *x.Reader) (Behavior, error) {
+func readBehavior(r *x.Reader) Behavior {
 	type0 := r.Read1b()
 	data := r.Read1b()
 
 	switch type0 {
 	case BehaviorTypeDefault:
-		return DefaultBehavior{}, nil
+		return DefaultBehavior{}
 	case BehaviorTypeLock:
-		return LockBehavior{}, nil
+		return LockBehavior{}
 	case BehaviorTypeRadioGroup:
-		return RadioGroupBehavior{data}, nil
+		return RadioGroupBehavior{data}
 	case BehaviorTypeOverlay1:
-		return Overlay1Behavior{x.Keycode(data)}, nil
+		return Overlay1Behavior{x.Keycode(data)}
 	case BehaviorTypeOverlay2:
-		return Overlay2Behavior{x.Keycode(data)}, nil
+		return Overlay2Behavior{x.Keycode(data)}
 	case BehaviorTypePermamentLock:
-		return PermamentLockBehavior{}, nil
+		return PermamentLockBehavior{}
 	case BehaviorTypePermamentRadioGroup:
-		return PermamentRadioGroupBehavior{data}, nil
+		return PermamentRadioGroupBehavior{data}
 	case BehaviorTypePermamentOverlay1:
-		return PermamentOverlay1Behavior{}, nil
+		return PermamentOverlay1Behavior{}
 	case BehaviorTypePermamentOverlay2:
-		return PermamentOverlay1Behavior{}, nil
+		return PermamentOverlay1Behavior{}
 	default:
-		return UnknownBehavior{type0, data}, nil
+		return UnknownBehavior{type0, data}
 	}
 }
 
@@ -1404,215 +1166,89 @@ func (PermamentOverlay2Behavior) Type() uint8 {
 	return BehaviorTypePermamentOverlay2
 }
 
+// size: 2b
 type SetExplicit struct {
 	Keycode  x.Keycode
 	Explicit uint8
 }
 
-func readSetExplicit(r *x.Reader) (SetExplicit, error) {
+func readSetExplicit(r *x.Reader) SetExplicit {
 	var v SetExplicit
 	v.Keycode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return SetExplicit{}, r.Err()
-	}
-
 	v.Explicit = r.Read1b()
-	if r.Err() != nil {
-		return SetExplicit{}, r.Err()
-	}
-
-	return v, nil
+	return v
 }
 
+// size: 2b
 type KeyModMap struct {
 	Keycode x.Keycode
 	Mods    uint8
 }
 
-func readKeyModMap(r *x.Reader) (KeyModMap, error) {
+func readKeyModMap(r *x.Reader) KeyModMap {
 	var v KeyModMap
 	v.Keycode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return KeyModMap{}, r.Err()
-	}
-
 	v.Mods = r.Read1b()
-	if r.Err() != nil {
-		return KeyModMap{}, r.Err()
-	}
-
-	return v, nil
+	return v
 }
 
+// size: 1 * 4b
 type KeyVModMap struct {
 	Keycode x.Keycode
 	VMods   uint16
 }
 
-func readKeyVModMap(r *x.Reader) (KeyVModMap, error) {
+func readKeyVModMap(r *x.Reader) KeyVModMap {
 	var v KeyVModMap
 	v.Keycode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return KeyVModMap{}, r.Err()
-	}
-
 	r.ReadPad(1)
-	if r.Err() != nil {
-		return KeyVModMap{}, r.Err()
-	}
-
 	v.VMods = r.Read2b()
-	if r.Err() != nil {
-		return KeyVModMap{}, r.Err()
-	}
-
-	return v, nil
+	return v
 }
 
 func readGetMapReply(r *x.Reader, v *GetMapReply) error {
-	v.DeviceID, _ = r.ReadReplyHeader()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(10) {
+		return x.ErrDataLenShort
 	}
+	v.DeviceID, _ = r.ReadReplyHeader()
 
 	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MinKeyCode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.MaxKeyCode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MaxKeyCode = x.Keycode(r.Read1b()) // 3
 
 	v.Present = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstType = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NTypes = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.TotalTypes = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstKeySym = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.TotalSyms = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.TotalSyms = r.Read2b() // 5
 
 	v.NKeySyms = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstKeyAction = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.TotalActions = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.NKeyActions = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstKeyBehavior = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NKeyBehaviors = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.TotalKeyBehaviors = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.FirstKeyExplicit = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NKeyExplicit = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.TotalKeyBehaviors = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.FirstModMapKey = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.FirstModMapKey = x.Keycode(r.Read1b()) // 8
 
 	v.NModMapKeys = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.TotalModMapKeys = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstVModMapKey = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NVModMapKeys = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.TotalVModMapKeys = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.VirtualMods = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.VirtualMods = r.Read2b() // 10
 
 	if v.Present&MapPartKeyTypes != 0 && v.NTypes > 0 {
 		v.Types = make([]KeyType, v.NTypes)
-
 		for i := 0; i < int(v.NTypes); i++ {
 			err := readKeyType(r, &v.Types[i])
 			if err != nil {
@@ -1634,31 +1270,30 @@ func readGetMapReply(r *x.Reader, v *GetMapReply) error {
 	if v.Present&MapPartKeyActions != 0 {
 		if v.NKeyActions > 0 {
 			var err error
-			_, v.ActionsCount, err = r.ReadBytesWithPad(int(v.NKeyActions))
+			v.ActionsCount, err = r.ReadBytesWithPad(int(v.NKeyActions))
 			if err != nil {
 				return err
 			}
 		}
 
 		if v.TotalActions > 0 {
+			if !r.RemainAtLeast4b(2 * int(v.TotalActions)) {
+				return x.ErrDataLenShort
+			}
 			v.Actions = make([]Action, v.TotalActions)
 			for i := 0; i < int(v.TotalActions); i++ {
-				var err error
-				v.Actions[i], err = readAction(r)
-				if err != nil {
-					return err
-				}
+				v.Actions[i] = readAction(r)
 			}
 		}
 	}
 
 	if v.Present&MapPartKeyBehaviors != 0 && v.TotalKeyBehaviors > 0 {
+		if !r.RemainAtLeast4b(int(v.TotalKeyBehaviors)) {
+			return x.ErrDataLenShort
+		}
 		v.Behaviors = make([]SetBehavior, v.TotalKeyBehaviors)
 		for i := 0; i < int(v.TotalKeyBehaviors); i++ {
-			err := readSetBehavior(r, &v.Behaviors[i])
-			if err != nil {
-				return err
-			}
+			readSetBehavior(r, &v.Behaviors[i])
 		}
 	}
 
@@ -1666,54 +1301,46 @@ func readGetMapReply(r *x.Reader, v *GetMapReply) error {
 		length := x.PopCount(int(v.VirtualMods))
 		if length > 0 {
 			var err error
-			_, v.VMods, err = r.ReadBytesWithPad(length)
+			v.VMods, err = r.ReadBytesWithPad(length)
 			if err != nil {
 				return err
 			}
-
 		}
 	}
 
 	if v.Present&MapPartExplicitComponents != 0 && v.TotalKeyExplicit > 0 {
+		n := int(v.TotalKeyExplicit) * 2
+		pad := x.Pad(n)
+		if !r.RemainAtLeast(n + pad) {
+			return x.ErrDataLenShort
+		}
 		v.Explicit = make([]SetExplicit, v.TotalKeyExplicit)
 		for i := 0; i < int(v.TotalKeyExplicit); i++ {
-			var err error
-			v.Explicit[i], err = readSetExplicit(r)
-			if err != nil {
-				return err
-			}
+			v.Explicit[i] = readSetExplicit(r)
 		}
-
-		r.ReadPad(x.Pad(int(v.TotalKeyExplicit) * 2))
-		if r.Err() != nil {
-			return r.Err()
-		}
+		r.ReadPad(pad)
 	}
 
 	if v.Present&MapPartModifierMap != 0 && v.TotalModMapKeys > 0 {
+		n := int(v.TotalModMapKeys) * 2
+		pad := x.Pad(n)
+		if !r.RemainAtLeast(n + pad) {
+			return x.ErrDataLenShort
+		}
 		v.ModMap = make([]KeyModMap, v.TotalModMapKeys)
 		for i := 0; i < int(v.TotalModMapKeys); i++ {
-			var err error
-			v.ModMap[i], err = readKeyModMap(r)
-			if err != nil {
-				return err
-			}
+			v.ModMap[i] = readKeyModMap(r)
 		}
-
-		r.ReadPad(x.Pad(int(v.TotalModMapKeys) * 2))
-		if r.Err() != nil {
-			return r.Err()
-		}
+		r.ReadPad(pad)
 	}
 
 	if v.Present&MapPartVirtualModMap != 0 && v.TotalVModMapKeys > 0 {
+		if !r.RemainAtLeast4b(int(v.TotalVModMapKeys)) {
+			return x.ErrDataLenShort
+		}
 		v.VModMap = make([]KeyVModMap, v.TotalVModMapKeys)
 		for i := 0; i < int(v.TotalVModMapKeys); i++ {
-			var err error
-			v.VModMap[i], err = readKeyVModMap(r)
-			if err != nil {
-				return err
-			}
+			v.VModMap[i] = readKeyVModMap(r)
 		}
 	}
 

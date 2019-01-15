@@ -12,33 +12,13 @@ type EnableReply struct {
 }
 
 func readEnableReply(r *x.Reader, v *EnableReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
 
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
-	// sequence
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.MaximumRequestLength = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MaximumRequestLength = r.Read4b() // 3
 
 	return nil
 }

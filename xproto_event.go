@@ -16,6 +16,10 @@ type KeyEvent struct {
 }
 
 func readKeyEvent(r *Reader, v *KeyEvent) error {
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
+	}
+
 	var detail uint8
 	detail, v.Sequence = r.ReadEventHeader()
 	v.Detail = Keycode(detail)
@@ -72,6 +76,10 @@ type ButtonEvent struct {
 }
 
 func readButtonEvent(r *Reader, v *ButtonEvent) error {
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
+	}
+
 	var detail uint8
 	detail, v.Sequence = r.ReadEventHeader()
 	v.Detail = Button(detail)
@@ -128,6 +136,10 @@ type MotionNotifyEvent struct {
 }
 
 func readMotionNotifyEvent(r *Reader, v *MotionNotifyEvent) error {
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
+	}
+
 	v.Detail, v.Sequence = r.ReadEventHeader()
 
 	v.Time = Timestamp(r.Read4b())
@@ -167,6 +179,10 @@ type PointerWindowEvent struct {
 }
 
 func readPointerWindowEvent(r *Reader, v *PointerWindowEvent) error {
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
+	}
+
 	v.Detail, v.Sequence = r.ReadEventHeader()
 
 	v.Time = Timestamp(r.Read4b())
@@ -214,6 +230,10 @@ type FocusEvent struct {
 }
 
 func readFocusEvent(r *Reader, v *FocusEvent) error {
+	if !r.RemainAtLeast4b(3) {
+		return ErrDataLenShort
+	}
+
 	v.Detail, v.Sequence = r.ReadEventHeader()
 
 	v.Event = Window(r.Read4b())
@@ -244,6 +264,10 @@ type KeymapNotifyEvent struct {
 }
 
 func readKeymapNotifyEvent(r *Reader, v *KeymapNotifyEvent) error {
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
+	}
+
 	r.ReadPad(1)
 	v.Keys = r.MustReadBytes(31) // 8
 	return nil
@@ -260,6 +284,10 @@ type ExposeEvent struct {
 }
 
 func readExposeEvent(r *Reader, v *ExposeEvent) error {
+	if !r.RemainAtLeast4b(5) {
+		return ErrDataLenShort
+	}
+
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Window = Window(r.Read4b())
@@ -288,6 +316,9 @@ type GraphicsExposureEvent struct {
 }
 
 func readGraphicsExposureEvent(r *Reader, v *GraphicsExposureEvent) error {
+	if !r.RemainAtLeast4b(6) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Drawable = Drawable(r.Read4b())
@@ -314,6 +345,9 @@ type NoExposureEvent struct {
 }
 
 func readNoExposureEvent(r *Reader, v *NoExposureEvent) error {
+	if !r.RemainAtLeast4b(3) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Drawable = Drawable(r.Read4b())
@@ -331,6 +365,9 @@ type VisibilityNotifyEvent struct {
 }
 
 func readVisibilityNotifyEvent(r *Reader, v *VisibilityNotifyEvent) error {
+	if !r.RemainAtLeast4b(3) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Window = Window(r.Read4b())
@@ -353,6 +390,9 @@ type CreateNotifyEvent struct {
 }
 
 func readCreateNotifyEvent(r *Reader, v *CreateNotifyEvent) error {
+	if !r.RemainAtLeast4b(5) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Window = Window(r.Read4b())
@@ -376,6 +416,9 @@ type DestroyNotifyEvent struct {
 }
 
 func readDestroyNotifyEvent(r *Reader, v *DestroyNotifyEvent) error {
+	if !r.RemainAtLeast4b(3) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Event = Window(r.Read4b())
@@ -393,6 +436,9 @@ type UnmapNotifyEvent struct {
 }
 
 func readUnmapNotifyEvent(r *Reader, v *UnmapNotifyEvent) error {
+	if !r.RemainAtLeast4b(4) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Event = Window(r.Read4b())
@@ -412,6 +458,9 @@ type MapNotifyEvent struct {
 }
 
 func readMapNotifyEvent(r *Reader, v *MapNotifyEvent) error {
+	if !r.RemainAtLeast4b(4) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Event = Window(r.Read4b())
@@ -430,6 +479,9 @@ type MapRequestEvent struct {
 }
 
 func readMapRequestEvent(r *Reader, v *MapRequestEvent) error {
+	if !r.RemainAtLeast4b(3) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Parent = Window(r.Read4b())
@@ -450,6 +502,9 @@ type ReparentNotifyEvent struct {
 }
 
 func readReparentNotifyEvent(r *Reader, v *ReparentNotifyEvent) error {
+	if !r.RemainAtLeast4b(6) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Event = Window(r.Read4b())
@@ -480,6 +535,9 @@ type ConfigureNotifyEvent struct {
 }
 
 func readConfigureNotifyEvent(r *Reader, v *ConfigureNotifyEvent) error {
+	if !r.RemainAtLeast4b(7) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Event = Window(r.Read4b())
@@ -515,6 +573,9 @@ type ConfigureRequestEvent struct {
 }
 
 func readConfigureRequestEvent(r *Reader, v *ConfigureRequestEvent) error {
+	if !r.RemainAtLeast4b(7) {
+		return ErrDataLenShort
+	}
 	v.StackMode, v.Sequence = r.ReadEventHeader()
 
 	v.Parent = Window(r.Read4b())
@@ -544,6 +605,9 @@ type GravityNotifyEvent struct {
 }
 
 func readGravityNotifyEvent(r *Reader, v *GravityNotifyEvent) error {
+	if !r.RemainAtLeast4b(4) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Event = Window(r.Read4b())
@@ -564,6 +628,9 @@ type ResizeRequestEvent struct {
 }
 
 func readResizeRequestEvent(r *Reader, v *ResizeRequestEvent) error {
+	if !r.RemainAtLeast4b(3) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Window = Window(r.Read4b())
@@ -582,6 +649,9 @@ type CirculateEvent struct {
 }
 
 func readCirculateEvent(r *Reader, v *CirculateEvent) error {
+	if !r.RemainAtLeast4b(5) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Event = Window(r.Read4b())
@@ -621,6 +691,9 @@ type PropertyNotifyEvent struct {
 }
 
 func readPropertyNotifyEvent(r *Reader, v *PropertyNotifyEvent) error {
+	if !r.RemainAtLeast4b(5) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Window = Window(r.Read4b())
@@ -642,6 +715,9 @@ type SelectionClearEvent struct {
 }
 
 func readSelectionClearEvent(r *Reader, v *SelectionClearEvent) error {
+	if !r.RemainAtLeast4b(4) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Time = Timestamp(r.Read4b())
@@ -664,6 +740,9 @@ type SelectionRequestEvent struct {
 }
 
 func readSelectionRequestEvent(r *Reader, v *SelectionRequestEvent) error {
+	if !r.RemainAtLeast4b(7) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Time = Timestamp(r.Read4b())
@@ -691,6 +770,9 @@ type SelectionNotifyEvent struct {
 }
 
 func readSelectionNotifyEvent(r *Reader, v *SelectionNotifyEvent) error {
+	if !r.RemainAtLeast4b(6) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Time = Timestamp(r.Read4b())
@@ -727,6 +809,9 @@ type ColormapNotifyEvent struct {
 }
 
 func readColormapNotifyEvent(r *Reader, v *ColormapNotifyEvent) error {
+	if !r.RemainAtLeast4b(4) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Window = Window(r.Read4b())
@@ -748,6 +833,9 @@ type ClientMessageEvent struct {
 }
 
 func readClientMessageEvent(r *Reader, v *ClientMessageEvent) error {
+	if !r.RemainAtLeast4b(8) {
+		return ErrDataLenShort
+	}
 	v.Format, v.Sequence = r.ReadEventHeader()
 
 	v.Window = Window(r.Read4b())
@@ -779,6 +867,9 @@ type MappingNotifyEvent struct {
 }
 
 func readMappingNotifyEvent(r *Reader, v *MappingNotifyEvent) error {
+	if !r.RemainAtLeast4b(2) {
+		return ErrDataLenShort
+	}
 	_, v.Sequence = r.ReadEventHeader()
 
 	v.Request = r.Read1b()
@@ -797,6 +888,9 @@ type GeGenericEvent struct {
 }
 
 func readGeGenericEvent(r *Reader, v *GeGenericEvent) error {
+	if !r.RemainAtLeast4b(3) {
+		return ErrDataLenShort
+	}
 	v.Extension, v.Sequence = r.ReadEventHeader()
 
 	v.Length = r.Read4b()

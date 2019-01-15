@@ -22,11 +22,6 @@ func (r *Reader) Pos() int {
 	return r.pos
 }
 
-// TODO remove
-func (r *Reader) Err() error {
-	return nil
-}
-
 func (r *Reader) Read1b() uint8 {
 	v := r.data[r.pos]
 	r.pos++
@@ -65,15 +60,15 @@ func (r *Reader) ReadBytes(n int) ([]byte, error) {
 	return v, nil
 }
 
-func (r *Reader) ReadBytesWithPad(n int) (int, []byte, error) {
+func (r *Reader) ReadBytesWithPad(n int) ([]byte, error) {
 	total := n + Pad(n)
 	if !r.RemainAtLeast(total) {
-		return 0, nil, ErrDataLenShort
+		return nil, ErrDataLenShort
 	}
 
 	v := r.data[r.pos : r.pos+n]
 	r.pos += total
-	return total, v, nil
+	return v, nil
 }
 
 func (r *Reader) ReadString(n int) (string, error) {
@@ -84,12 +79,12 @@ func (r *Reader) ReadString(n int) (string, error) {
 	return string(v), nil
 }
 
-func (r *Reader) ReadStrWithPad(n int) (int, string, error) {
-	n, v, err := r.ReadBytesWithPad(n)
+func (r *Reader) ReadStrWithPad(n int) (string, error) {
+	v, err := r.ReadBytesWithPad(n)
 	if err != nil {
-		return 0, "", err
+		return "", err
 	}
-	return n, string(v), nil
+	return string(v), nil
 }
 
 func (r *Reader) ReadNulTermStr() string {
@@ -134,7 +129,7 @@ func (r *Reader) ReadReplyHeader() (data uint8, length uint32) {
 	// seq
 	r.ReadPad(2)
 	// length
-	length = r.Read4b()
+	length = r.Read4b() // 2
 	return
 }
 
@@ -142,6 +137,6 @@ func (r *Reader) ReadEventHeader() (data uint8, seq uint16) {
 	r.ReadPad(1)
 	data = r.Read1b()
 	// seq
-	seq = r.Read2b()
+	seq = r.Read2b() // 1
 	return
 }

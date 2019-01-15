@@ -141,9 +141,6 @@ const KeyPressEventCode = 2
 func NewKeyPressEvent(data []byte) (*KeyPressEvent, error) {
 	var ev KeyPressEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readKeyPressEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -156,9 +153,6 @@ const KeyReleaseEventCode = 3
 func NewKeyReleaseEvent(data []byte) (*KeyReleaseEvent, error) {
 	var ev KeyReleaseEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readKeyReleaseEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -181,9 +175,6 @@ const ButtonPressEventCode = 4
 func NewButtonPressEvent(data []byte) (*ButtonPressEvent, error) {
 	var ev ButtonPressEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readButtonPressEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -196,9 +187,6 @@ const ButtonReleaseEventCode = 5
 func NewButtonReleaseEvent(data []byte) (*ButtonReleaseEvent, error) {
 	var ev ButtonReleaseEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readButtonReleaseEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -217,9 +205,6 @@ const MotionNotifyEventCode = 6
 func NewMotionNotifyEvent(data []byte) (*MotionNotifyEvent, error) {
 	var ev MotionNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readMotionNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -252,9 +237,6 @@ const EnterNotifyEventCode = 7
 func NewEnterNotifyEvent(data []byte) (*EnterNotifyEvent, error) {
 	var ev EnterNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readEnterNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -267,9 +249,6 @@ const LeaveNotifyEventCode = 8
 func NewLeaveNotifyEvent(data []byte) (*LeaveNotifyEvent, error) {
 	var ev LeaveNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readLeaveNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -282,9 +261,6 @@ const FocusInEventCode = 9
 func NewFocusInEvent(data []byte) (*FocusInEvent, error) {
 	var ev FocusInEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readFocusInEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -297,9 +273,6 @@ const FocusOutEventCode = 10
 func NewFocusOutEvent(data []byte) (*FocusOutEvent, error) {
 	var ev FocusOutEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readFocusOutEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -312,9 +285,6 @@ const KeymapNotifyEventCode = 11
 func NewKeymapNotifyEvent(data []byte) (*KeymapNotifyEvent, error) {
 	var ev KeymapNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readKeymapNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -327,9 +297,6 @@ const ExposeEventCode = 12
 func NewExposeEvent(data []byte) (*ExposeEvent, error) {
 	var ev ExposeEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readExposeEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -342,9 +309,6 @@ const GraphicsExposureEventCode = 13
 func NewGraphicsExposureEvent(data []byte) (*GraphicsExposureEvent, error) {
 	var ev GraphicsExposureEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readGraphicsExposureEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -357,9 +321,6 @@ const NoExposureEventCode = 14
 func NewNoExposureEvent(data []byte) (*NoExposureEvent, error) {
 	var ev NoExposureEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readNoExposureEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -379,9 +340,6 @@ const VisibilityNotifyEventCode = 15
 func NewVisibilityNotifyEvent(data []byte) (*VisibilityNotifyEvent, error) {
 	var ev VisibilityNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readVisibilityNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -394,9 +352,6 @@ const CreateNotifyEventCode = 16
 func NewCreateNotifyEvent(data []byte) (*CreateNotifyEvent, error) {
 	var ev CreateNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readCreateNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -409,9 +364,6 @@ const DestroyNotifyEventCode = 17
 func NewDestroyNotifyEvent(data []byte) (*DestroyNotifyEvent, error) {
 	var ev DestroyNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readDestroyNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -424,9 +376,6 @@ const UnmapNotifyEventCode = 18
 func NewUnmapNotifyEvent(data []byte) (*UnmapNotifyEvent, error) {
 	var ev UnmapNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readUnmapNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -439,9 +388,6 @@ const MapNotifyEventCode = 19
 func NewMapNotifyEvent(data []byte) (*MapNotifyEvent, error) {
 	var ev MapNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readMapNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -454,9 +400,6 @@ const MapRequestEventCode = 20
 func NewMapRequestEvent(data []byte) (*MapRequestEvent, error) {
 	var ev MapRequestEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readMapRequestEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -469,9 +412,6 @@ const ReparentNotifyEventCode = 21
 func NewReparentNotifyEvent(data []byte) (*ReparentNotifyEvent, error) {
 	var ev ReparentNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readReparentNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -484,9 +424,6 @@ const ConfigureNotifyEventCode = 22
 func NewConfigureNotifyEvent(data []byte) (*ConfigureNotifyEvent, error) {
 	var ev ConfigureNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readConfigureNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -499,9 +436,6 @@ const ConfigureRequestEventCode = 23
 func NewConfigureRequestEvent(data []byte) (*ConfigureRequestEvent, error) {
 	var ev ConfigureRequestEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readConfigureRequestEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -514,9 +448,6 @@ const GravityNotifyEventCode = 24
 func NewGravityNotifyEvent(data []byte) (*GravityNotifyEvent, error) {
 	var ev GravityNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readGravityNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -529,9 +460,6 @@ const ResizeRequestEventCode = 25
 func NewResizeRequestEvent(data []byte) (*ResizeRequestEvent, error) {
 	var ev ResizeRequestEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readResizeRequestEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -550,9 +478,6 @@ const CirculateNotifyEventCode = 26
 func NewCirculateNotifyEvent(data []byte) (*CirculateNotifyEvent, error) {
 	var ev CirculateNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readCirculateNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -565,9 +490,6 @@ const CirculateRequestEventCode = 27
 func NewCirculateRequestEvent(data []byte) (*CirculateRequestEvent, error) {
 	var ev CirculateRequestEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readCirculateRequestEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -586,9 +508,6 @@ const PropertyNotifyEventCode = 28
 func NewPropertyNotifyEvent(data []byte) (*PropertyNotifyEvent, error) {
 	var ev PropertyNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readPropertyNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -601,9 +520,6 @@ const SelectionClearEventCode = 29
 func NewSelectionClearEvent(data []byte) (*SelectionClearEvent, error) {
 	var ev SelectionClearEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readSelectionClearEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -695,9 +611,6 @@ const SelectionRequestEventCode = 30
 func NewSelectionRequestEvent(data []byte) (*SelectionRequestEvent, error) {
 	var ev SelectionRequestEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readSelectionRequestEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -710,9 +623,6 @@ const SelectionNotifyEventCode = 31
 func NewSelectionNotifyEvent(data []byte) (*SelectionNotifyEvent, error) {
 	var ev SelectionNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readSelectionNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -736,9 +646,6 @@ const ColormapNotifyEventCode = 32
 func NewColormapNotifyEvent(data []byte) (*ColormapNotifyEvent, error) {
 	var ev ColormapNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readColormapNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -751,9 +658,6 @@ const ClientMessageEventCode = 33
 func NewClientMessageEvent(data []byte) (*ClientMessageEvent, error) {
 	var ev ClientMessageEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readClientMessageEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -773,9 +677,6 @@ const MappingNotifyEventCode = 34
 func NewMappingNotifyEvent(data []byte) (*MappingNotifyEvent, error) {
 	var ev MappingNotifyEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readMappingNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -788,9 +689,6 @@ const GeGenericEventCode = 35
 func NewGeGenericEvent(data []byte) (*GeGenericEvent, error) {
 	var ev GeGenericEvent
 	r := NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, ErrDataLenShort
-	}
 	err := readGeGenericEvent(r, &ev)
 	if err != nil {
 		return nil, err

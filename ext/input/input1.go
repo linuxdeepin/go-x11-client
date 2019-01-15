@@ -19,46 +19,23 @@ type OpenDeviceReply struct {
 }
 
 func readOpenDeviceReply(r *x.Reader, v *OpenDeviceReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
 
-	v.XIReplyType = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.XIReplyType, _ = r.ReadReplyHeader()
 
 	classInfosLen := int(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	r.ReadPad(23)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(23) // 8
 
 	if classInfosLen > 0 {
-		var err error
+		if !r.RemainAtLeast(2 * classInfosLen) {
+			return x.ErrDataLenShort
+		}
 		v.ClassInfos = make([]ClassInfo, classInfosLen)
 		for i := 0; i < classInfosLen; i++ {
-			v.ClassInfos[i], err = readClassInfo(r)
-			if err != nil {
-				return err
-			}
+			v.ClassInfos[i] = readClassInfo(r)
 		}
 	}
 
@@ -76,24 +53,17 @@ func FindTypeAndClass(deviceId uint8, classInfos []ClassInfo,
 	return
 }
 
+// size: 2b
 type ClassInfo struct {
 	ClassId       uint8
 	EventTypeBase uint8
 }
 
-func readClassInfo(r *x.Reader) (ClassInfo, error) {
+func readClassInfo(r *x.Reader) ClassInfo {
 	var v ClassInfo
 	v.ClassId = r.Read1b()
-	if r.Err() != nil {
-		return ClassInfo{}, r.Err()
-	}
-
 	v.EventTypeBase = r.Read1b()
-	if r.Err() != nil {
-		return ClassInfo{}, r.Err()
-	}
-
-	return v, nil
+	return v
 }
 
 // #WREQ

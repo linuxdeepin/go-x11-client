@@ -17,38 +17,15 @@ type QueryVersionReply struct {
 }
 
 func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(4) {
+		return x.ErrDataLenShort
 	}
 
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// sequence
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.MajorVersion = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.MinorVersion = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MinorVersion = r.Read4b() // 4
 
 	return nil
 }

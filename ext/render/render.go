@@ -20,38 +20,14 @@ type QueryVersionReply struct {
 }
 
 func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(4) {
+		return x.ErrDataLenShort
 	}
-
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.MajorVersion = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.MinorVersion = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MinorVersion = r.Read4b() // 4
 	return nil
 }
 
@@ -68,6 +44,7 @@ type QueryPictFormatsReply struct {
 	SubPixels  []uint32
 }
 
+// size: 7 * 4b
 type PictFormatInfo struct {
 	Id       PictFormat
 	Type     uint8
@@ -76,40 +53,19 @@ type PictFormatInfo struct {
 	Colormap x.Colormap
 }
 
-func readPictFormatInfo(r *x.Reader, v *PictFormatInfo) error {
+func readPictFormatInfo(r *x.Reader, v *PictFormatInfo) {
 	v.Id = PictFormat(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Type = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Depth = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(2) // 2
 
-	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	readDirectFormat(r, &v.Direct)
 
-	err := readDirectFormat(r, &v.Direct)
-	if err != nil {
-		return err
-	}
-
-	v.Colormap = x.Colormap(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	return nil
+	v.Colormap = x.Colormap(r.Read4b()) // 7
 }
 
+// size: 4 * 4b
 type DirectFormat struct {
 	RedShift   uint16
 	RedMask    uint16
@@ -121,47 +77,18 @@ type DirectFormat struct {
 	AlphaMask  uint16
 }
 
-func readDirectFormat(r *x.Reader, v *DirectFormat) error {
+func readDirectFormat(r *x.Reader, v *DirectFormat) {
 	v.RedShift = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.RedMask = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.GreenShift = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.GreenMask = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.BlueShift = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.BlueMask = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.AlphaShift = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.AlphaMask = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-	return nil
 }
 
 type PictScreen struct {
@@ -170,15 +97,12 @@ type PictScreen struct {
 }
 
 func readPictScreen(r *x.Reader, v *PictScreen) error {
+	if !r.RemainAtLeast4b(2) {
+		return x.ErrDataLenShort
+	}
 	depthsLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Fallback = PictFormat(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Fallback = PictFormat(r.Read4b()) // 2
 
 	if depthsLen > 0 {
 		v.Depths = make([]PictDepth, depthsLen)
@@ -200,120 +124,63 @@ type PictDepth struct {
 
 func readPictDepth(r *x.Reader, v *PictDepth) error {
 	v.Depth = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	visualsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	r.ReadPad(4)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(4) // 2
 
 	if visualsLen > 0 {
+		if !r.RemainAtLeast4b(2 * visualsLen) {
+			return x.ErrDataLenShort
+		}
 		v.Visuals = make([]PictVisual, visualsLen)
-		var err error
 		for i := 0; i < visualsLen; i++ {
-			v.Visuals[i], err = readPictVisual(r)
-			if err != nil {
-				return err
-			}
+			v.Visuals[i] = readPictVisual(r)
 		}
 	}
 
 	return nil
 }
 
+// size: 2 * 4b
 type PictVisual struct {
 	Visual x.VisualID
 	Format PictFormat
 }
 
-func readPictVisual(r *x.Reader) (PictVisual, error) {
+func readPictVisual(r *x.Reader) PictVisual {
 	var v PictVisual
 	v.Visual = x.VisualID(r.Read4b())
-	if r.Err() != nil {
-		return PictVisual{}, r.Err()
-	}
 
 	v.Format = PictFormat(r.Read4b())
-	if r.Err() != nil {
-		return PictVisual{}, r.Err()
-	}
-
-	return v, nil
+	return v
 }
 
 func readQueryPictFormatsReply(r *x.Reader, v *QueryPictFormatsReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	formatsLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	screensLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.NumDepths = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.NumDepths = r.Read4b() // 5
 
 	v.NumVisuals = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	subPixelsLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	r.ReadPad(4)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(4) // 8
 
 	if formatsLen > 0 {
+		if !r.RemainAtLeast4b(7 * formatsLen) {
+			return x.ErrDataLenShort
+		}
 		v.Formats = make([]PictFormatInfo, formatsLen)
 		for i := 0; i < formatsLen; i++ {
-			err := readPictFormatInfo(r, &v.Formats[i])
-			if err != nil {
-				return err
-			}
+			readPictFormatInfo(r, &v.Formats[i])
 		}
 	}
 
@@ -328,12 +195,12 @@ func readQueryPictFormatsReply(r *x.Reader, v *QueryPictFormatsReply) error {
 	}
 
 	if subPixelsLen > 0 {
+		if !r.RemainAtLeast4b(subPixelsLen) {
+			return x.ErrDataLenShort
+		}
 		v.SubPixels = make([]uint32, subPixelsLen)
 		for i := 0; i < subPixelsLen; i++ {
 			v.SubPixels[i] = r.Read4b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
@@ -348,6 +215,7 @@ func encodeQueryPictIndexValues(format PictFormat) (b x.RequestBody) {
 	return
 }
 
+// size: 3 * 4b
 type IndexValue struct {
 	Pixel uint32
 	Red   uint16
@@ -356,33 +224,14 @@ type IndexValue struct {
 	Alpha uint16
 }
 
-func readIndexValue(r *x.Reader, v *IndexValue) error {
+func readIndexValue(r *x.Reader, v *IndexValue) {
 	v.Pixel = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Red = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Green = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Blue = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Alpha = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	return nil
 }
 
 type QueryPictIndexValuesReply struct {
@@ -390,46 +239,22 @@ type QueryPictIndexValuesReply struct {
 }
 
 func readQueryPictIndexValuesReply(r *x.Reader, v *QueryPictIndexValuesReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	valuesLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(20) // 8
 
 	if valuesLen > 0 {
+		if !r.RemainAtLeast4b(3 * valuesLen) {
+			return x.ErrDataLenShort
+		}
 		v.Values = make([]IndexValue, valuesLen)
 		for i := 0; i < valuesLen; i++ {
-			err := readIndexValue(r, &v.Values[i])
-			if err != nil {
-				return err
-			}
+			readIndexValue(r, &v.Values[i])
 		}
 	}
 
@@ -450,53 +275,27 @@ type QueryFiltersReply struct {
 }
 
 func readQueryFiltersReply(r *x.Reader, v *QueryFiltersReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	aliasesLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	filtersLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	r.ReadPad(16)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(16) // 8
 
 	if aliasesLen > 0 {
+		pad := x.Pad(2 * aliasesLen)
+		if !r.RemainAtLeast(2*aliasesLen + pad) {
+			return x.ErrDataLenShort
+		}
 		v.Aliases = make([]uint16, aliasesLen)
 		for i := 0; i < aliasesLen; i++ {
 			v.Aliases[i] = r.Read2b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
-		r.ReadPad(x.Pad(aliasesLen * 2))
+		r.ReadPad(pad)
 	}
 
 	if filtersLen > 0 {
@@ -554,6 +353,7 @@ func encodeSetPictureClipRectangles(picture Picture, clipXOrigin,
 	return
 }
 
+// size: 9 * 4b
 type Transform struct {
 	Matrix11 Fixed
 	Matrix12 Fixed

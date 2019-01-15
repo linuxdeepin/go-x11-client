@@ -66,7 +66,7 @@ func readSetup(r *Reader, v *Setup) error {
 	r.Read4b() // 10
 
 	var err error
-	_, v.Vendor, err = r.ReadStrWithPad(int(vendorLen))
+	v.Vendor, err = r.ReadStrWithPad(int(vendorLen))
 	if err != nil {
 		return err
 	}
@@ -240,30 +240,14 @@ type Rectangle struct {
 	Width, Height uint16
 }
 
-// TODO:
-func ReadRectangle(r *Reader) (Rectangle, error) {
+func ReadRectangle(r *Reader) Rectangle {
 	var v Rectangle
 	v.X = int16(r.Read2b())
-	if r.Err() != nil {
-		return Rectangle{}, r.Err()
-	}
-
 	v.Y = int16(r.Read2b())
-	if r.Err() != nil {
-		return Rectangle{}, r.Err()
-	}
 
 	v.Width = r.Read2b()
-	if r.Err() != nil {
-		return Rectangle{}, r.Err()
-	}
-
-	v.Height = r.Read2b()
-	if r.Err() != nil {
-		return Rectangle{}, r.Err()
-	}
-
-	return v, nil
+	v.Height = r.Read2b() // 2
+	return v
 }
 
 func WriteRectangle(b *FixedSizeBuf, v Rectangle) {
@@ -481,7 +465,7 @@ type GetGeometryReply struct {
 }
 
 func readGetGeometryReply(r *Reader, v *GetGeometryReply) error {
-	if !r.RemainAtLeast4b(8) {
+	if !r.RemainAtLeast4b(6) {
 		return ErrDataLenShort
 	}
 	v.Depth, _ = r.ReadReplyHeader() // 2
@@ -494,10 +478,7 @@ func readGetGeometryReply(r *Reader, v *GetGeometryReply) error {
 	v.Width = r.Read2b()
 	v.Height = r.Read2b() // 5
 
-	v.BorderWidth = r.Read2b()
-
-	// unused
-	r.ReadPad(10) // 8
+	v.BorderWidth = r.Read2b() // 6
 
 	return nil
 }
@@ -519,7 +500,7 @@ func readQueryTreeReply(r *Reader, v *QueryTreeReply) error {
 	if !r.RemainAtLeast4b(8) {
 		return ErrDataLenShort
 	}
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	v.Root = Window(r.Read4b())
 
@@ -565,7 +546,7 @@ func readInternAtomReply(r *Reader, v *InternAtomReply) error {
 	if !r.RemainAtLeast4b(3) {
 		return ErrDataLenShort
 	}
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	v.Atom = Atom(r.Read4b()) // 3
 	return nil
@@ -587,7 +568,7 @@ func readGetAtomNameReply(r *Reader, v *GetAtomNameReply) error {
 	if !r.RemainAtLeast4b(8) {
 		return ErrDataLenShort
 	}
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	// name len
 	nameLen := r.Read2b()
@@ -696,7 +677,7 @@ func readListPropertiesReply(r *Reader, v *ListPropertiesReply) error {
 	if !r.RemainAtLeast4b(8) {
 		return ErrDataLenShort
 	}
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	atomsLen := int(r.Read2b())
 
@@ -742,7 +723,7 @@ func readGetSelectionOwnerReply(r *Reader, v *GetSelectionOwnerReply) error {
 	if !r.RemainAtLeast4b(3) {
 		return ErrDataLenShort
 	}
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	v.Owner = Window(r.Read4b()) // 3
 	return nil
@@ -1005,7 +986,7 @@ func readGetMotionEventsReply(r *Reader, v *GetMotionEventsReply) error {
 		return ErrDataLenShort
 	}
 
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	eventsLen := int(r.Read4b()) // 3
 
@@ -1118,7 +1099,7 @@ func readQueryKeymapReply(r *Reader, v *QueryKeymapReply) error {
 		return ErrDataLenShort
 	}
 
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	// keys
 	v.Keys = r.MustReadBytes(32) // 10
@@ -1178,7 +1159,7 @@ func readQueryFontReply(r *Reader, v *QueryFontReply) error {
 	if !r.RemainAtLeast4b(15) {
 		return ErrDataLenShort
 	}
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	readCharInfo(r, &v.MinBounds) // 5
 
@@ -1285,7 +1266,7 @@ func readListFontsReply(r *Reader, v *ListFontsReply) error {
 	if !r.RemainAtLeast4b(8) {
 		return ErrDataLenShort
 	}
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	namesLen := int(r.Read2b())
 
@@ -1441,7 +1422,7 @@ func readGetFontPathReply(r *Reader, v *GetFontPathReply) error {
 	if !r.RemainAtLeast4b(8) {
 		return ErrDataLenShort
 	}
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	pathsLen := int(r.Read2b())
 
@@ -1843,7 +1824,7 @@ func readQueryExtensionReply(r *Reader, v *QueryExtensionReply) error {
 		return ErrDataLenShort
 	}
 
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	v.Present = r.ReadBool()
 	v.MajorOpcode = r.Read1b()
@@ -1995,7 +1976,7 @@ func readGetScreenSaverReply(r *Reader, v *GetScreenSaverReply) error {
 	if !r.RemainAtLeast4b(4) {
 		return ErrDataLenShort
 	}
-	r.ReadReplyHeader() // 2
+	r.ReadPad(8) // 2
 
 	v.Timeout = r.Read2b()
 	v.Interval = r.Read2b()

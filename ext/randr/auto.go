@@ -221,9 +221,6 @@ const ScreenChangeNotifyEventCode = 0
 func NewScreenChangeNotifyEvent(data []byte) (*ScreenChangeNotifyEvent, error) {
 	var ev ScreenChangeNotifyEvent
 	r := x.NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, x.ErrDataLenShort
-	}
 	err := readScreenChangeNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err
@@ -258,9 +255,6 @@ const NotifyEventCode = 1
 func NewNotifyEvent(data []byte) (*NotifyEvent, error) {
 	var ev NotifyEvent
 	r := x.NewReaderFromData(data)
-	if !r.RemainAtLeast4b(8) {
-		return nil, x.ErrDataLenShort
-	}
 	err := readNotifyEvent(r, &ev)
 	if err != nil {
 		return nil, err

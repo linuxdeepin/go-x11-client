@@ -18,71 +18,27 @@ type ScreenChangeNotifyEvent struct {
 }
 
 func readScreenChangeNotifyEvent(r *x.Reader, v *ScreenChangeNotifyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	v.Rotation = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Rotation, v.Sequence = r.ReadEventHeader()
 
 	v.Timestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.ConfigTimestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Root = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.RequestWindow = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.RequestWindow = x.Window(r.Read4b()) // 5
 
 	v.SizeID = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.SubpixelOrder = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Width = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Height = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.MmWidth = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.MmHeight = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MmHeight = r.Read2b() // 8
 
 	return nil
 }
@@ -94,23 +50,12 @@ type NotifyEvent struct {
 }
 
 func readNotifyEvent(r *x.Reader, v *NotifyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
+	v.SubCode, v.Sequence = r.ReadEventHeader()
 
-	v.SubCode = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Data = r.MustReadBytes(28)
+	v.Data = r.MustReadBytes(28) // 8
 
 	return nil
 }
@@ -157,55 +102,25 @@ type CrtcChangeNotifyEvent struct {
 }
 
 func readCrtcChangeNotifyEvent(r *x.Reader, v *CrtcChangeNotifyEvent) error {
-	v.Timestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(7) {
+		return x.ErrDataLenShort
 	}
+	v.Timestamp = x.Timestamp(r.Read4b())
 
 	v.Window = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Crtc = Crtc(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Mode = Mode(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Rotation = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(2) // 5
 
 	v.X = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Y = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Width = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Height = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Height = r.Read2b() // 7
 
 	return nil
 }
@@ -223,50 +138,24 @@ type OutputChangeNotifyEvent struct {
 }
 
 func readOutputChangeNotifyEvent(r *x.Reader, v *OutputChangeNotifyEvent) error {
-	v.Timestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(7) {
+		return x.ErrDataLenShort
 	}
+	v.Timestamp = x.Timestamp(r.Read4b())
 
 	v.ConfigTimestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Window = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Output = Output(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Crtc = Crtc(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Crtc = Crtc(r.Read4b()) // 5
 
 	v.Mode = Mode(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Rotation = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Connection = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.SubPixelOrder = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.SubPixelOrder = r.Read1b() // 7
 
 	return nil
 }
@@ -280,30 +169,18 @@ type OutputPropertyNotifyEvent struct {
 }
 
 func readOutputPropertyNotifyEvent(r *x.Reader, v *OutputPropertyNotifyEvent) error {
-	v.Window = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(5) {
+		return x.ErrDataLenShort
 	}
+	v.Window = x.Window(r.Read4b())
 
 	v.Output = Output(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Atom = x.Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Timestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Status = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Status = r.Read1b() // 5
 
 	return nil
 }

@@ -21,42 +21,14 @@ type QueryVersionReply struct {
 }
 
 func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(4) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// len
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.MajorVersion = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.MinorVersion = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(16)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MinorVersion = r.Read4b() // 4
 
 	return nil
 }
@@ -75,6 +47,7 @@ func encodeChangeSaveSet(mode, target, map0 uint8, window x.Window) (b x.Request
 
 type SelectionNotifyEvent struct {
 	Subtype            uint8
+	Sequence           uint16
 	Window             x.Window
 	Owner              x.Window
 	Selection          x.Atom
@@ -83,51 +56,20 @@ type SelectionNotifyEvent struct {
 }
 
 func readSelectionNotifyEvent(r *x.Reader, v *SelectionNotifyEvent) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(6) {
+		return x.ErrDataLenShort
 	}
-
-	v.Subtype = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Subtype, v.Sequence = r.ReadEventHeader()
 
 	v.Window = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Owner = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Selection = x.Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Timestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.SelectionTimestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(8)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.SelectionTimestamp = x.Timestamp(r.Read4b()) // 6
 
 	return nil
 }
@@ -145,6 +87,7 @@ func encodeSelectSelectionInput(window x.Window, selection x.Atom,
 
 type CursorNotifyEvent struct {
 	Subtype      uint8
+	Sequence     uint16
 	Window       x.Window
 	CursorSerial uint32
 	Timestamp    x.Timestamp
@@ -152,46 +95,18 @@ type CursorNotifyEvent struct {
 }
 
 func readCursorNotifyEvent(r *x.Reader, v *CursorNotifyEvent) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(5) {
+		return x.ErrDataLenShort
 	}
-
-	v.Subtype = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Subtype, v.Sequence = r.ReadEventHeader()
 
 	v.Window = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.CursorSerial = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Timestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Name = x.Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(12)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Name = x.Atom(r.Read4b()) // 5
 
 	return nil
 }
@@ -222,71 +137,30 @@ type GetCursorImageReply struct {
 }
 
 func readGetCursorImageReply(r *x.Reader, v *GetCursorImageReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(6) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// len
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.X = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Y = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Width = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Height = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.XHot = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.YHot = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.CursorSerial = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.CursorSerial = r.Read4b() // 6
 
 	dataLen := int(v.Width) * int(v.Height)
 	if dataLen > 0 {
+		if !r.RemainAtLeast4b(dataLen) {
+			return x.ErrDataLenShort
+		}
 		v.CursorImage = make([]uint32, dataLen)
 		for i := 0; i < dataLen; i++ {
 			v.CursorImage[i] = r.Read4b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
@@ -429,47 +303,23 @@ type FetchRegionReply struct {
 }
 
 func readFetchRegionReply(r *x.Reader, v *FetchRegionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
+	_, replyLen := r.ReadReplyHeader()
 
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Extents = x.ReadRectangle(r) // 4
 
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(16) // 8
 
-	// len
-	replyLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	var err error
-	v.Extents, err = x.ReadRectangle(r)
-	if err != nil {
-		return err
-	}
-
-	r.ReadPad(16)
-	if err != nil {
-		return err
-	}
-
-	rectanglesLen := replyLen / 2
+	rectanglesLen := int(replyLen / 2)
 	if rectanglesLen > 0 {
+		if !r.RemainAtLeast4b(2 * rectanglesLen) {
+			return x.ErrDataLenShort
+		}
 		v.Rectangles = make([]x.Rectangle, rectanglesLen)
 		for i := 0; i < rectanglesLen; i++ {
-			v.Rectangles[i], err = x.ReadRectangle(r)
-			if err != nil {
-				return err
-			}
+			v.Rectangles[i] = x.ReadRectangle(r)
 		}
 	}
 
@@ -519,96 +369,41 @@ type GetCursorImageAndNameReply struct {
 }
 
 func readGetCursorImageAndNameReply(r *x.Reader, v *GetCursorImageAndNameReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// len
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.X = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Y = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Width = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Height = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.XHot = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.YHot = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.YHot = r.Read2b() // 5
 
 	v.CursorSerial = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.CursorAtom = x.Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	cursorNameLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(2) // 8
 
-	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	cursorImageLen := int(v.Width) * int(v.Height)
-	if cursorImageLen > 0 {
-		v.CursorImage = make([]uint32, cursorImageLen)
-		for i := 0; i < cursorImageLen; i++ {
+	dataLen := int(v.Width) * int(v.Height)
+	if dataLen > 0 {
+		if !r.RemainAtLeast4b(dataLen) {
+			return x.ErrDataLenShort
+		}
+		v.CursorImage = make([]uint32, dataLen)
+		for i := 0; i < dataLen; i++ {
 			v.CursorImage[i] = r.Read4b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
 	var err error
 	v.CursorName, err = r.ReadString(cursorNameLen)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // #WREQ

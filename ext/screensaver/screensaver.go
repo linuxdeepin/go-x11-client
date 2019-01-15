@@ -13,52 +13,19 @@ type NotifyEvent struct {
 }
 
 func readNotifyEvent(r *x.Reader, v *NotifyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(5) {
+		return x.ErrDataLenShort
 	}
-
-	v.State = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.State, v.Sequence = r.ReadEventHeader()
 
 	v.Time = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Root = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Window = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Kind = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Forced = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(14)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Forced = r.ReadBool() // 5
 
 	return nil
 }
@@ -79,42 +46,13 @@ type QueryVersionReply struct {
 }
 
 func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.ServerMajorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.ServerMinorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.ServerMinorVersion = r.Read2b() // 3
 
 	return nil
 }
@@ -137,58 +75,20 @@ type QueryInfoReply struct {
 }
 
 func readQueryInfoReply(r *x.Reader, v *QueryInfoReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(7) {
+		return x.ErrDataLenShort
 	}
-
-	v.State = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.State, _ = r.ReadReplyHeader()
 
 	v.SaverWindow = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.MsUntilServer = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.MsSinceUserInput = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.EventMask = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.EventMask = r.Read4b() // 6
 
-	v.Kind = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// read field Pad0
-	r.ReadPad(7)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Kind = r.Read1b() // 7
 
 	return nil
 }

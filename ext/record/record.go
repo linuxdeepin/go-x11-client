@@ -15,18 +15,11 @@ func writeRange8(b *x.FixedSizeBuf, v Range8) {
 	b.Write1b(v.Last)
 }
 
-func readRange8(r *x.Reader) (Range8, error) {
+func readRange8(r *x.Reader) Range8 {
 	var v Range8
 	v.First = r.Read1b()
-	if r.Err() != nil {
-		return Range8{}, r.Err()
-	}
-
 	v.Last = r.Read1b()
-	if r.Err() != nil {
-		return Range8{}, r.Err()
-	}
-	return v, nil
+	return v
 }
 
 // size: 4b
@@ -35,18 +28,11 @@ type Range16 struct {
 	Last  uint16
 }
 
-func readRange16(r *x.Reader) (Range16, error) {
+func readRange16(r *x.Reader) Range16 {
 	var v Range16
 	v.First = r.Read2b()
-	if r.Err() != nil {
-		return Range16{}, r.Err()
-	}
-
 	v.Last = r.Read2b()
-	if r.Err() != nil {
-		return Range16{}, r.Err()
-	}
-	return v, nil
+	return v
 }
 
 func writeRange16(b *x.FixedSizeBuf, v Range16) {
@@ -60,18 +46,10 @@ type ExtRange struct {
 	Minor Range16
 }
 
-func readExtRange(r *x.Reader) (v ExtRange, err error) {
-	v.Major, err = readRange8(r)
-	if err != nil {
-		return ExtRange{}, err
-	}
-
-	v.Minor, err = readRange16(r)
-	if err != nil {
-		return ExtRange{}, err
-	}
-
-	return v, nil
+func readExtRange(r *x.Reader) (v ExtRange) {
+	v.Major = readRange8(r)
+	v.Minor = readRange16(r)
+	return
 }
 
 func writeExtRange(b *x.FixedSizeBuf, v ExtRange) {
@@ -105,53 +83,20 @@ func writeRange(b *x.FixedSizeBuf, v *Range) {
 	b.Write1b(x.BoolToUint8(v.ClientDied))
 }
 
-func readRange(r *x.Reader, v *Range) error {
-	var err error
-	v.CoreRequests, err = readRange8(r)
-	if err != nil {
-		return err
-	}
+func readRange(r *x.Reader, v *Range) {
+	v.CoreRequests = readRange8(r)
+	v.CoreReplies = readRange8(r)
 
-	v.CoreReplies, err = readRange8(r)
-	if err != nil {
-		return err
-	}
+	v.ExtRequests = readExtRange(r)
 
-	v.ExtRequests, err = readExtRange(r)
-	if err != nil {
-		return err
-	}
+	v.ExtRequests = readExtRange(r)
 
-	v.ExtRequests, err = readExtRange(r)
-	if err != nil {
-		return err
-	}
+	v.DeliveredEvents = readRange8(r)
+	v.DeviceEvents = readRange8(r)
 
-	v.DeliveredEvents, err = readRange8(r)
-	if err != nil {
-		return err
-	}
-
-	v.DeviceEvents, err = readRange8(r)
-	if err != nil {
-		return err
-	}
-
-	v.Errors, err = readRange8(r)
-	if err != nil {
-		return err
-	}
-
-	v.ClientStarted = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.ClientDied = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-	return nil
+	v.Errors = readRange8(r)
+	v.ClientStarted = r.ReadBool()
+	v.ClientDied = r.ReadBool()
 }
 
 type ClientInfo struct {
@@ -160,23 +105,20 @@ type ClientInfo struct {
 }
 
 func readClientInfo(r *x.Reader, v *ClientInfo) error {
+	if !r.RemainAtLeast4b(2) {
+		return x.ErrDataLenShort
+	}
 	v.ClientResource = ClientSpec(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	interceptedProtocolLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	interceptedProtocolLen := int(r.Read4b()) // 2
 
 	if interceptedProtocolLen > 0 {
+		if !r.RemainAtLeast4b(6 * interceptedProtocolLen) {
+			return x.ErrDataLenShort
+		}
 		v.InterceptedProtocol = make([]Range, interceptedProtocolLen)
 		for i := 0; i < interceptedProtocolLen; i++ {
-			err := readRange(r, &v.InterceptedProtocol[i])
-			if err != nil {
-				return err
-			}
+			readRange(r, &v.InterceptedProtocol[i])
 		}
 	}
 
@@ -198,38 +140,13 @@ type QueryVersionReply struct {
 }
 
 func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
-
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.MajorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.MinorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MinorVersion = r.Read2b() // 3
 
 	return nil
 }
@@ -312,43 +229,16 @@ type GetContextReply struct {
 }
 
 func readGetContextReply(r *x.Reader, v *GetContextReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(4) {
+		return x.ErrDataLenShort
 	}
-
-	v.Enabled = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// len
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	enabled, _ := r.ReadReplyHeader()
+	v.Enabled = x.Uint8ToBool(enabled)
 
 	v.ElementHeader = ElementHeader(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// unused
 	r.ReadPad(3)
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	interceptedClientsLen := int(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	interceptedClientsLen := int(r.Read4b()) // 4
 
 	if interceptedClientsLen > 0 {
 		v.InterceptedClients = make([]ClientInfo, interceptedClientsLen)
@@ -403,11 +293,7 @@ func readEnableContextReply(r *x.Reader, v *EnableContextReply) error {
 	dataLen := 4 * int(replyLen)
 	var err error
 	v.Data, err = r.ReadBytes(dataLen)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // #WREQ

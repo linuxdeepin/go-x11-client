@@ -4,27 +4,23 @@ import (
 	"github.com/linuxdeepin/go-x11-client"
 )
 
-func readFP1616(r *x.Reader) (float32, error) {
+// FP1616 size: 1 * 4b
+func readFP1616(r *x.Reader) float32 {
 	value := int32(r.Read4b())
 	ret := float32(value) / float32(1<<16)
-	return ret, nil
+	return ret
 }
 
 func writeFP1616(b *x.FixedSizeBuf, value float32) {
 	b.Write4b(uint32(int32(value * float32(1<<16))))
 }
 
-func readFP3232(r *x.Reader) (float64, error) {
+// FP3232 size: 2 * 4b
+func readFP3232(r *x.Reader) float64 {
 	integral := int32(r.Read4b())
-	if r.Err() != nil {
-		return 0, r.Err()
-	}
-	frac := r.Read4b()
-	if r.Err() != nil {
-		return 0, r.Err()
-	}
+	frac := r.Read4b() // 2
 	ret := float64(integral) + (float64(frac) * (1.0 / (1 << 32)))
-	return ret, nil
+	return ret
 }
 
 // #WREQ
@@ -42,42 +38,13 @@ type XIQueryVersionReply struct {
 }
 
 func readXIQueryVersionReply(r *x.Reader, v *XIQueryVersionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.MajorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.MinorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MinorVersion = r.Read2b() // 3
 
 	return nil
 }
@@ -96,37 +63,14 @@ type XIQueryDeviceReply struct {
 }
 
 func readXIQueryDeviceReply(r *x.Reader, v *XIQueryDeviceReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	infosLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	r.ReadPad(22)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(22) // 8
 
 	if infosLen > 0 {
 		v.Infos = make([]XIDeviceInfo, infosLen)
@@ -150,50 +94,23 @@ type XIDeviceInfo struct {
 }
 
 func readXIDeviceInfo(r *x.Reader, v *XIDeviceInfo) error {
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
+	}
 	v.Id = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Type = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Attachment = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	classesLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	nameLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Enabled = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Enabled = r.ReadBool()
+	r.ReadPad(1) // 3
 
 	var err error
-	v.Name, err = r.ReadString(nameLen)
+	v.Name, err = r.ReadStrWithPad(nameLen)
 	if err != nil {
 		return err
-	}
-
-	r.ReadPad(x.Pad(nameLen))
-	if r.Err() != nil {
-		return r.Err()
 	}
 
 	// classes
@@ -285,21 +202,15 @@ func (dc *GenericDeviceClass) GetSourceId() DeviceId {
 }
 
 func readGenericDeviceClass(r *x.Reader, v *GenericDeviceClass) error {
+	if !r.RemainAtLeast(6) {
+		return x.ErrDataLenShort
+	}
 	v.Type = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Len = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.SourceId = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
+	// TODO: 检查传入 ReadBytes 的值大于 0
 	var err error
 	v.Data, err = r.ReadBytes((int(v.Len) * 4) - 6)
 	if err != nil {
@@ -323,19 +234,20 @@ func (kc *KeyClass) GetSourceId() DeviceId {
 }
 
 func readKeyClass(r *x.Reader, v *KeyClass) error {
-	v.NumKeys = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast(2) {
+		return x.ErrDataLenShort
 	}
+	v.NumKeys = r.Read2b()
 
 	numKeys := int(v.NumKeys)
 	if numKeys > 0 {
+		if !r.RemainAtLeast4b(numKeys) {
+			return x.ErrDataLenShort
+		}
+
 		v.Keys = make([]uint32, numKeys)
 		for i := 0; i < numKeys; i++ {
 			v.Keys[i] = r.Read4b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 	return nil
@@ -357,30 +269,30 @@ func (bc *ButtonClass) GetSourceId() DeviceId {
 }
 
 func readButtonClass(r *x.Reader, v *ButtonClass) error {
-	v.NumButtons = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast(2) {
+		return x.ErrDataLenShort
 	}
+	v.NumButtons = r.Read2b()
 
 	numButtons := int(v.NumButtons)
 	stateLen := (numButtons + 31) / 32
 	if stateLen > 0 {
+		if !r.RemainAtLeast4b(stateLen) {
+			return x.ErrDataLenShort
+		}
 		v.State = make([]uint32, stateLen)
 		for i := 0; i < stateLen; i++ {
 			v.State[i] = r.Read4b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
 	if numButtons > 0 {
+		if !r.RemainAtLeast4b(numButtons) {
+			return x.ErrDataLenShort
+		}
 		v.Labels = make([]x.Atom, numButtons)
 		for i := 0; i < numButtons; i++ {
 			v.Labels[i] = x.Atom(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 	return nil
@@ -407,46 +319,25 @@ func (vc *ValuatorClass) GetSourceId() DeviceId {
 }
 
 func readValuatorClass(r *x.Reader, v *ValuatorClass) error {
-	v.Number = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast(20) {
+		return x.ErrDataLenShort
 	}
+
+	v.Number = r.Read2b()
 
 	v.Label = x.Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	var err error
-	v.Min, err = readFP3232(r)
-	if err != nil {
-		return err
-	}
+	v.Min = readFP3232(r)
 
-	v.Max, err = readFP3232(r)
-	if err != nil {
-		return err
-	}
+	v.Max = readFP3232(r)
 
-	v.Value, err = readFP3232(r)
-	if err != nil {
-		return err
-	}
+	v.Value = readFP3232(r) // 12b
 
 	v.Resolution = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Mode = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	r.ReadPad(3)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(3) // 20b
 
 	return nil
 }
@@ -468,31 +359,18 @@ func (sc *ScrollClass) GetSourceId() DeviceId {
 }
 
 func readScrollClass(r *x.Reader, v *ScrollClass) error {
-	v.Number = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast(18) {
+		return x.ErrDataLenShort
 	}
+	v.Number = r.Read2b()
 
 	v.ScrollType = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Flags = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	var err error
-	v.Increment, err = readFP3232(r)
-	if err != nil {
-		return err
-	}
+	v.Increment = readFP3232(r) // 18b
 
 	return nil
 }
@@ -512,15 +390,12 @@ func (tc *TouchClass) GetSourceId() DeviceId {
 }
 
 func readTouchClass(r *x.Reader, v *TouchClass) error {
-	v.Mode = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast(2) {
+		return x.ErrDataLenShort
 	}
 
+	v.Mode = r.Read1b()
 	v.NumTouches = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	return nil
 }
@@ -562,23 +437,20 @@ func writeEventMask(b *x.FixedSizeBuf, v EventMask) {
 }
 
 func readEventMask(r *x.Reader, v *EventMask) error {
-	v.DeviceId = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast(4) {
+		return x.ErrDataLenShort
 	}
+	v.DeviceId = DeviceId(r.Read2b())
 
 	maskLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	if maskLen > 0 {
+		if !r.RemainAtLeast4b(maskLen) {
+			return x.ErrDataLenShort
+		}
 		v.Mask = make([]uint32, maskLen)
 		for i := 0; i < maskLen; i++ {
 			v.Mask[i] = r.Read4b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 	return nil
@@ -597,37 +469,14 @@ type XIGetSelectedEventsReply struct {
 }
 
 func readXIGetSelectedEventsReply(r *x.Reader, v *XIGetSelectedEventsReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	masksLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	r.ReadPad(22)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(22) // 8
 
 	if masksLen > 0 {
 		v.Masks = make([]EventMask, masksLen)
@@ -666,99 +515,47 @@ type XIQueryPointerReply struct {
 }
 
 func readXIQueryPointerReply(r *x.Reader, v *XIQueryPointerReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(14) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.Root = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Child = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Child = x.Window(r.Read4b()) // 4
 
-	var err error
-	v.RootX, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.RootX = readFP1616(r)
 
-	v.RootY, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.RootY = readFP1616(r)
 
-	v.WinX, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.WinX = readFP1616(r)
 
-	v.WinY, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.WinY = readFP1616(r) // 8
 
-	v.SameScreen = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	v.SameScreen = r.ReadBool()
 	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	buttonsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	buttonsLen := int(r.Read2b()) // 9
 
 	// mods
-	err = readModifierInfo(r, &v.Mods)
-	if err != nil {
-		return err
-	}
+	readModifierInfo(r, &v.Mods) // 13
 
 	// group
-	err = readGroupInfo(r, &v.Group)
-	if err != nil {
-		return err
-	}
+	readGroupInfo(r, &v.Group) // 14
 
 	if buttonsLen > 0 {
+		if !r.RemainAtLeast4b(buttonsLen) {
+			return x.ErrDataLenShort
+		}
 		v.Buttons = make([]uint32, buttonsLen)
 		for i := 0; i < buttonsLen; i++ {
 			v.Buttons[i] = r.Read4b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
 	return nil
 }
 
+// size: 4 * 4b
 type ModifierInfo struct {
 	Base      uint32
 	Latched   uint32
@@ -766,30 +563,17 @@ type ModifierInfo struct {
 	Effective uint32
 }
 
-func readModifierInfo(r *x.Reader, v *ModifierInfo) error {
+func readModifierInfo(r *x.Reader, v *ModifierInfo) {
 	v.Base = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Latched = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Locked = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Effective = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	return nil
 }
 
+// size: 1 * 4b
 type GroupInfo struct {
 	Base      uint8
 	Latched   uint8
@@ -797,28 +581,11 @@ type GroupInfo struct {
 	Effective uint8
 }
 
-func readGroupInfo(r *x.Reader, v *GroupInfo) error {
+func readGroupInfo(r *x.Reader, v *GroupInfo) {
 	v.Base = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Latched = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Locked = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Effective = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	return nil
 }
 
 // #WREQ
@@ -992,47 +759,15 @@ type XIGetClientPointerReply struct {
 }
 
 func readXIGetClientPointerReply(r *x.Reader, v *XIGetClientPointerReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
 
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Set = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	v.Set = r.ReadBool()
 	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.DeviceId = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.DeviceId = DeviceId(r.Read2b()) // 3
 
 	return nil
 }
@@ -1062,32 +797,12 @@ type XIGetFocusReply struct {
 }
 
 func readXIGetFocusReply(r *x.Reader, v *XIGetFocusReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
+	r.ReadPad(8)
 
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Focus = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Focus = x.Window(r.Read4b()) // 3
 
 	return nil
 }
@@ -1122,37 +837,12 @@ type XIGrabDeviceReply struct {
 }
 
 func readXIGrabDeviceReply(r *x.Reader, v *XIGrabDeviceReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
+	r.ReadPad(8)
 
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Status = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(23)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Status = r.Read1b() // 3
 
 	return nil
 }
@@ -1216,72 +906,39 @@ type XIPassiveGrabDeviceReply struct {
 }
 
 func readXIPassiveGrabDeviceReply(r *x.Reader, v *XIPassiveGrabDeviceReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	modifiersLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	r.ReadPad(22)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(22) // 8
 
 	if modifiersLen > 0 {
+		if !r.RemainAtLeast4b(2 * modifiersLen) {
+			return x.ErrDataLenShort
+		}
 		v.Modifiers = make([]GrabModifierInfo, modifiersLen)
 		for i := 0; i < modifiersLen; i++ {
-			err := readGrabModifierInfo(r, &v.Modifiers[i])
-			if err != nil {
-				return err
-			}
+			readGrabModifierInfo(r, &v.Modifiers[i])
 		}
 	}
 
 	return nil
 }
 
+// size: 2 * 4b
 type GrabModifierInfo struct {
 	Modifiers uint32
 	Status    uint8
 }
 
-func readGrabModifierInfo(r *x.Reader, v *GrabModifierInfo) error {
+func readGrabModifierInfo(r *x.Reader, v *GrabModifierInfo) {
 	v.Modifiers = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Status = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	r.ReadPad(3)
-	if r.Err() != nil {
-		return r.Err()
-	}
-	return nil
 }
 
 // #WREQ
@@ -1317,45 +974,22 @@ type XIListPropertiesReply struct {
 }
 
 func readXIListPropertiesReply(r *x.Reader, v *XIListPropertiesReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	propertiesLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	r.ReadPad(22)
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	if propertiesLen > 0 {
+		if !r.RemainAtLeast4b(propertiesLen) {
+			return x.ErrDataLenShort
+		}
 		v.Properties = make([]x.Atom, propertiesLen)
 		for i := 0; i < propertiesLen; i++ {
 			v.Properties[i] = x.Atom(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 	return nil
@@ -1413,60 +1047,24 @@ type XIGetPropertyReply struct {
 }
 
 func readXIGetPropertyReply(r *x.Reader, v *XIGetPropertyReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.Type = x.Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.BytesAfter = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.NumItems = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.NumItems = r.Read4b() // 5
 
 	v.Format = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// unused
-	r.ReadPad(11)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(11) // 8
 
 	n := int(v.NumItems) * int(v.Format/8)
 	var err error
 	v.Data, err = r.ReadBytes(n)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

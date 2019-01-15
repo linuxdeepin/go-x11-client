@@ -31,7 +31,7 @@ func (s *MySuite) TestReaderReadBytes(c *C) {
 }
 
 func (s *MySuite) TestReaderReadBytesWithPad(c *C) {
-	_, v, err := s.r.ReadBytesWithPad(3)
+	v, err := s.r.ReadBytesWithPad(3)
 	c.Assert(v, DeepEquals, []byte{1, 2, 3})
 	c.Assert(s.r.Pos(), Equals, 4)
 	c.Assert(err, IsNil)

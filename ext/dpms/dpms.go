@@ -17,37 +17,13 @@ type GetVersionReply struct {
 }
 
 func readGetVersionReply(r *x.Reader, v *GetVersionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.ServerMajorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.ServerMinorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.ServerMinorVersion = r.Read2b() // 3
 
 	return nil
 }
@@ -62,37 +38,13 @@ type CapableReply struct {
 }
 
 func readCapableReply(r *x.Reader, v *CapableReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
 
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Capable = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(23)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Capable = r.ReadBool() // 3
 
 	return nil
 }
@@ -109,47 +61,15 @@ type GetTimeoutsReply struct {
 }
 
 func readGetTimeoutsReply(r *x.Reader, v *GetTimeoutsReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(4) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.StandbyTimeout = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.SuspendTimeout = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.OffTimeout = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(18)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.OffTimeout = r.Read2b() // 4
 
 	return nil
 }
@@ -195,42 +115,13 @@ type InfoReply struct {
 }
 
 func readInfoReply(r *x.Reader, v *InfoReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.PowerLevel = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.State = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(21)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.State = r.ReadBool() // 3
 
 	return nil
 }

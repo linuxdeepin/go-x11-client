@@ -2,6 +2,7 @@ package xkb
 
 import "github.com/linuxdeepin/go-x11-client"
 
+// size: 9b
 type eventHeader struct {
 	XkbType  uint8
 	Sequence uint16
@@ -28,15 +29,20 @@ type NewKeyboardNotifyEvent struct {
 }
 
 func readNewKeyboardNotifyEvent(r *x.Reader, v *NewKeyboardNotifyEvent) error {
+	if !r.RemainAtLeast4b(5) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
 	v.OldDeviceID = r.Read1b()
 	v.MinKeyCode = x.Keycode(r.Read1b())
-	v.MaxKeyCode = x.Keycode(r.Read1b())
+	v.MaxKeyCode = x.Keycode(r.Read1b()) // 3
+
 	v.OldMinKeyCode = x.Keycode(r.Read1b())
 	v.OldMaxKeyCode = x.Keycode(r.Read1b())
 	v.RequestMajor = r.Read1b()
 	v.RequestMinor = r.Read1b()
-	v.Changed = r.Read2b()
+
+	v.Changed = r.Read2b() // 5
 	return nil
 }
 
@@ -64,26 +70,33 @@ type MapNotifyEvent struct {
 }
 
 func readMapNotifyEvent(r *x.Reader, v *MapNotifyEvent) error {
+	if !r.RemainAtLeast4b(7) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
 	v.PtrBtnActions = r.Read1b()
 	v.Changed = r.Read2b()
-	v.MinKeyCode = x.Keycode(r.Read1b())
+	v.MinKeyCode = x.Keycode(r.Read1b()) // 3
+
 	v.MaxKeyCode = x.Keycode(r.Read1b())
 	v.FirstType = r.Read1b()
 	v.NTypes = r.Read1b()
 	v.FirstKeySym = x.Keycode(r.Read1b())
+
 	v.NKeySyms = r.Read1b()
 	v.FirstKeyAct = x.Keycode(r.Read1b())
 	v.NKeyActs = r.Read1b()
 	v.FirstKeyBehavior = x.Keycode(r.Read1b())
+
 	v.NKeyBehavior = r.Read1b()
 	v.FirstKeyExplicit = x.Keycode(r.Read1b())
 	v.NKeyExplicit = r.Read1b()
 	v.FirstModMapKey = x.Keycode(r.Read1b())
+
 	v.NModMapKeys = r.Read1b()
 	v.FirstVModMapKey = x.Keycode(r.Read1b())
 	v.NVModMapKeys = r.Read1b()
-	v.VirtualMods = r.Read2b()
+	v.VirtualMods = r.Read2b() // 7
 	return nil
 }
 
@@ -111,103 +124,35 @@ type StateNotifyEvent struct {
 }
 
 func readStateNotifyEvent(r *x.Reader, v *StateNotifyEvent) error {
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Mods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.BaseMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.LatchedMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.LatchedMods = r.Read1b() // 3
 
 	v.LockedMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Group = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.BaseGroup = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.LatchedGroup = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.LockedGroup = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.CompatState = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.GrabMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.CompatGrabMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.LookupMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.CompatLookupMods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.PtrBtnState = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Changed = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Keycode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.EventType = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.RequestMajor = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.RequestMinor = r.Read1b()
-	return r.Err()
+	v.RequestMinor = r.Read1b() // 8
+	return nil
 }
 
 type ControlsNotifyEvent struct {
@@ -223,53 +168,24 @@ type ControlsNotifyEvent struct {
 }
 
 func readControlsNotifyEvent(r *x.Reader, v *ControlsNotifyEvent) error {
+	if !r.RemainAtLeast4b(7) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NumGroups = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(2) // 3
 
 	v.ChangedControls = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.EnabledControls = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.EnabledControlChanges = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Keycode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.EventType = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.RequestMajor = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.RequestMinor = r.Read1b()
-	return r.Err()
+	v.RequestMinor = r.Read1b() // 7
+	return nil
 }
 
 type IndicatorStateNotifyEvent struct {
@@ -279,23 +195,16 @@ type IndicatorStateNotifyEvent struct {
 }
 
 func readIndicatorStateNotifyEvent(r *x.Reader, v *IndicatorStateNotifyEvent) error {
+	if !r.RemainAtLeast4b(5) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(3)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(3) // 3
 
 	v.State = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.StateChanged = r.Read4b()
-	return r.Err()
+	v.StateChanged = r.Read4b() // 5
+	return nil
 }
 
 type IndicatorMapNotifyEvent struct {
@@ -305,23 +214,16 @@ type IndicatorMapNotifyEvent struct {
 }
 
 func readIndicatorMapNotifyEvent(r *x.Reader, v *IndicatorMapNotifyEvent) error {
+	if !r.RemainAtLeast4b(5) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(3)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(3) // 3
 
 	v.State = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.MapChanged = r.Read4b()
-	return r.Err()
+	v.MapChanged = r.Read4b() // 5
+	return nil
 }
 
 type NamesNotifyEvent struct {
@@ -341,78 +243,29 @@ type NamesNotifyEvent struct {
 }
 
 func readNamesNotifyEvent(r *x.Reader, v *NamesNotifyEvent) error {
+	if !r.RemainAtLeast4b(7) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Changed = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Changed = r.Read2b() // 3
 
 	v.FirstType = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NTypes = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstLevelName = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NLevelNames = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NRadioGroups = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NKeyAliases = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.ChangedGroupNames = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.ChangedVirtualMods = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstKey = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NKeys = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.ChangedIndicators = r.Read4b()
-	return r.Err()
+	v.ChangedIndicators = r.Read4b() // 7
+	return nil
 }
 
 type CompatMapNotifyEvent struct {
@@ -424,28 +277,16 @@ type CompatMapNotifyEvent struct {
 }
 
 func readCompatMapNotifyEvent(r *x.Reader, v *CompatMapNotifyEvent) error {
+	if !r.RemainAtLeast4b(4) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.ChangedGroup = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.FirstSI = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.FirstSI = r.Read2b() // 3
 
 	v.NSI = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NTotalSI = r.Read2b()
-	return r.Err()
+	return nil
 }
 
 type BellNotifyEvent struct {
@@ -461,48 +302,23 @@ type BellNotifyEvent struct {
 }
 
 func readBellNotifyEvent(r *x.Reader, v *BellNotifyEvent) error {
+	if !r.RemainAtLeast4b(7) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.BellClass = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.BellID = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Percent = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Percent = r.Read1b() // 3
 
 	v.Pitch = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Duration = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Name = x.Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Window = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.EventOnly = x.Uint8ToBool(r.Read1b())
-	return r.Err()
+	v.EventOnly = r.ReadBool() // 7
+	return nil
 }
 
 type ActionMessageEvent struct {
@@ -516,41 +332,20 @@ type ActionMessageEvent struct {
 }
 
 func readActionMessageEvent(r *x.Reader, v *ActionMessageEvent) error {
+	if !r.RemainAtLeast(22) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Keycode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Press = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.KeyEventFollows = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.KeyEventFollows = x.Uint8ToBool(r.Read1b()) // 3
 
 	v.Mods = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Group = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	msg := r.MustReadBytes(8)
-	if r.Err() != nil {
-		return r.Err()
-	}
-	v.Message = string(msg)
+	// TODO: 0 in msg
+	v.Message = string(msg) // 22b
 
 	return nil
 }
@@ -564,28 +359,16 @@ type AccessXNotifyEvent struct {
 }
 
 func readAccessXNotifyEvent(r *x.Reader, v *AccessXNotifyEvent) error {
+	if !r.RemainAtLeast4b(4) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Keycode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Detail = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Detail = r.Read2b() // 3
 
 	v.SlowKeysDelay = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.DebounceDelay = r.Read2b()
-	return r.Err()
+	v.DebounceDelay = r.Read2b() // 4
+	return nil
 }
 
 type ExtensionDeviceNotifyEvent struct {
@@ -602,56 +385,24 @@ type ExtensionDeviceNotifyEvent struct {
 }
 
 func readExtensionDeviceNotifyEvent(r *x.Reader, v *ExtensionDeviceNotifyEvent) error {
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
+	}
 	readEventHeader(r, &v.eventHeader)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Reason = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Reason = r.Read2b() // 3
 
 	v.LedClass = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.LedID = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.LedsDefined = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.LedState = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.FirstButton = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NButtons = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Supported = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Unsupported = r.Read2b()
-	return r.Err()
+	v.Unsupported = r.Read2b() // 8
+	return nil
 }

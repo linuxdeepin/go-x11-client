@@ -21,37 +21,14 @@ type QueryVersionReply struct {
 }
 
 func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(4) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.ServerMajorVersion = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.ServerMinorVersion = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.ServerMinorVersion = r.Read4b() // 4
 
 	return nil
 }
@@ -80,95 +57,44 @@ type GetCrtcInfoReply struct {
 }
 
 func readGetCrtcInfoReply(r *x.Reader, v *GetCrtcInfoReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	v.Status = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Status, _ = r.ReadReplyHeader()
 
 	v.Timestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.X = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Y = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Width = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Height = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Height = r.Read2b() // 5
 
 	v.Mode = Mode(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Rotation = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Rotations = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	outputsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	possibleOutputsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	possibleOutputsLen := int(r.Read2b()) // 8
 
 	if outputsLen > 0 {
+		if !r.RemainAtLeast4b(outputsLen) {
+			return x.ErrDataLenShort
+		}
 		v.Outputs = make([]Output, outputsLen)
 		for i := 0; i < outputsLen; i++ {
 			v.Outputs[i] = Output(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
 	if possibleOutputsLen > 0 {
+		if !r.RemainAtLeast4b(possibleOutputsLen) {
+			return x.ErrDataLenShort
+		}
 		v.PossibleOutputs = make([]Output, possibleOutputsLen)
 		for i := 0; i < possibleOutputsLen; i++ {
 			v.PossibleOutputs[i] = Output(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
@@ -200,124 +126,66 @@ type GetOutputInfoReply struct {
 }
 
 func readGetOutputInfoReply(r *x.Reader, v *GetOutputInfoReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(9) {
+		return x.ErrDataLenShort
 	}
-
-	v.Status = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Status, _ = r.ReadReplyHeader()
 
 	v.Timestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Crtc = Crtc(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.MmWidth = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MmWidth = r.Read4b() // 5
 
 	v.MmHeight = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Connection = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.SubPixelOrder = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	crtcsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	modesLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.NumPreferred = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.NumPreferred = r.Read2b() // 8
 
 	if int(v.NumPreferred) > modesLen {
 		return errors.New("numPreferred > modesLen")
 	}
 
 	clonesLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	nameLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	nameLen := int(r.Read2b()) // 9
 
 	if crtcsLen > 0 {
+		if !r.RemainAtLeast4b(crtcsLen) {
+			return x.ErrDataLenShort
+		}
 		v.Crtcs = make([]Crtc, crtcsLen)
 		for i := 0; i < crtcsLen; i++ {
 			v.Crtcs[i] = Crtc(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
 	if modesLen > 0 {
+		if !r.RemainAtLeast4b(modesLen) {
+			return x.ErrDataLenShort
+		}
 		v.Modes = make([]Mode, modesLen)
 		for i := 0; i < modesLen; i++ {
 			v.Modes[i] = Mode(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
 	if clonesLen > 0 {
+		if !r.RemainAtLeast4b(clonesLen) {
+			return x.ErrDataLenShort
+		}
 		v.Clones = make([]Output, clonesLen)
 		for i := 0; i < clonesLen; i++ {
 			v.Clones[i] = Output(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
 	var err error
 	v.Name, err = r.ReadString(nameLen)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (r *GetOutputInfoReply) GetPreferredMode() Mode {
@@ -340,6 +208,7 @@ type GetScreenResourcesReply struct {
 	Modes           []ModeInfo
 }
 
+// size: 8 * 4b
 type ModeInfo struct {
 	Id         uint32
 	Width      uint16
@@ -357,162 +226,76 @@ type ModeInfo struct {
 	ModeFlags  uint32
 }
 
-func readModeInfo(r *x.Reader, v *ModeInfo) error {
+func readModeInfo(r *x.Reader, v *ModeInfo) {
 	v.Id = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Width = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Height = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.DotClock = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.HSyncStart = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.HSyncEnd = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.HTotal = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.HSkew = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.HSkew = r.Read2b() // 5
 
 	v.VSyncStart = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.VSyncEnd = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.VTotal = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.nameLen = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.ModeFlags = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	return nil
+	v.ModeFlags = r.Read4b() // 8
 }
 
 func readGetScreenResourcesReply(r *x.Reader, v *GetScreenResourcesReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.Timestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.ConfigTimestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	crtcsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	outputsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	outputsLen := int(r.Read2b()) // 5
 
 	modesLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	// namesLen
 	modeNamesLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// unused
-	r.ReadPad(8)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8) // 8
 
 	if crtcsLen > 0 {
+		if !r.RemainAtLeast4b(crtcsLen) {
+			return x.ErrDataLenShort
+		}
 		v.Crtcs = make([]Crtc, crtcsLen)
 		for i := 0; i < crtcsLen; i++ {
 			v.Crtcs[i] = Crtc(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
 	if outputsLen > 0 {
+		if !r.RemainAtLeast4b(outputsLen) {
+			return x.ErrDataLenShort
+		}
 		v.Outputs = make([]Output, outputsLen)
 		for i := 0; i < outputsLen; i++ {
 			v.Outputs[i] = Output(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
 	if modesLen > 0 {
+		if !r.RemainAtLeast4b(8 * modesLen) {
+			return x.ErrDataLenShort
+		}
 		v.Modes = make([]ModeInfo, modesLen)
 		for i := 0; i < modesLen; i++ {
-			err := readModeInfo(r, &v.Modes[i])
-			if err != nil {
-				return err
-			}
+			readModeInfo(r, &v.Modes[i])
 		}
 	}
 
@@ -547,37 +330,12 @@ type GetOutputPrimaryReply struct {
 }
 
 func readGetOutputPrimaryReply(r *x.Reader, v *GetOutputPrimaryReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
+	r.ReadPad(8)
 
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Output = Output(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(16)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Output = Output(r.Read4b()) // 3
 
 	return nil
 }
@@ -607,57 +365,24 @@ type GetOutputPropertyReply struct {
 }
 
 func readGetOutputPropertyReply(r *x.Reader, v *GetOutputPropertyReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	v.Format = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Format, _ = r.ReadReplyHeader()
 
 	v.Type = x.Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.BytesAfter = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.ValueLen = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.ValueLen = r.Read4b() // 5
 
 	// unused
-	r.ReadPad(12)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(12) // 8
 
 	var err error
 	n := int(v.ValueLen) * int(v.Format/8)
 	v.Value, err = r.ReadBytes(n)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // #WREQ
@@ -686,37 +411,12 @@ type SetCrtcConfigReply struct {
 }
 
 func readSetCrtcConfigReply(r *x.Reader, v *SetCrtcConfigReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
+	v.Status, _ = r.ReadReplyHeader()
 
-	v.Status = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Timestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Timestamp = x.Timestamp(r.Read4b()) // 3
 
 	return nil
 }
@@ -745,36 +445,18 @@ type GetCrtcGammaSizeReply struct {
 
 func readGetCrtcGammaSizeReply(r *x.Reader, v *GetCrtcGammaSizeReply) error {
 	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// seq
 	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	// length
 	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Size = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	r.ReadPad(22)
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	return nil
 }

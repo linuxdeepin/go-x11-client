@@ -15,47 +15,20 @@ type NotifyEvent struct {
 }
 
 func readNotifyEvent(r *x.Reader, v *NotifyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	v.Level = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Level, v.Sequence = r.ReadEventHeader()
 
 	v.Drawable = x.Drawable(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Damage = Damage(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Timestamp = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Timestamp = x.Timestamp(r.Read4b()) // 4
 
-	var err error
-	v.Area, err = x.ReadRectangle(r)
-	if err != nil {
-		return err
-	}
+	v.Area = x.ReadRectangle(r) // 6
 
-	v.Geometry, err = x.ReadRectangle(r)
-	if err != nil {
-		return err
-	}
+	v.Geometry = x.ReadRectangle(r) // 8
 
 	return nil
 }
@@ -75,38 +48,14 @@ type QueryVersionReply struct {
 }
 
 func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(4) {
+		return x.ErrDataLenShort
 	}
-
-	// unused
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// sequence
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(8)
 
 	v.MajorVersion = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.MinorVersion = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MinorVersion = r.Read4b() // 4
 
 	return nil
 }

@@ -17,6 +17,7 @@ type HierarchyEvent struct {
 	Infos []HierarchyInfo
 }
 
+// size: 3 * 4b
 type HierarchyInfo struct {
 	DeviceId   DeviceId
 	Attachment DeviceId
@@ -25,80 +26,41 @@ type HierarchyInfo struct {
 	Flags      uint32
 }
 
-func readHierarchyInfo(r *x.Reader, v *HierarchyInfo) error {
+func readHierarchyInfo(r *x.Reader, v *HierarchyInfo) {
 	v.DeviceId = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Attachment = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Type = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Enabled = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
+	v.Enabled = r.ReadBool()
 	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Flags = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-	return nil
+	v.Flags = r.Read4b() // 3
 }
 
-func readEventHeader(r *x.Reader) (EventHeader, error) {
+// EventHeader size: 6b
+func readEventHeader(r *x.Reader) EventHeader {
 	var v EventHeader
 	v.DeviceId = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return EventHeader{}, r.Err()
-	}
-
 	v.Time = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return EventHeader{}, r.Err()
-	}
-
-	return v, nil
+	return v
 }
 
 func readHierarchyEvent(r *x.Reader, v *HierarchyEvent) error {
-	var err error
-	v.EventHeader, err = readEventHeader(r)
-	if err != nil {
-		return err
+	if !r.RemainAtLeast(22) {
+		return x.ErrDataLenShort
 	}
+	v.EventHeader = readEventHeader(r)
 
 	v.Flags = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	infosLen := int(r.Read2b())
 
-	r.ReadPad(10)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(10) // 22b
 
 	if infosLen > 0 {
 		v.Infos = make([]HierarchyInfo, infosLen)
 		for i := 0; i < infosLen; i++ {
-			err = readHierarchyInfo(r, &v.Infos[i])
-			if err != nil {
-				return err
-			}
+			readHierarchyInfo(r, &v.Infos[i])
 		}
 	}
 	return nil
@@ -112,35 +74,22 @@ type DeviceChangedEvent struct {
 }
 
 func readDeviceChangedEvent(r *x.Reader, v *DeviceChangedEvent) error {
-	var err error
-	v.EventHeader, err = readEventHeader(r)
-	if err != nil {
-		return err
+	if !r.RemainAtLeast(22) {
+		return x.ErrDataLenShort
 	}
+	v.EventHeader = readEventHeader(r)
 
 	classesLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.SourceId = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Reason = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	r.ReadPad(11)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(11) // 22b
 
 	if classesLen > 0 {
 		v.Classes = make([]DeviceClass, classesLen)
 		for i := 0; i < classesLen; i++ {
+			var err error
 			v.Classes[i], err = readDeviceClass(r)
 			if err != nil {
 				return err
@@ -171,104 +120,56 @@ type DeviceEvent struct {
 }
 
 func readDeviceEvent(r *x.Reader, v *DeviceEvent) error {
-	var err error
-	v.EventHeader, err = readEventHeader(r)
-	if err != nil {
-		return err
+	if !r.RemainAtLeast(70) {
+		return x.ErrDataLenShort
 	}
+	v.EventHeader = readEventHeader(r)
 
 	v.Detail = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Root = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Event = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Child = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Child = x.Window(r.Read4b()) // 22b
 
-	v.RootX, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.RootX = readFP1616(r)
 
-	v.RootY, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.RootY = readFP1616(r)
 
-	v.EventX, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.EventX = readFP1616(r)
 
-	v.EventY, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.EventY = readFP1616(r) // 38b
 
 	buttonsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	valuatorsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.SourceId = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(2) // 46b
 
 	v.Flags = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	err = readModifierInfo(r, &v.Mods)
-	if err != nil {
-		return err
-	}
+	readModifierInfo(r, &v.Mods)
 
-	err = readGroupInfo(r, &v.Group)
-	if err != nil {
-		return err
-	}
+	readGroupInfo(r, &v.Group) // 70b
 
 	if buttonsLen > 0 {
+		if !r.RemainAtLeast4b(buttonsLen) {
+			return x.ErrDataLenShort
+		}
 		v.ButtonMask = make([]uint32, buttonsLen)
 		for i := 0; i < buttonsLen; i++ {
 			v.ButtonMask[i] = r.Read4b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
 	if valuatorsLen > 0 {
+		if !r.RemainAtLeast4b(valuatorsLen) {
+			return x.ErrDataLenShort
+		}
 		v.ValuatorMask = make([]uint32, valuatorsLen)
 		for i := 0; i < valuatorsLen; i++ {
 			v.ValuatorMask[i] = r.Read4b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
@@ -337,94 +238,44 @@ type EnterLeaveEvent struct {
 }
 
 func readEnterLeaveEvent(r *x.Reader, v *EnterLeaveEvent) error {
-	var err error
-	v.EventHeader, err = readEventHeader(r)
-	if err != nil {
-		return err
+	if !r.RemainAtLeast(62) {
+		return x.ErrDataLenShort
 	}
+	v.EventHeader = readEventHeader(r)
 
 	v.SourceId = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Mode = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Detail = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Detail = r.Read1b() // 10b
 
 	v.Root = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Event = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Child = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Child = x.Window(r.Read4b()) // 22b
 
-	v.RootX, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.RootX = readFP1616(r)
 
-	v.RootY, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.RootY = readFP1616(r)
 
-	v.EventX, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.EventX = readFP1616(r)
 
-	v.EventY, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.EventY = readFP1616(r) // 38b
 
-	v.SameScreen = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.SameScreen = r.ReadBool()
+	v.Focus = r.ReadBool()
+	buttonsLen := int(r.Read2b()) // 42b
 
-	v.Focus = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	readModifierInfo(r, &v.Mods)
 
-	buttonsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	err = readModifierInfo(r, &v.Mods)
-	if err != nil {
-		return err
-	}
-
-	err = readGroupInfo(r, &v.Group)
-	if err != nil {
-		return err
-	}
+	readGroupInfo(r, &v.Group) // 62b
 
 	if buttonsLen > 0 {
+		if !r.RemainAtLeast4b(buttonsLen) {
+			return x.ErrDataLenShort
+		}
 		v.Buttons = make([]uint32, buttonsLen)
 		for i := 0; i < buttonsLen; i++ {
 			v.Buttons[i] = r.Read4b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
@@ -471,26 +322,14 @@ type PropertyEvent struct {
 }
 
 func readPropertyEvent(r *x.Reader, v *PropertyEvent) error {
-	var err error
-	v.EventHeader, err = readEventHeader(r)
-	if err != nil {
-		return err
+	if !r.RemainAtLeast(11) {
+		return x.ErrDataLenShort
 	}
+	v.EventHeader = readEventHeader(r)
 
 	v.Property = x.Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.What = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(11)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.What = r.Read1b() // 11b
 
 	return nil
 }
@@ -507,44 +346,27 @@ type RawEvent struct {
 }
 
 func readRawEvent(r *x.Reader, v *RawEvent) error {
-	var err error
-	v.EventHeader, err = readEventHeader(r)
-	if err != nil {
-		return err
+	if !r.RemainAtLeast(22) {
+		return x.ErrDataLenShort
 	}
+	v.EventHeader = readEventHeader(r)
 
 	v.Detail = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.SourceId = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	valuatorsLen := int(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	valuatorsLen := int(r.Read2b()) // 14b
 
 	v.Flags = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	r.ReadPad(4)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(4) // 22b
 
 	if valuatorsLen > 0 {
+		if !r.RemainAtLeast4b(valuatorsLen) {
+			return x.ErrDataLenShort
+		}
 		v.ValuatorMask = make([]uint32, valuatorsLen)
 		for i := 0; i < valuatorsLen; i++ {
 			v.ValuatorMask[i] = r.Read4b()
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
@@ -629,51 +451,23 @@ type TouchOwnershipEvent struct {
 }
 
 func readTouchOwnershipEvent(r *x.Reader, v *TouchOwnershipEvent) error {
-	var err error
-	v.EventHeader, err = readEventHeader(r)
-	if err != nil {
-		return err
+	if !r.RemainAtLeast(30) {
+		return x.ErrDataLenShort
 	}
+	v.EventHeader = readEventHeader(r)
 
-	v.TouchId = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.TouchId = r.Read4b() // 10b
 
 	v.Root = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Event = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Child = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.SourceId = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Flags = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(8)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Flags = r.Read4b() // 30b
 
 	return nil
 }
@@ -719,71 +513,33 @@ type BarrierEvent struct {
 }
 
 func readBarrierEvent(r *x.Reader, v *BarrierEvent) error {
-	var err error
-	v.EventHeader, err = readEventHeader(r)
-	if err != nil {
-		return err
+	if !r.RemainAtLeast(58) {
+		return x.ErrDataLenShort
 	}
+	v.EventHeader = readEventHeader(r)
 
-	v.EventId = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.EventId = r.Read4b() // 10b
 
 	v.Root = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Event = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Barrier = xfixes.Barrier(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.DTime = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Flags = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.SourceId = DeviceId(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	r.ReadPad(2) // 34b
 
-	r.ReadPad(2)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.RootX = readFP1616(r)
 
-	v.RootX, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.RootY = readFP1616(r)
 
-	v.RootY, err = readFP1616(r)
-	if err != nil {
-		return err
-	}
+	v.DX = readFP3232(r)
 
-	v.DX, err = readFP3232(r)
-	if err != nil {
-		return err
-	}
-
-	v.DY, err = readFP3232(r)
-	if err != nil {
-		return err
-	}
+	v.DY = readFP3232(r) //58b
 
 	return nil
 }
@@ -813,45 +569,22 @@ type DeviceValuatorEvent struct {
 }
 
 func readDeviceValuatorEvent(r *x.Reader, v *DeviceValuatorEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(2) {
+		return x.ErrDataLenShort
 	}
-
-	v.DeviceId = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	//seq
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.DeviceId, v.Sequence = r.ReadEventHeader()
 
 	v.DeviceState = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	valuatorsLen := int(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.FirstValuator = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.FirstValuator = r.Read1b() // 2
 
 	if valuatorsLen > 0 {
+		if !r.RemainAtLeast4b(valuatorsLen) {
+			return x.ErrDataLenShort
+		}
 		v.Valuators = make([]int32, valuatorsLen)
 		for i := 0; i < valuatorsLen; i++ {
 			v.Valuators[i] = int32(r.Read4b())
-			if r.Err() != nil {
-				return r.Err()
-			}
 		}
 	}
 
@@ -875,77 +608,28 @@ type DeviceKeyEvent struct {
 }
 
 func readDeviceKeyEvent(r *x.Reader, v *DeviceKeyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	v.Detail = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	//seq
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Detail, v.Sequence = r.ReadEventHeader()
 
 	v.Time = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Root = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Event = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Child = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Child = x.Window(r.Read4b()) // 5
 
 	v.RootX = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.RootY = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.EventX = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.EventY = int16(r.Read2b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.State = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.SameScreen = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.DeviceId = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.SameScreen = r.ReadBool()
+	v.DeviceId = r.Read1b() // 8
 
 	return nil
 }
@@ -1000,42 +684,17 @@ type DeviceFocusEvent struct {
 }
 
 func readDeviceFocusEvent(r *x.Reader, v *DeviceFocusEvent) error {
-	//code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(4) {
+		return x.ErrDataLenShort
 	}
-
-	v.Detail = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Detail, v.Sequence = r.ReadEventHeader()
 
 	v.Time = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Window = x.Window(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Mode = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.DeviceId = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.DeviceId = r.Read1b() // 4
 
 	return nil
 }
@@ -1086,64 +745,25 @@ type DeviceStateNotifyEvent struct {
 }
 
 func readDeviceStateNotifyEvent(r *x.Reader, v *DeviceStateNotifyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	v.DeviceId = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.DeviceId, v.Sequence = r.ReadEventHeader()
 
 	v.Time = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.NumKeys = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NumButtons = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.NumValuators = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.ClassesReported = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.ClassesReported = r.Read1b() // 3
 
 	v.Buttons = r.MustReadBytes(4)
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Keys = r.MustReadBytes(4)
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Valuators = make([]uint32, 3)
+	v.Valuators = make([]uint32, 3) // 8
 	for i := 0; i < 3; i++ {
 		v.Valuators[i] = r.Read4b()
-		if r.Err() != nil {
-			return r.Err()
-		}
 	}
 
 	return nil
@@ -1159,51 +779,17 @@ type DeviceMappingNotifyEvent struct {
 }
 
 func readDeviceMappingNotifyEvent(r *x.Reader, v *DeviceMappingNotifyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
-
-	v.DeviceId = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.DeviceId, v.Sequence = r.ReadEventHeader()
 
 	v.Request = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.FirstKeycode = x.Keycode(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Count = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Time = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Time = x.Timestamp(r.Read4b()) // 3
 
 	return nil
 }
@@ -1216,36 +802,14 @@ type ChangeDeviceNotifyEvent struct {
 }
 
 func readChangeDeviceNotifyEvent(r *x.Reader, v *ChangeDeviceNotifyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
-
-	v.DeviceId = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.DeviceId, v.Sequence = r.ReadEventHeader()
 
 	v.Time = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Request = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(23)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Request = r.Read1b() // 3
 
 	return nil
 }
@@ -1257,26 +821,12 @@ type DeviceKeyStateNotifyEvent struct {
 }
 
 func readDeviceKeyStateNotifyEvent(r *x.Reader, v *DeviceKeyStateNotifyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
+	v.DeviceId, v.Sequence = r.ReadEventHeader()
 
-	v.DeviceId = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Keys = r.MustReadBytes(28)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Keys = r.MustReadBytes(28) // 8
 
 	return nil
 }
@@ -1288,26 +838,12 @@ type DeviceButtonStateNotifyEvent struct {
 }
 
 func readDeviceButtonStateNotifyEvent(r *x.Reader, v *DeviceButtonStateNotifyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
+	v.DeviceId, v.Sequence = r.ReadEventHeader()
 
-	v.DeviceId = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Buttons = r.MustReadBytes(28)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Buttons = r.MustReadBytes(28) // 8
 
 	return nil
 }
@@ -1321,46 +857,16 @@ type DevicePresenceNotifyEvent struct {
 }
 
 func readDevicePresenceNotifyEvent(r *x.Reader, v *DevicePresenceNotifyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
-
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	_, v.Sequence = r.ReadEventHeader()
 
 	v.Time = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.DevChange = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.DeviceId = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Control = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(20)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Control = r.Read2b() // 3
 
 	return nil
 }
@@ -1374,41 +880,18 @@ type DevicePropertyNotifyEvent struct {
 }
 
 func readDevicePropertyNotifyEvent(r *x.Reader, v *DevicePropertyNotifyEvent) error {
-	// code
-	r.ReadPad(1)
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(8) {
+		return x.ErrDataLenShort
 	}
-
-	v.State = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.Sequence = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.State, v.Sequence = r.ReadEventHeader()
 
 	v.Time = x.Timestamp(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Property = x.Atom(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	r.ReadPad(19)
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.DeviceId = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.DeviceId = r.Read1b() // 8
 
 	return nil
 }

@@ -3,9 +3,14 @@ package shm
 import "github.com/linuxdeepin/go-x11-client"
 
 type CompletionEvent struct {
+	Sequence uint16
 }
 
 func readCompletionEvent(r *x.Reader, v *CompletionEvent) error {
+	if !r.RemainAtLeast4b(1) {
+		return x.ErrDataLenShort
+	}
+	_, v.Sequence = r.ReadEventHeader()
 	return nil
 }
 
@@ -24,57 +29,19 @@ type QueryVersionReply struct {
 }
 
 func readQueryVersionReply(r *x.Reader, v *QueryVersionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(5) {
+		return x.ErrDataLenShort
 	}
-
-	v.SharedPixmaps = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	sharedPixmaps, _ := r.ReadReplyHeader()
+	v.SharedPixmaps = x.Uint8ToBool(sharedPixmaps)
 
 	v.MajorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.MinorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
 	v.Uid = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
 	v.Gid = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.PixmapFormat = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	r.ReadPad(15)
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.PixmapFormat = r.Read1b() // 5
 
 	return nil
 }
@@ -149,37 +116,14 @@ type GetImageReply struct {
 }
 
 func readGetImageReply(r *x.Reader, v *GetImageReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(4) {
+		return x.ErrDataLenShort
 	}
-
-	v.Depth = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// length
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Depth, _ = r.ReadReplyHeader()
 
 	v.Visual = x.VisualID(r.Read4b())
-	if r.Err() != nil {
-		return r.Err()
-	}
 
-	v.Size = r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.Size = r.Read4b() // 4
 
 	return nil
 }

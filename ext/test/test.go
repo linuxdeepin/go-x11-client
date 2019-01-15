@@ -20,32 +20,12 @@ type GetVersionReply struct {
 }
 
 func readGetVersionReply(r *x.Reader, v *GetVersionReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(3) {
+		return x.ErrDataLenShort
 	}
+	v.MajorVersion, _ = r.ReadReplyHeader()
 
-	v.MajorVersion = r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// len
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	v.MinorVersion = r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	v.MinorVersion = r.Read2b() // 3
 
 	return nil
 }
@@ -64,27 +44,12 @@ type CompareCursorReply struct {
 }
 
 func readCompareCursorReply(r *x.Reader, v *CompareCursorReply) error {
-	r.Read1b()
-	if r.Err() != nil {
-		return r.Err()
+	if !r.RemainAtLeast4b(2) {
+		return x.ErrDataLenShort
 	}
 
-	v.Same = x.Uint8ToBool(r.Read1b())
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// seq
-	r.Read2b()
-	if r.Err() != nil {
-		return r.Err()
-	}
-
-	// len
-	r.Read4b()
-	if r.Err() != nil {
-		return r.Err()
-	}
+	same, _ := r.ReadReplyHeader() // 2
+	v.Same = x.Uint8ToBool(same)
 	return nil
 }
 
