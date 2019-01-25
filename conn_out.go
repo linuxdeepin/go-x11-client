@@ -264,6 +264,10 @@ func (b *FixedSizeBuf) WriteBytes(p []byte) *FixedSizeBuf {
 	return b
 }
 
+func (b *FixedSizeBuf) WriteBool(v bool) *FixedSizeBuf {
+	return b.Write1b(BoolToUint8(v))
+}
+
 func (b *FixedSizeBuf) End() {
 	if len(b.data) != b.offset {
 		panic("not end")

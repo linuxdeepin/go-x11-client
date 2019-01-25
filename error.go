@@ -12,19 +12,17 @@ type Error struct {
 }
 
 func (err *Error) Error() string {
+	var errDesc string
 	var errName string
-	var ext *Extension
 	if 1 <= err.Code && err.Code <= 127 {
 		// core error code in range [1,127]
 		errName = errorCodeNameMap[err.Code]
 	} else {
-		// ext error code in range [128,255]
-		var code uint8
-		ext, code = err.conn.ext.getExtAndErrorCode(err.Code)
-		errName = ext.errCodeNameMap[code]
+		// is ext error
+		errName = err.conn.ext.getExtErrName(err.Code)
 	}
-	if errName == "" {
-		errName = "unknown"
+	if errName != "" {
+		errDesc = " (" + errName + ")"
 	}
 
 	var majorCodeDesc, minorCodeDesc string
@@ -37,6 +35,7 @@ func (err *Error) Error() string {
 		}
 	} else {
 		// is ext request
+		ext := err.conn.ext.getExtByMajorOpcode(err.MajorCode)
 		if ext != nil {
 			reqName := ext.reqOpcodeNameMap[uint(err.MinorCode)]
 			if reqName != "" {
@@ -46,9 +45,9 @@ func (err *Error) Error() string {
 		}
 	}
 
-	return fmt.Sprintf("x.Error: %d (%s), sequence: %d, resource id: %d,"+
+	return fmt.Sprintf("x.Error: %d%s, sequence: %d, resource id: %d,"+
 		" major code: %d%s, minor code: %d%s",
-		err.Code, errName, err.Sequence, err.ResourceID,
+		err.Code, errDesc, err.Sequence, err.ResourceID,
 		err.MajorCode, majorCodeDesc,
 		err.MinorCode, minorCodeDesc)
 }

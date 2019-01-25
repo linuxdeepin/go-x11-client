@@ -76,20 +76,33 @@ func (e *ext) getById(id int) *extAndData {
 	return &e.extensions[id-1]
 }
 
-func (e *ext) getExtAndErrorCode(errCode uint8) (*Extension, uint8) {
+func (e *ext) getExtByMajorOpcode(majorOpcode uint8) *Extension {
 	for _, extAndData := range e.extensions {
 		ext := extAndData.ext
 		lzr := extAndData.reply
-		if ext != nil && lzr.reply != nil {
+		if ext != nil && lzr != nil && lzr.reply != nil {
+			if majorOpcode == lzr.reply.MajorOpcode {
+				return ext
+			}
+		}
+	}
+	return nil
+}
+
+func (e *ext) getExtErrName(errCode uint8) string {
+	for _, extAndData := range e.extensions {
+		ext := extAndData.ext
+		lzr := extAndData.reply
+		if ext != nil && lzr != nil && lzr.reply != nil {
 			base := lzr.reply.FirstError
 			max := lzr.reply.FirstError + ext.maxErrCode
 
 			if base <= errCode && errCode <= max {
-				return ext, errCode - base
+				return ext.errCodeNameMap[errCode-base]
 			}
 		}
 	}
-	return nil, 0
+	return ""
 }
 
 func (e *ext) getLazyReply(conn *Conn, ext *Extension) (lzr *lazyReply) {
