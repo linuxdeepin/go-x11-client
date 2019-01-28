@@ -1,0 +1,7 @@
+Verified+1: <jenkins@deepin.com>
+Code-Review+2: electricface <songwentai@deepin.com>
+Submitted-by: electricface <songwentai@deepin.com>
+Submitted-at: Mon, 28 Jan 2019 19:24:43 +0800
+Reviewed-on: https://cr.deepin.io/41499
+Project: go-x11-client
+Branch: refs/heads/dev/encode
