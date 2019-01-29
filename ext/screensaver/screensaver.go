@@ -137,7 +137,7 @@ func encodeUnsetAttributes(drawable x.Drawable) (b x.RequestBody) {
 // #WREQ
 func encodeSuspend(suspend bool) (b x.RequestBody) {
 	b.AddBlock(1).
-		Write1b(x.BoolToUint8(suspend)).
+		WriteBool(suspend).
 		WritePad(3).
 		End()
 	return

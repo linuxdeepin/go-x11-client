@@ -349,9 +349,7 @@ func readGetWindowAttributesReply(r *Reader, v *GetWindowAttributesReply) error 
 
 	v.YourEventMask = r.Read4b()
 
-	v.DoNotPropagateMask = r.Read2b()
-	// unused
-	r.Read2b() // 11
+	v.DoNotPropagateMask = r.Read2b() // 11
 
 	return nil
 }

@@ -160,8 +160,8 @@ func encodeBell(deviceSpec DeviceSpec, bellClass BellClassSpec, bellID IdSpec,
 		Write2b(uint16(bellClass)). // 1
 		Write2b(uint16(bellID)).
 		Write1b(uint8(percent)).
-		Write1b(x.BoolToUint8(forceSound)). // 2
-		Write1b(x.BoolToUint8(eventOnly)).
+		WriteBool(forceSound). // 2
+		WriteBool(eventOnly).
 		WritePad(1).
 		Write2b(uint16(pitch)). // 3
 		Write2b(uint16(duration)).
@@ -237,12 +237,12 @@ func encodeLatchLockState(deviceSpec DeviceSpec, affectModLocks, modLocks uint8,
 		Write2b(uint16(deviceSpec)).
 		Write1b(affectModLocks).
 		Write1b(modLocks). // 1
-		Write1b(x.BoolToUint8(lockGroup)).
+		WriteBool(lockGroup).
 		Write1b(groupLock).
 		Write1b(affectModLatches).
 		Write1b(modLatches). // 2
 		WritePad(1).
-		Write1b(x.BoolToUint8(latchGroup)).
+		WriteBool(latchGroup).
 		Write2b(groupLatch). // 3
 		End()
 	return
@@ -567,7 +567,7 @@ func writeSetKeyType(w *x.FixedSizeBuf, v *SetKeyType) {
 		Write2b(v.VirtualMods).
 		Write1b(v.NumLevels).
 		Write1b(v.NMapEntries).
-		Write1b(x.BoolToUint8(v.Preserve)).
+		WriteBool(v.Preserve).
 		WritePad(1) // 2
 	for i := 0; i < int(v.NMapEntries); i++ {
 		writeKTSetMapEntry(w, v.Entries[i]) // v.NMapEntries

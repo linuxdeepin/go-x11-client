@@ -51,7 +51,7 @@ func encodeAttach(shmSeg Seg, shmId uint32, readOnly bool) (b x.RequestBody) {
 	b.AddBlock(3).
 		Write4b(uint32(shmSeg)).
 		Write4b(shmId).
-		Write1b(x.BoolToUint8(readOnly)).
+		WriteBool(readOnly).
 		WritePad(3).
 		End()
 	return
@@ -83,7 +83,7 @@ func encodePutImage(drawable x.Drawable, gc x.GContext, totalWidth,
 		Write2b(uint16(dstY)).
 		Write1b(depth).
 		Write1b(format).
-		Write1b(x.BoolToUint8(sendEvent)).
+		WriteBool(sendEvent).
 		WritePad(1).
 		Write4b(uint32(shmSeg)).
 		Write4b(offset).

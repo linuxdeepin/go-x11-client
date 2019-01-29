@@ -657,8 +657,8 @@ type AddMaster struct {
 func (am *AddMaster) writeTo(b *x.FixedSizeBuf) {
 	nameLen := len(am.Name)
 	b.Write2b(uint16(nameLen))
-	b.Write1b(x.BoolToUint8(am.SendCore))
-	b.Write1b(x.BoolToUint8(am.Enable))
+	b.WriteBool(am.SendCore)
+	b.WriteBool(am.Enable)
 
 	b.WriteString(am.Name)
 	b.WritePad(x.Pad(nameLen))
@@ -821,7 +821,7 @@ func encodeXIGrabDevice(window x.Window, time x.Timestamp, cursor x.Cursor, devi
 		Write2b(uint16(deviceId)).
 		Write1b(mode).
 		Write1b(pairedDeviceMode).
-		Write1b(x.BoolToUint8(ownerEvents)).
+		WriteBool(ownerEvents).
 		WritePad(1).
 		Write2b(uint16(len(masks)))
 
@@ -880,15 +880,15 @@ func encodeXIPassiveGrabDevice(grabWindow x.Window, cursor x.Cursor, detail uint
 		WritePad(4). // unused time field
 		Write4b(uint32(grabWindow)).
 		Write4b(uint32(cursor)).
-		Write4b(detail).
+		Write4b(detail). // 4
 		Write2b(uint16(deviceId)).
 		Write2b(uint16(len(modifiers))).
 		Write2b(uint16(len(masks))).
 		Write1b(grabType).
-		Write1b(grabMode).
+		Write1b(grabMode). // 6
 		Write1b(pairedDeviceMode).
-		Write1b(x.BoolToUint8(ownerEvents)).
-		WritePad(2)
+		WriteBool(ownerEvents).
+		WritePad(2) // 7
 
 	for _, mask := range masks {
 		b0.Write4b(mask)
@@ -1028,7 +1028,7 @@ func encodeXIGetProperty(deviceId DeviceId, delete bool, property x.Atom,
 
 	b.AddBlock(5).
 		Write2b(uint16(deviceId)).
-		Write1b(x.BoolToUint8(delete)).
+		WriteBool(delete).
 		WritePad(1).
 		Write4b(uint32(property)).
 		Write4b(uint32(Type)).

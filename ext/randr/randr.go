@@ -348,10 +348,10 @@ func encodeGetOutputProperty(output Output, property, Type x.Atom,
 		Write4b(uint32(property)).
 		Write4b(uint32(Type)).
 		Write4b(longOffset).
-		Write4b(longLength).
-		Write1b(x.BoolToUint8(delete)).
-		Write1b(x.BoolToUint8(pending)).
-		WritePad(2).
+		Write4b(longLength). // 5
+		WriteBool(delete).
+		WriteBool(pending).
+		WritePad(2). // 6
 		End()
 	return
 }

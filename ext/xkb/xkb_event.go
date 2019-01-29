@@ -337,15 +337,14 @@ func readActionMessageEvent(r *x.Reader, v *ActionMessageEvent) error {
 	}
 	readEventHeader(r, &v.eventHeader)
 	v.Keycode = x.Keycode(r.Read1b())
-	v.Press = x.Uint8ToBool(r.Read1b())
-	v.KeyEventFollows = x.Uint8ToBool(r.Read1b()) // 3
+	v.Press = r.ReadBool()
+	v.KeyEventFollows = r.ReadBool() // 3
 
 	v.Mods = r.Read1b()
 	v.Group = r.Read1b()
 
 	msg := r.MustReadBytes(8)
-	// TODO: 0 in msg
-	v.Message = string(msg) // 22b
+	v.Message = bytesToStr(msg) // 22b
 
 	return nil
 }

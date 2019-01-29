@@ -75,7 +75,7 @@ func encodeFakeInput(evType uint8, detail uint8, time x.Timestamp, root x.Window
 // #WREQ
 func encodeGrabControl(impervious bool) (b x.RequestBody) {
 	b.AddBlock(1).
-		Write1b(x.BoolToUint8(impervious)).
+		WriteBool(impervious).
 		WritePad(3).
 		End()
 	return

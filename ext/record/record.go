@@ -79,8 +79,8 @@ func writeRange(b *x.FixedSizeBuf, v *Range) {
 	writeRange8(b, v.DeviceEvents)
 	writeRange8(b, v.Errors)
 
-	b.Write1b(x.BoolToUint8(v.ClientStarted))
-	b.Write1b(x.BoolToUint8(v.ClientDied))
+	b.WriteBool(v.ClientStarted).
+		WriteBool(v.ClientDied)
 }
 
 func readRange(r *x.Reader, v *Range) {
@@ -278,7 +278,7 @@ func readEnableContextReply(r *x.Reader, v *EnableContextReply) error {
 	v.Category, replyLen = r.ReadReplyHeader() // 2
 
 	v.ElementHeader = ElementHeader(r.Read1b())
-	v.ClientSwapped = x.Uint8ToBool(r.Read1b())
+	v.ClientSwapped = r.ReadBool()
 	r.ReadPad(2) // 3
 
 	v.XidBase = r.Read4b()
