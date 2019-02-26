@@ -1,3 +1,17 @@
+[0.3.0] 2019-02-26
+*   chore: use WriteBool and ReadBool
+*   feat: xkb add more functions
+*   chore: exts use new reader
+*   chore: xproto event use new reader
+*   feat: implement new Reader
+*   feat: add ext xkb
+*   feat: delete other error types, leaving only the Error type
+*   chore: continue to replace uint64 with SeqNum
+*   feat: use special seqNum to indicate error
+*   fix: requestCheck do not unlock c.ioMu before return
+*   chore: replace uint64 with SeqNum
+*   feat: reduce memory usage for encoding requests
+
 # [0.2.0] - 2018-11-23
 *   fix: readSetup
 
