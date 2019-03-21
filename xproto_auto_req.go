@@ -2159,3 +2159,30 @@ func NoOperationChecked(conn *Conn, n int) VoidCookie {
 	seq := conn.SendRequest(RequestChecked, req)
 	return VoidCookie(seq)
 }
+
+func FreeCursor(conn *Conn, cursor Cursor) {
+	headerData, body := encodeFreeCursor(cursor)
+	req := &ProtocolRequest{
+		NoReply: true,
+		Header: RequestHeader{
+			Opcode: FreeCursorOpcode,
+			Data:   headerData,
+		},
+		Body: body,
+	}
+	conn.SendRequest(0, req)
+}
+
+func FreeCursorChecked(conn *Conn, cursor Cursor) VoidCookie {
+	headerData, body := encodeFreeCursor(cursor)
+	req := &ProtocolRequest{
+		NoReply: true,
+		Header: RequestHeader{
+			Opcode: FreeCursorOpcode,
+			Data:   headerData,
+		},
+		Body: body,
+	}
+	seq := conn.SendRequest(RequestChecked, req)
+	return VoidCookie(seq)
+}

@@ -1996,3 +1996,11 @@ func encodeNoOperation(n int) (hd uint8, b RequestBody) {
 	b.AddBlock(n)
 	return
 }
+
+// #WREQ
+func encodeFreeCursor(cursor Cursor) (hd uint8, b RequestBody) {
+	b.AddBlock(1).
+		Write4b(uint32(cursor)).
+		End()
+	return
+}
