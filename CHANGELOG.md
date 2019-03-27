@@ -1,3 +1,6 @@
+[0.4.0] 2019-03-27
+*   feat: add util xcursor
+
 [0.3.0] 2019-02-26
 *   chore: use WriteBool and ReadBool
 *   feat: xkb add more functions
