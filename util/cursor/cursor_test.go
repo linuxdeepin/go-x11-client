@@ -31,6 +31,10 @@ func TestLoadImages(t *testing.T) {
 
 func TestLoadImageFromFile(t *testing.T) {
 	img, err := LoadImageFromFile("testdata/left_ptr", 24)
+	if os.IsNotExist(err) {
+		t.Skip(err)
+	}
+
 	assert.Nil(t, err)
 	_ = img.Img()
 	assert.EqualValues(t, 24, img.Size)
@@ -43,6 +47,9 @@ func TestLoadImageFromFile(t *testing.T) {
 
 func TestLoadImagesFromFile(t *testing.T) {
 	images, err := LoadImagesFromFile("testdata/watch", 24)
+	if os.IsNotExist(err) {
+		t.Skip(err)
+	}
 	assert.Nil(t, err)
 	assert.Len(t, images, 16)
 
@@ -79,6 +86,9 @@ func BenchmarkLoadImagesFromFile(b *testing.B) {
 
 func TestImages_ToGIF(t *testing.T) {
 	images, err := LoadImagesFromFile("testdata/watch", 24)
+	if os.IsNotExist(err) {
+		t.Skip(err)
+	}
 	assert.Nil(t, err)
 	outGif := images.ToGIF()
 	err = gif.EncodeAll(ioutil.Discard, outGif)
