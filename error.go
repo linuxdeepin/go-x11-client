@@ -8,7 +8,7 @@ type Error struct {
 	Sequence   uint16 // Sequence number
 	ResourceID uint32 // Resource ID for requests with side effects only
 	MinorCode  uint16 // Minor opcode of the failed request
-	MajorCode  uint8  // Major opcode of the faield request
+	MajorCode  uint8  // Major opcode of the failed request
 }
 
 func (err *Error) Error() string {
