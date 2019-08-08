@@ -6,6 +6,16 @@ import (
 	"github.com/linuxdeepin/go-x11-client"
 )
 
+const fixedOne = 1 << 16
+
+func ToFixed(v float64) Fixed {
+	return Fixed(v * fixedOne)
+}
+
+func (f Fixed) ToFloat64() float64 {
+	return float64(f) / fixedOne
+}
+
 // #WREQ
 func encodeQueryVersion(majorVersion, minorVersion uint32) (b x.RequestBody) {
 	b.AddBlock(2).
@@ -366,7 +376,7 @@ type Transform struct {
 	Matrix33 Fixed
 }
 
-func writeTransform(b *x.FixedSizeBuf, v *Transform) {
+func WriteTransform(b *x.FixedSizeBuf, v *Transform) {
 	b.Write4b(uint32(v.Matrix11))
 	b.Write4b(uint32(v.Matrix12))
 	b.Write4b(uint32(v.Matrix13))
@@ -380,11 +390,25 @@ func writeTransform(b *x.FixedSizeBuf, v *Transform) {
 	b.Write4b(uint32(v.Matrix33))
 }
 
+func ReadTransform(r *x.Reader, v *Transform) {
+	v.Matrix11 = Fixed(r.Read4b())
+	v.Matrix12 = Fixed(r.Read4b())
+	v.Matrix13 = Fixed(r.Read4b())
+
+	v.Matrix21 = Fixed(r.Read4b())
+	v.Matrix22 = Fixed(r.Read4b())
+	v.Matrix23 = Fixed(r.Read4b())
+
+	v.Matrix31 = Fixed(r.Read4b())
+	v.Matrix32 = Fixed(r.Read4b())
+	v.Matrix33 = Fixed(r.Read4b())
+}
+
 // #WREQ
 func encodeSetPictureTransform(picture Picture, transform *Transform) (b x.RequestBody) {
 	b0 := b.AddBlock(10).
 		Write4b(uint32(picture))
-	writeTransform(b0, transform)
+	WriteTransform(b0, transform)
 	b0.End()
 	return
 }

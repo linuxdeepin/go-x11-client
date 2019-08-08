@@ -17,9 +17,11 @@ import (
 )
 
 var optIsExt bool
+var optExtraExts string
 
 func init() {
 	flag.BoolVar(&optIsExt, "e", false, "is ext")
+	flag.StringVar(&optExtraExts, "extra-exts", "", "")
 }
 
 var xPrefix string
@@ -162,8 +164,17 @@ func main() {
 
 	g.p("package %s\n", goPackage)
 
+	const pkgPathBase = "github.com/linuxdeepin/go-x11-client"
 	if goPackage != "x" {
-		g.p("import x \"github.com/linuxdeepin/go-x11-client\"")
+		g.p("import x \"%s\"\n", pkgPathBase)
+	}
+
+	extraExts := strings.Split(optExtraExts, ",")
+	for _, e := range extraExts {
+		if e == "" {
+			continue
+		}
+		g.p("import \"%s/ext/%s\"\n", pkgPathBase, e)
 	}
 
 	for _, reqFunc := range requestFuncs {
