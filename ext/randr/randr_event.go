@@ -91,6 +91,17 @@ func (e *NotifyEvent) NewOutputPropertyNotifyEvent() (*OutputPropertyNotifyEvent
 	return &ev, nil
 }
 
+func (e *NotifyEvent) NewResourceChangeNotifyEvent() (*ResourceChangeNotifyEvent,
+	error) {
+	var ev ResourceChangeNotifyEvent
+	r := x.NewReaderFromData(e.Data)
+	err := readResourceChangeNotifyEvent(r, &ev)
+	if err != nil {
+		return nil, err
+	}
+	return &ev, nil
+}
+
 type CrtcChangeNotifyEvent struct {
 	Timestamp     x.Timestamp
 	Window        x.Window
@@ -182,5 +193,19 @@ func readOutputPropertyNotifyEvent(r *x.Reader, v *OutputPropertyNotifyEvent) er
 
 	v.Status = r.Read1b() // 5
 
+	return nil
+}
+
+type ResourceChangeNotifyEvent struct {
+	Timestamp x.Timestamp
+	Window    x.Window
+}
+
+func readResourceChangeNotifyEvent(r *x.Reader, v *ResourceChangeNotifyEvent) error {
+	if !r.RemainAtLeast4b(2) {
+		return x.ErrDataLenShort
+	}
+	v.Timestamp = x.Timestamp(r.Read4b())
+	v.Window = x.Window(r.Read4b())
 	return nil
 }

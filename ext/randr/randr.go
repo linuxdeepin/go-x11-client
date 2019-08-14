@@ -389,6 +389,9 @@ func readGetOutputInfoReply(r *x.Reader, v *GetOutputInfoReply) error {
 }
 
 func (r *GetOutputInfoReply) GetPreferredMode() Mode {
+	if r.NumPreferred == 0 || len(r.Modes) == 0 {
+		return 0
+	}
 	return r.Modes[r.NumPreferred-1]
 }
 
