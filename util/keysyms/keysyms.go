@@ -17,6 +17,15 @@ func StringToKeysym(str string) (x.Keysym, bool) {
 	return sym, true
 }
 
+func StringToVisibleChar(str string) (rune, bool) {
+	sym, ok := EngKeysymMap[str]
+	if !ok {
+		return 0, false
+	}
+	char, ok := KeysymVisibleCharMap[sym]
+	return char, ok
+}
+
 func KeysymToString(sym x.Keysym) (string, bool) {
 	if sym == x.NoSymbol {
 		return "NoSymbol", true

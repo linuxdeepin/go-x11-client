@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -20,6 +21,24 @@ type Keysym struct {
 	Value   string
 	Unicode string
 	Comment string
+}
+
+func (ks *Keysym) getVisibleChar() string {
+	if ks.Unicode == "" {
+		return ""
+	}
+
+	if len(ks.Unicode) <= 4 {
+		zeroCount := 4 - len(ks.Unicode)
+		return "\\u" + strings.Repeat("0", zeroCount) + strings.ToLower(ks.Unicode)
+
+	} else if len(ks.Unicode) <= 8 {
+		zeroCount := 8 - len(ks.Unicode)
+		return "\\U" + strings.Repeat("0", zeroCount) + strings.ToLower(ks.Unicode)
+
+	} else {
+		panic(fmt.Errorf("keysym %s invalid unicode %q", ks.Name, ks.Unicode))
+	}
 }
 
 var reIfDef = regexp.MustCompile(`^#ifdef\s+(\w+)`)
@@ -246,6 +265,29 @@ func main() {
 	fmt.Println("var EngKeysymMap = map[string]x.Keysym{")
 	for _, sym := range symbols {
 		fmt.Printf("%q:%s,\n", getEnglish(sym.Name), sym.Name)
+	}
+	fmt.Println("}")
+
+	// map keysym => visible character
+	tempMap = make(map[string]string, len(symbols))
+	fmt.Println("var KeysymVisibleCharMap = map[x.Keysym]rune{")
+	for _, sym := range symbols {
+		visibleChar := sym.getVisibleChar()
+		if visibleChar == "" {
+			continue
+		}
+		dupSym, ok := tempMap[sym.Value]
+		if ok {
+			fmt.Printf("// %s == %s # %s\n", sym.Name, dupSym, sym.Comment)
+		} else {
+			tempMap[sym.Value] = sym.Name
+			str, err := strconv.Unquote("'" + visibleChar + "'")
+			if err != nil {
+				panic(fmt.Errorf("failed to unquote %q", visibleChar))
+			}
+
+			fmt.Printf("%s:'%s', // %s\n", sym.Name, visibleChar, str)
+		}
 	}
 	fmt.Println("}")
 }
