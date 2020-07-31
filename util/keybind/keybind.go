@@ -21,7 +21,7 @@ func Grab(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) {
 
 func Ungrab(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) {
 	for _, m := range grabMods {
-		x.UngrabKeyChecked(conn, key, win, mods|m).Check(conn)
+		_ = x.UngrabKeyChecked(conn, key, win, mods|m).Check(conn)
 	}
 }
 

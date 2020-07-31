@@ -152,7 +152,7 @@ func (images Images) ToGIF() *gif.GIF {
 		img := img0.Img()
 		bounds := img.Bounds()
 		pImg := image.NewPaletted(bounds, p)
-		draw.Draw(pImg, bounds, img, image.ZP, draw.Src)
+		draw.Draw(pImg, bounds, img, image.Point{}, draw.Src)
 		result.Image = append(result.Image, pImg)
 		result.Delay = append(result.Delay, int(img0.Delay)/10)
 		result.Disposal = append(result.Disposal, gif.DisposalBackground)

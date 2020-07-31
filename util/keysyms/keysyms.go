@@ -100,7 +100,7 @@ func (ks *KeySymbols) getKbdMap() *x.GetKeyboardMappingReply {
 
 	// discard old replies
 	for _, ck := range ks.oldCookies {
-		ck.Reply(ks.conn)
+		_, _ = ck.Reply(ks.conn)
 	}
 	ks.oldCookies = nil
 

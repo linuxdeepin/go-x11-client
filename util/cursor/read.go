@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	typeComment = 0xfffe0001
 	typeImage   = 0xfffd0002
 )
 

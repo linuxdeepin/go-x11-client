@@ -123,10 +123,7 @@ func BoolToUint8(b bool) uint8 {
 }
 
 func Uint8ToBool(v uint8) bool {
-	if v == 0 {
-		return false
-	}
-	return true
+	return v != 0
 }
 
 func TruncateStr(s string, n int) string {

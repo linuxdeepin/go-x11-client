@@ -114,7 +114,9 @@ func processKeysymdef() []Keysym {
 		}
 
 		if strings.HasPrefix(line, "#endif") {
-			currentSection = ""
+			if currentSection != "" {
+				currentSection = ""
+			}
 			currentSectionOk = false
 			continue
 		}
