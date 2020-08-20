@@ -8,6 +8,9 @@ all: build
 build:
 	echo ignore build
 
+print_gopath:
+	GOPATH="${CURDIR}/${GOPATH_DIR}:${GOPATH}"
+
 install:
 	mkdir -p ${SRC_DIR}
 	cp *.go ${SRC_DIR}
