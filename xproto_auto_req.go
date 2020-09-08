@@ -2186,3 +2186,30 @@ func FreeCursorChecked(conn *Conn, cursor Cursor) VoidCookie {
 	seq := conn.SendRequest(RequestChecked, req)
 	return VoidCookie(seq)
 }
+
+func ChangeHosts(conn *Conn, mode, family uint8, address string) {
+	headerData, body := encodeChangeHosts(mode, family, address)
+	req := &ProtocolRequest{
+		NoReply: true,
+		Header: RequestHeader{
+			Opcode: ChangeHostsOpcode,
+			Data:   headerData,
+		},
+		Body: body,
+	}
+	conn.SendRequest(0, req)
+}
+
+func ChangeHostsChecked(conn *Conn, mode, family uint8, address string) VoidCookie {
+	headerData, body := encodeChangeHosts(mode, family, address)
+	req := &ProtocolRequest{
+		NoReply: true,
+		Header: RequestHeader{
+			Opcode: ChangeHostsOpcode,
+			Data:   headerData,
+		},
+		Body: body,
+	}
+	seq := conn.SendRequest(RequestChecked, req)
+	return VoidCookie(seq)
+}

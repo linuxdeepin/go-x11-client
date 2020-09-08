@@ -2004,3 +2004,16 @@ func encodeFreeCursor(cursor Cursor) (hd uint8, b RequestBody) {
 		End()
 	return
 }
+
+// #WREQ
+func encodeChangeHosts(mode, family uint8, address string)  (hd uint8, b RequestBody) {
+	address = TruncateStr(address, math.MaxUint16)
+	hd = mode
+	b.AddBlock(1).
+		Write1b(family).
+		Write1b(0).
+		Write2b(uint16(len(address))).
+		End()
+	b.AddBytes([]byte(address))
+	return
+}
