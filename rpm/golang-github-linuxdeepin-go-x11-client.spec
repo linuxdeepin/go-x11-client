@@ -6,7 +6,6 @@
 %if 0%{?with_debug}
 %global debug_package   %{nil}
 %endif
-%gometa
 
 %global provider        github
 %global provider_tld    com
@@ -17,7 +16,7 @@
 %global import_path     %{provider_prefix}
 
 Name:           golang-github-linuxdeepin-go-x11-client
-Version:        0.6.5
+Version:        0.6.6
 Release:        0.10
 Summary:        A X11 client Go bindings for Deepin Desktop Environment
 License:        GPLv3
@@ -53,16 +52,10 @@ for file in $(find . -iname "*.go") ; do
     echo "%%{gopath}/src/%%{import_path}/$file" >> devel.file-list
 done
 
-
-%if %{with check}
-%check
-%gochecks
-%endif
-
 %files devel -f devel.file-list
 %doc README
 %license LICENSE
 
 %changelog
-* Thu Mar 19 2021 uoser <uoser@uniontech.com> - 0.6.5-1
-- Update to 0.6.5
+* Thu Mar 19 2021 uoser <uoser@uniontech.com> - 0.6.6-1
+- Update to 0.6.6
