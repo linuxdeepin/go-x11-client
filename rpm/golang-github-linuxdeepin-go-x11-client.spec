@@ -16,14 +16,13 @@
 %global import_path     %{provider_prefix}
 
 Name:           golang-github-linuxdeepin-go-x11-client
-Version:        0.6.6
-Release:        0.10
+Version:        0.6.7
+Release:        1
 Summary:        A X11 client Go bindings for Deepin Desktop Environment
 License:        GPLv3
 URL:            %{gourl}
 Source0:        %{name}_%{version}.orig.tar.xz	
-#BuildRequires:  compiler(go-compiler)
-BuildRequires:  go-compilers-golang-compiler >= 1-35
+BuildRequires:  compiler(go-compiler)
 
 %description
 %{summary}.
@@ -31,10 +30,7 @@ BuildRequires:  go-compilers-golang-compiler >= 1-35
 %package devel
 Summary:        %{summary}
 BuildArch:      noarch
-#BuildRequires:  golang(gopkg.in/check.v1)
-#BuildRequires:  golang(golang.org/x/text/encoding/charmap)
-#BuildRequires:  golang(github.com/stretchr/testify/assert)
-BuildRequires:  testify-devel
+BuildRequires:  gocode
 
 
 %description devel
@@ -57,5 +53,5 @@ done
 %license LICENSE
 
 %changelog
-* Thu Mar 19 2021 uoser <uoser@uniontech.com> - 0.6.6-1
-- Update to 0.6.6
+* Thu Mar 19 2021 uoser <uoser@uniontech.com> - 0.6.7-1
+- Update to 0.6.7
