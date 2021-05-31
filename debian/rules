@@ -1,5 +1,6 @@
 #!/usr/bin/make -f
 
+export GOCACHE := /tmp/gocache
 export DH_GOLANG_EXCLUDES := tools/gen util/tool/gen-keysymdef
 
 ifeq ($(DEB_BUILD_ARCH),sw_64)
