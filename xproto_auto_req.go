@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package x
 
 func CreateWindow(conn *Conn, depth uint8, wid, parent Window, x, y int16, width, height, borderWidth uint16, class uint16, visual VisualID, valueMask uint32, valueList []uint32) {
