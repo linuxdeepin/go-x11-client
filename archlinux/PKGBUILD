@@ -10,8 +10,8 @@ conflicts=('golang-github-linuxdeepin-go-x11-client')
 provides=('golang-github-linuxdeepin-go-x11-client')
 groups=('deepin-git')
 depends=('golang-golang-x-text')
-makedepends=('git' 'go' 'xorg-server-xvfb' 'golang-github-stretchr-testify' 'golang-gopkg-check.v1' 'golang-gopkg-yaml.v2')
-checkdepends=('xorg-server-xvfb' 'golang-github-stretchr-testify' 'golang-gopkg-check.v1' 'golang-gopkg-yaml.v2' 'git')
+makedepends=('git' 'go' 'xorg-server-xvfb' 'golang-github-stretchr-testify' 'golang-gopkg-check.v1' 'golang-gopkg-yaml.v3')
+checkdepends=('xorg-server-xvfb' 'golang-github-stretchr-testify' 'golang-gopkg-check.v1' 'golang-gopkg-yaml.v3' 'git')
 source=('source.tar.gz')
 sha512sums=('SKIP')
 
@@ -26,7 +26,6 @@ check() {
   mkdir -p "$srcdir"/build/src/github.com/linuxdeepin
   cp -a "$srcdir/$deepin_source_name" "$srcdir"/build/src/github.com/linuxdeepin/go-x11-client
   cd "$srcdir"/build/src/github.com/linuxdeepin/go-x11-client
-  go get gopkg.in/yaml.v3
   xvfb-run go test -v $(go list ./...)
 }
 
