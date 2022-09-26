@@ -26,7 +26,7 @@ License: CC0-1.0
 # sh
 Files: gen.sh util/tool/gen-keysymdef/gen.sh
 Copyright: None
-License: CC0-1.0
+License: GPL-3.0-or-later
 
 # debian rpm archlinux
 Files: debian/* rpm/* archlinux/*
@@ -57,8 +57,3 @@ License: GPL-3.0-or-later
 Files: *testdata/*
 Copyright: UnionTech Software Technology Co., Ltd.
 License: GPL-3.0-or-later
-
-# go vendor dir
-Files: vendor/*
-Copyright: UnionTech Software Technology Co., Ltd.
-License: CC0-1.0
