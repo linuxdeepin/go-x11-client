@@ -52,9 +52,10 @@ func readAuthority(hostname, display string) (
 	if err != nil {
 		return "", nil, err
 	}
+	defer r.Close()
 	defer func() {
-		if err := r.Close(); err != nil {
-			return nil, err
+		if err := f.Close(); err != nil {
+			panic(err)
 		}
 	}()
 	for {
