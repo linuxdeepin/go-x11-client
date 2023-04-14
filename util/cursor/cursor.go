@@ -67,17 +67,12 @@ func loadImageFromFile(f *os.File, size int) (*Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	var closeErr error
 	defer func() {
-		if	closeErr := d.Close()
-			if err == nil {
-				err = closeErr
-			}
+		closeErr := d.Close()
+		if err == nil {
+			err = closeErr
 		}
 	}()
-	if err != nil {
-		return nil,err
-	}
 	bestSize, _ := d.findBestSize(size)
 	if bestSize == 0 {
 		return nil, errImageNotFound
@@ -135,17 +130,12 @@ func loadImagesFromFile(f *os.File, size int) (Images, error) {
 	if err != nil {
 		return nil, err
 	}
-	var closeErr error
 	defer func() {
-		if	closeErr := d.Close()
-			if err == nil {
-				err = closeErr
-			}
+		closeErr := d.Close()
+		if err == nil {
+			err = closeErr
 		}
 	}()
-	if err != nil {
-		return nil,err
-	}
 	bestSize, nSizes := d.findBestSize(size)
 	if bestSize == 0 {
 		return nil, errImageNotFound
