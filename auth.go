@@ -57,11 +57,6 @@ func readAuthority(hostname, display string) (
 			return "", nil, err
 		}
 	}()
-	defer func() {
-		if err := f.Close(); err != nil {
-			panic(err)
-		}
-	}()
 	for {
 		var family uint16
 		if err := binary.Read(r, binary.BigEndian, &family); err != nil {
