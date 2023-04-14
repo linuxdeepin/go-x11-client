@@ -52,11 +52,16 @@ func readAuthority(hostname, display string) (
 	if err != nil {
 		return "", nil, err
 	}
+	var closeErr error
 	defer func() {
 		if err := r.Close(); err != nil {
-			return "", nil, err
+			closeErr = err
 		}
 	}()
+	if closeErr != nil {
+		return fmt.Errorf("failed to close file: %w", closeErr)
+	}
+	return nil
 	for {
 		var family uint16
 		if err := binary.Read(r, binary.BigEndian, &family); err != nil {
