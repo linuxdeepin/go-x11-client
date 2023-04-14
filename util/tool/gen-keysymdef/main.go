@@ -93,8 +93,11 @@ func processKeysymdef() []Keysym {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer fh.Close()
-
+	defer func() {
+		if err := fh.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 	var currentSection string
 	var currentSectionOk bool = true
 	scanner := bufio.NewScanner(fh)
@@ -191,7 +194,11 @@ func processXF86Keysymdef() []Keysym {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer fh.Close()
+	defer func() {
+		if err := fh.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 	scanner := bufio.NewScanner(fh)
 	var defOtherCount int
 	var def3Count int
