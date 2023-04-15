@@ -68,7 +68,7 @@ func loadImageFromFile(f *os.File, size int) (*Image, error) {
 		return nil, err
 	}
 	defer func() {
-		if closeErr := d.Close(); err == nil {
+		if closeErr := d.close(); err == nil {
 			err = closeErr
 		}
 	}()
@@ -130,7 +130,7 @@ func loadImagesFromFile(f *os.File, size int) (Images, error) {
 		return nil, err
 	}
 	defer func() {
-		if closeErr := d.Close(); err == nil {
+		if closeErr := d.close(); err == nil {
 			err = closeErr
 		}
 	}()
