@@ -14,6 +14,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"log"
 	"os"
 )
 
@@ -34,7 +35,7 @@ func readAuthority(hostname, display string) (
 	if len(hostname) == 0 || hostname == "localhost" {
 		hostname, err = os.Hostname()
 		if err != nil {
-			return "", nil, err
+			return
 		}
 	}
 
@@ -43,41 +44,50 @@ func readAuthority(hostname, display string) (
 		home := os.Getenv("HOME")
 		if len(home) == 0 {
 			err = errors.New("Xauthority not found: $XAUTHORITY, $HOME not set")
-			return "", nil, err
+			return
 		}
 		fname = home + "/.Xauthority"
 	}
 
 	r, err := os.Open(fname)
 	if err != nil {
-		return "", nil, err
+		return
 	}
-	defer r.Close()
+	defer func() {
+		closeErr := r.Close()
+		if err == nil {
+			err = closeErr
+		} else {
+			log.Printf("error on close file %v: %v", r.Name(), closeErr)
+		}
+	}()
 
 	for {
 		var family uint16
-		if err := binary.Read(r, binary.BigEndian, &family); err != nil {
-			return "", nil, err
+		if err = binary.Read(r, binary.BigEndian, &family); err != nil {
+			return
 		}
 
-		addr, err := getString(r, b)
+		var addr string
+		addr, err = getString(r, b)
 		if err != nil {
-			return "", nil, err
+			return
 		}
 
-		disp, err := getString(r, b)
+		var disp string
+		disp, err = getString(r, b)
 		if err != nil {
-			return "", nil, err
+			return
 		}
 
-		name0, err := getString(r, b)
+		name, err = getString(r, b)
 		if err != nil {
-			return "", nil, err
+			return
 		}
 
-		data0, err := getBytes(r, b)
+		data, err = getBytes(r, b)
 		if err != nil {
-			return "", nil, err
+			return
 		}
 
 		addrmatch := (family == familyWild) ||
@@ -85,7 +95,7 @@ func readAuthority(hostname, display string) (
 		dispmatch := (disp == "") || (disp == display)
 
 		if addrmatch && dispmatch {
-			return name0, data0, nil
+			return
 		}
 	}
 }
