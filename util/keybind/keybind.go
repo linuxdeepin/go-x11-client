@@ -30,9 +30,13 @@ func Ungrab(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) {
 }
 
 func GrabChecked(conn *x.Conn, win x.Window, mods uint16, key x.Keycode) error {
+	return GrabCheckedV2(conn, win, mods, key, x.GrabModeAsync, x.GrabModeAsync)
+}
+
+func GrabCheckedV2(conn *x.Conn, win x.Window, mods uint16, key x.Keycode, pointerMode uint8, keyboardMode uint8) error {
 	for _, m := range grabMods {
 		err := x.GrabKeyChecked(conn, true, win, mods|m,
-			key, x.GrabModeAsync, x.GrabModeAsync).Check(conn)
+			key, pointerMode, keyboardMode).Check(conn)
 		if err != nil {
 			return err
 		}
