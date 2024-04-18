@@ -4,7 +4,7 @@ pkgver=0.6.8.r2.g9476531
 pkgrel=1
 sourcename=go-x11-client
 pkgsourcename="golang-github-linuxdeepin-go-x11-client"
-sourcetars=("$pkgsourcename"_"$pkgver".tar.xz)
+sourcetars=("$pkgsourcename"_"$pkgver".tar.xz vendor.tar.gz)
 sourcedir="$sourcename"
 pkgdesc='X11 protocol go language binding'
 arch=('any')
@@ -13,11 +13,10 @@ license=('GPL')
 conflicts=('golang-github-linuxdeepin-go-x11-client')
 provides=('golang-github-linuxdeepin-go-x11-client')
 groups=('deepin-git')
-depends=('golang-golang-x-text')
-makedepends=('git' 'go' 'xorg-server-xvfb' 'golang-github-stretchr-testify' 'golang-gopkg-check.v1' 'golang-gopkg-yaml.v3')
-checkdepends=('xorg-server-xvfb' 'golang-github-stretchr-testify' 'golang-gopkg-check.v1' 'golang-gopkg-yaml.v3' 'git')
+makedepends=('git' 'go' 'xorg-server-xvfb')
+checkdepends=('xorg-server-xvfb' 'git')
 source=("${sourcetars[@]}")
-sha512sums=('SKIP')
+sha512sums=('SKIP' 'SKIP')
 
 prepare() {
   cd $sourcedir
@@ -26,8 +25,9 @@ prepare() {
 
 check() {
   export GOPATH="$srcdir/build:/usr/share/gocode"
-  export GO111MODULE=off
+  #export GO111MODULE=off
   mkdir -p "$srcdir"/build/src/github.com/linuxdeepin
+  mv "$srcdir"/vendor "$srcdir"/"$sourcedir"/vendor
   cp -a "$srcdir/$sourcedir" "$srcdir"/build/src/github.com/linuxdeepin/go-x11-client
   cd "$srcdir"/build/src/github.com/linuxdeepin/go-x11-client
   xvfb-run go test -v $(go list ./...)
