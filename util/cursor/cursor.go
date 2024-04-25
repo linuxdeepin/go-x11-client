@@ -11,6 +11,7 @@ import (
 	"image/color/palette"
 	"image/draw"
 	"image/gif"
+	"log"
 	"os"
 
 	"github.com/linuxdeepin/go-x11-client"
@@ -62,30 +63,39 @@ func LoadImageFromFile(filename string, size int) (*Image, error) {
 	return loadImageFromFile(f, size)
 }
 
-func loadImageFromFile(f *os.File, size int) (*Image, error) {
+func loadImageFromFile(f *os.File, size int) (img *Image, err error) {
 	d, err := newDecoder(f)
 	if err != nil {
-		return nil, err
+		return
 	}
-	defer d.close()
+	defer func() {
+		closeErr := d.close()
+		if err == nil {
+			err = closeErr
+		} else {
+			log.Printf("error on close decoder %v: %v", f.Name(), closeErr)
+		}
+	}()
 
 	bestSize, _ := d.findBestSize(size)
 	if bestSize == 0 {
-		return nil, errImageNotFound
+		err = errImageNotFound
+		return
 	}
 
 	for _, toc := range d.tocs {
 		if toc.Type == typeImage && int(toc.Subtype) == bestSize {
-			img, err := d.readImage(toc)
+			img, err = d.readImage(toc)
 			if err != nil {
-				return nil, err
+				return
 			}
 
-			return img, nil
+			return
 		}
 	}
 
-	return nil, errImageNotFound
+	err = errImageNotFound
+	return
 }
 
 func dist(a, b int) int {
@@ -121,32 +131,41 @@ func LoadImagesFromFile(filename string, size int) (Images, error) {
 	return loadImagesFromFile(f, size)
 }
 
-func loadImagesFromFile(f *os.File, size int) (Images, error) {
+func loadImagesFromFile(f *os.File, size int) (images Images, err error) {
 	d, err := newDecoder(f)
 	if err != nil {
-		return nil, err
+		return
 	}
-	defer d.close()
+	defer func() {
+		closeErr := d.close()
+		if err == nil {
+			err = closeErr
+		} else {
+			log.Printf("error on close decoder %v: %v", f.Name(), closeErr)
+		}
+	}()
 
 	bestSize, nSizes := d.findBestSize(size)
 	if bestSize == 0 {
-		return nil, errImageNotFound
+		err = errImageNotFound
+		return
 	}
 
-	images := make(Images, nSizes)
+	images = make(Images, nSizes)
 	var idx int
 	for _, toc := range d.tocs {
 		if toc.Type == typeImage && int(toc.Subtype) == bestSize {
-			img, err := d.readImage(toc)
+			var img *Image
+			img, err = d.readImage(toc)
 			if err != nil {
-				return nil, err
+				return
 			}
 
 			images[idx] = img
 			idx++
 		}
 	}
-	return images, nil
+	return
 }
 
 func (images Images) ToGIF() *gif.GIF {
